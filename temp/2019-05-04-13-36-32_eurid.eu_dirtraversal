@@ -1,0 +1,88 @@
+{
+    "http://mail2.eurid.eu:80/": [
+        {
+            "content-length": 0,
+            "path": "php",
+            "redirect": "https://mail2.eurid.eu/php",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "js",
+            "redirect": "https://mail2.eurid.eu/js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "yml",
+            "redirect": "https://mail2.eurid.eu/yml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "txt",
+            "redirect": "https://mail2.eurid.eu/txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "_vti_txt",
+            "redirect": "https://mail2.eurid.eu/_vti_txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminphp",
+            "redirect": "https://mail2.eurid.eu/adminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminjs",
+            "redirect": "https://mail2.eurid.eu/adminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admintxt",
+            "redirect": "https://mail2.eurid.eu/admintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminyml",
+            "redirect": "https://mail2.eurid.eu/adminyml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin_js",
+            "redirect": "https://mail2.eurid.eu/admin_js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminphp",
+            "redirect": "https://mail2.eurid.eu/myadminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminjs",
+            "redirect": "https://mail2.eurid.eu/myadminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadmintxt",
+            "redirect": "https://mail2.eurid.eu/myadmintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminyml",
+            "redirect": "https://mail2.eurid.eu/myadminyml",
+            "status": 302
+        }
+    ]
+}

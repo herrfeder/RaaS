@@ -1,0 +1,88 @@
+{
+    "http://why.eurid.eu:80/": [
+        {
+            "content-length": 0,
+            "path": "txt",
+            "redirect": "https://why.eurid.eu/txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "yml",
+            "redirect": "https://why.eurid.eu/yml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "js",
+            "redirect": "https://why.eurid.eu/js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "php",
+            "redirect": "https://why.eurid.eu/php",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "_vti_txt",
+            "redirect": "https://why.eurid.eu/_vti_txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminphp",
+            "redirect": "https://why.eurid.eu/adminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminjs",
+            "redirect": "https://why.eurid.eu/adminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admintxt",
+            "redirect": "https://why.eurid.eu/admintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminyml",
+            "redirect": "https://why.eurid.eu/adminyml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin_js",
+            "redirect": "https://why.eurid.eu/admin_js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminphp",
+            "redirect": "https://why.eurid.eu/myadminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadmintxt",
+            "redirect": "https://why.eurid.eu/myadmintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminjs",
+            "redirect": "https://why.eurid.eu/myadminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminyml",
+            "redirect": "https://why.eurid.eu/myadminyml",
+            "status": 302
+        }
+    ]
+}

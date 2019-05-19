@@ -1,0 +1,88 @@
+{
+    "http://trust.eurid.eu:80/": [
+        {
+            "content-length": 0,
+            "path": "php",
+            "redirect": "https://trust.eurid.eu/php",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "js",
+            "redirect": "https://trust.eurid.eu/js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "yml",
+            "redirect": "https://trust.eurid.eu/yml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "txt",
+            "redirect": "https://trust.eurid.eu/txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "_vti_txt",
+            "redirect": "https://trust.eurid.eu/_vti_txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminphp",
+            "redirect": "https://trust.eurid.eu/adminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminjs",
+            "redirect": "https://trust.eurid.eu/adminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admintxt",
+            "redirect": "https://trust.eurid.eu/admintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminyml",
+            "redirect": "https://trust.eurid.eu/adminyml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin_js",
+            "redirect": "https://trust.eurid.eu/admin_js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminphp",
+            "redirect": "https://trust.eurid.eu/myadminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminjs",
+            "redirect": "https://trust.eurid.eu/myadminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminyml",
+            "redirect": "https://trust.eurid.eu/myadminyml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadmintxt",
+            "redirect": "https://trust.eurid.eu/myadmintxt",
+            "status": 302
+        }
+    ]
+}

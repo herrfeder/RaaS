@@ -1,0 +1,76 @@
+{
+    "https://dialin.eurid.eu:443/": [
+        {
+            "content-length": 312,
+            "path": "%2e%2e//google.com",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 3420,
+            "path": "%3f/",
+            "redirect": null,
+            "status": 400
+        },
+        {
+            "content-length": 703,
+            "path": "ClientAccessPolicy.xml",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 9622,
+            "path": "favicon.ico",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 157,
+            "path": "fonts",
+            "redirect": "https://dialin.eurid.eu:443/fonts/",
+            "status": 301
+        },
+        {
+            "content-length": 60135,
+            "path": "scheduler/",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 161,
+            "path": "scheduler",
+            "redirect": "https://dialin.eurid.eu:443/scheduler/",
+            "status": 301
+        },
+        {
+            "content-length": 1233,
+            "path": "storage",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 1233,
+            "path": "storage/logs/laravel.log",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 3420,
+            "path": "Trace.axd::$DATA",
+            "redirect": null,
+            "status": 400
+        },
+        {
+            "content-length": 2452,
+            "path": "Trace.axd",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 3420,
+            "path": "web.config::$DATA",
+            "redirect": null,
+            "status": 400
+        }
+    ]
+}

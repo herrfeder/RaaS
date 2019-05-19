@@ -1,0 +1,94 @@
+{
+    "https://secure.registry.eu:443/": [
+        {
+            "content-length": 231,
+            "path": "php",
+            "redirect": "https://registry.eu/php",
+            "status": 301
+        },
+        {
+            "content-length": 231,
+            "path": "txt",
+            "redirect": "https://registry.eu/txt",
+            "status": 301
+        },
+        {
+            "content-length": 231,
+            "path": "yml",
+            "redirect": "https://registry.eu/yml",
+            "status": 301
+        },
+        {
+            "content-length": 230,
+            "path": "js",
+            "redirect": "https://registry.eu/js",
+            "status": 301
+        },
+        {
+            "content-length": 236,
+            "path": "_vti_txt",
+            "redirect": "https://registry.eu/_vti_txt",
+            "status": 301
+        },
+        {
+            "content-length": 236,
+            "path": "adminphp",
+            "redirect": "https://registry.eu/adminphp",
+            "status": 301
+        },
+        {
+            "content-length": 235,
+            "path": "adminjs",
+            "redirect": "https://registry.eu/adminjs",
+            "status": 301
+        },
+        {
+            "content-length": 236,
+            "path": "admintxt",
+            "redirect": "https://registry.eu/admintxt",
+            "status": 301
+        },
+        {
+            "content-length": 236,
+            "path": "adminyml",
+            "redirect": "https://registry.eu/adminyml",
+            "status": 301
+        },
+        {
+            "content-length": 236,
+            "path": "admin_js",
+            "redirect": "https://registry.eu/admin_js",
+            "status": 301
+        },
+        {
+            "content-length": 238,
+            "path": "myadminphp",
+            "redirect": "https://registry.eu/myadminphp",
+            "status": 301
+        },
+        {
+            "content-length": 238,
+            "path": "myadmintxt",
+            "redirect": "https://registry.eu/myadmintxt",
+            "status": 301
+        },
+        {
+            "content-length": 237,
+            "path": "myadminjs",
+            "redirect": "https://registry.eu/myadminjs",
+            "status": 301
+        },
+        {
+            "content-length": 238,
+            "path": "myadminyml",
+            "redirect": "https://registry.eu/myadminyml",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "status/",
+            "redirect": "https://secure.registry.eu:443",
+            "status": 302
+        }
+    ]
+}

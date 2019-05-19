@@ -1,0 +1,34 @@
+{
+    "https://lyncdiscover.eurid.eu:443/": [
+        {
+            "content-length": 312,
+            "path": "%2e%2e//google.com",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 312,
+            "path": "js",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 312,
+            "path": "adminjs",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 312,
+            "path": "admin_js",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 312,
+            "path": "myadminjs",
+            "redirect": null,
+            "status": 200
+        }
+    ]
+}

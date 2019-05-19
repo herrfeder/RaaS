@@ -1,0 +1,88 @@
+{
+    "https://documentation.eurid.eu:443/": [
+        {
+            "content-length": 241,
+            "path": "js",
+            "redirect": "https://documentation.eurid.eu/js",
+            "status": 301
+        },
+        {
+            "content-length": 242,
+            "path": "txt",
+            "redirect": "https://documentation.eurid.eu/txt",
+            "status": 301
+        },
+        {
+            "content-length": 242,
+            "path": "php",
+            "redirect": "https://documentation.eurid.eu/php",
+            "status": 301
+        },
+        {
+            "content-length": 242,
+            "path": "yml",
+            "redirect": "https://documentation.eurid.eu/yml",
+            "status": 301
+        },
+        {
+            "content-length": 247,
+            "path": "_vti_txt",
+            "redirect": "https://documentation.eurid.eu/_vti_txt",
+            "status": 301
+        },
+        {
+            "content-length": 247,
+            "path": "adminphp",
+            "redirect": "https://documentation.eurid.eu/adminphp",
+            "status": 301
+        },
+        {
+            "content-length": 246,
+            "path": "adminjs",
+            "redirect": "https://documentation.eurid.eu/adminjs",
+            "status": 301
+        },
+        {
+            "content-length": 247,
+            "path": "admintxt",
+            "redirect": "https://documentation.eurid.eu/admintxt",
+            "status": 301
+        },
+        {
+            "content-length": 247,
+            "path": "adminyml",
+            "redirect": "https://documentation.eurid.eu/adminyml",
+            "status": 301
+        },
+        {
+            "content-length": 247,
+            "path": "admin_js",
+            "redirect": "https://documentation.eurid.eu/admin_js",
+            "status": 301
+        },
+        {
+            "content-length": 249,
+            "path": "myadminphp",
+            "redirect": "https://documentation.eurid.eu/myadminphp",
+            "status": 301
+        },
+        {
+            "content-length": 248,
+            "path": "myadminjs",
+            "redirect": "https://documentation.eurid.eu/myadminjs",
+            "status": 301
+        },
+        {
+            "content-length": 249,
+            "path": "myadmintxt",
+            "redirect": "https://documentation.eurid.eu/myadmintxt",
+            "status": 301
+        },
+        {
+            "content-length": 249,
+            "path": "myadminyml",
+            "redirect": "https://documentation.eurid.eu/myadminyml",
+            "status": 301
+        }
+    ]
+}

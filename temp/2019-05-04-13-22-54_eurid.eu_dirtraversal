@@ -1,0 +1,100 @@
+{
+    "https://events.lu.eurid.eu:443/": [
+        {
+            "content-length": 0,
+            "path": "%ff/",
+            "redirect": null,
+            "status": 400
+        },
+        {
+            "content-length": 210,
+            "path": "cgi-bin/",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 214,
+            "path": "manager",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager/",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager.php",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager/admin.asp",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager/html",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager/html/",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager/login",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager/login.asp",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 214,
+            "path": "manager/VERSION",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 244,
+            "path": "media",
+            "redirect": "http://events.lu.eurid.eu:443/media/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "search",
+            "redirect": "http://events.lu.eurid.eu:443/",
+            "status": 302
+        },
+        {
+            "content-length": 213,
+            "path": "server-info",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 245,
+            "path": "static",
+            "redirect": "http://events.lu.eurid.eu:443/static/",
+            "status": 301
+        },
+        {
+            "content-length": 920,
+            "path": "test",
+            "redirect": null,
+            "status": 200
+        }
+    ]
+}

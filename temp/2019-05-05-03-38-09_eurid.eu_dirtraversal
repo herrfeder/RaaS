@@ -1,0 +1,88 @@
+{
+    "http://ambition.eurid.eu:80/": [
+        {
+            "content-length": 0,
+            "path": "php",
+            "redirect": "https://ambition.eurid.eu/php",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "js",
+            "redirect": "https://ambition.eurid.eu/js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "yml",
+            "redirect": "https://ambition.eurid.eu/yml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "txt",
+            "redirect": "https://ambition.eurid.eu/txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "_vti_txt",
+            "redirect": "https://ambition.eurid.eu/_vti_txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminphp",
+            "redirect": "https://ambition.eurid.eu/adminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminjs",
+            "redirect": "https://ambition.eurid.eu/adminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admintxt",
+            "redirect": "https://ambition.eurid.eu/admintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminyml",
+            "redirect": "https://ambition.eurid.eu/adminyml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin_js",
+            "redirect": "https://ambition.eurid.eu/admin_js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminphp",
+            "redirect": "https://ambition.eurid.eu/myadminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminjs",
+            "redirect": "https://ambition.eurid.eu/myadminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadmintxt",
+            "redirect": "https://ambition.eurid.eu/myadmintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminyml",
+            "redirect": "https://ambition.eurid.eu/myadminyml",
+            "status": 302
+        }
+    ]
+}

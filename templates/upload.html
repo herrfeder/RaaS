@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+
+	<div class="inner-container col_left">
+			<h3>Insert Passwords from Clipboard</h3>
+				<form id="uploadsubmitclipbard" class="form-horizontal query-form" method="post" action="{{ url_for('uploadWeb') }}">
+								<div class="form-group">
+									<div class="col-sm-10">
+										<div class="uploadclipboard">
+											<div class="validateuploadbar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; background-color: #c0c0c0">
+												Waiting for input
+											</div>
+											<textarea class="uploadclipboard" name="credentialsraw" placeholder="Paste your stuff!"></textarea>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-sm-2" for="oprel">Operational Relevance?</label>
+									<div class="col-sm-10">
+										<input type="checkbox" name="oprel">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-sm-2" for="oprel">Type of credential?</label>
+									<div class="col-sm-10">
+										<input type="text" name="oprel" placeholder="ssh">
+									</div>
+								</div>
+
+
+				</form>
+	</div>
+
+
+
+ 	<div class="content inner-container col_right">
+		<h3>Insert Passwords from File</h3>
+				<form id="uploadsubmitfile" class="form-horizontal query-form" method="post" action="{{ url_for('uploadWeb') }}">
+								<div class="form-group">
+									<div class="col-sm-10">
+										<div class="uploadclipboard">
+											<div class="validateuploadbar progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%; background-color: #c0c0c0">
+												Waiting for input
+											</div>
+											<textarea class="uploadclipboard" name="credentialsraw" placeholder="Paste your stuff!"></textarea>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-sm-2" for="oprel">Operational Relevance?</label>
+									<div class="col-sm-10">
+										<input type="checkbox" name="oprel">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label class="control-label col-sm-2" for="oprel">Type of credential?</label>
+									<div class="col-sm-10">
+										<input type="text" name="oprel" placeholder="ssh">
+									</div>
+								</div>
+
+
+				</form>
+	</div>
+
+
+{% endblock %}

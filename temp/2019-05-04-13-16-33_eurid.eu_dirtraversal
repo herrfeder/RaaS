@@ -1,0 +1,88 @@
+{
+    "http://eccomm.eurid.eu:80/": [
+        {
+            "content-length": 238,
+            "path": "php",
+            "redirect": "https://eccomm.registry.eu/php",
+            "status": 301
+        },
+        {
+            "content-length": 238,
+            "path": "yml",
+            "redirect": "https://eccomm.registry.eu/yml",
+            "status": 301
+        },
+        {
+            "content-length": 237,
+            "path": "js",
+            "redirect": "https://eccomm.registry.eu/js",
+            "status": 301
+        },
+        {
+            "content-length": 238,
+            "path": "txt",
+            "redirect": "https://eccomm.registry.eu/txt",
+            "status": 301
+        },
+        {
+            "content-length": 243,
+            "path": "_vti_txt",
+            "redirect": "https://eccomm.registry.eu/_vti_txt",
+            "status": 301
+        },
+        {
+            "content-length": 243,
+            "path": "adminphp",
+            "redirect": "https://eccomm.registry.eu/adminphp",
+            "status": 301
+        },
+        {
+            "content-length": 242,
+            "path": "adminjs",
+            "redirect": "https://eccomm.registry.eu/adminjs",
+            "status": 301
+        },
+        {
+            "content-length": 243,
+            "path": "admintxt",
+            "redirect": "https://eccomm.registry.eu/admintxt",
+            "status": 301
+        },
+        {
+            "content-length": 243,
+            "path": "adminyml",
+            "redirect": "https://eccomm.registry.eu/adminyml",
+            "status": 301
+        },
+        {
+            "content-length": 243,
+            "path": "admin_js",
+            "redirect": "https://eccomm.registry.eu/admin_js",
+            "status": 301
+        },
+        {
+            "content-length": 245,
+            "path": "myadminphp",
+            "redirect": "https://eccomm.registry.eu/myadminphp",
+            "status": 301
+        },
+        {
+            "content-length": 245,
+            "path": "myadmintxt",
+            "redirect": "https://eccomm.registry.eu/myadmintxt",
+            "status": 301
+        },
+        {
+            "content-length": 244,
+            "path": "myadminjs",
+            "redirect": "https://eccomm.registry.eu/myadminjs",
+            "status": 301
+        },
+        {
+            "content-length": 245,
+            "path": "myadminyml",
+            "redirect": "https://eccomm.registry.eu/myadminyml",
+            "status": 301
+        }
+    ]
+}

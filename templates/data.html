@@ -1,0 +1,13 @@
+{% extends "bootstrap/base.html" %}
+
+{% block content %}
+
+<h4 id="DataOutput" style="visibility:hidden"> </h4>
+{% for table in tables %}
+
+
+	{{ table | safe }}
+
+{% endfor %}
+
+{% endblock %}

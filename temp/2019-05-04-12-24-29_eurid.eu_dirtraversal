@@ -1,0 +1,88 @@
+{
+    "http://webcat.eurid.eu:80/": [
+        {
+            "content-length": 235,
+            "path": "txt",
+            "redirect": "https://webcat.eurid.eu/txt",
+            "status": 301
+        },
+        {
+            "content-length": 234,
+            "path": "js",
+            "redirect": "https://webcat.eurid.eu/js",
+            "status": 301
+        },
+        {
+            "content-length": 235,
+            "path": "yml",
+            "redirect": "https://webcat.eurid.eu/yml",
+            "status": 301
+        },
+        {
+            "content-length": 235,
+            "path": "php",
+            "redirect": "https://webcat.eurid.eu/php",
+            "status": 301
+        },
+        {
+            "content-length": 240,
+            "path": "_vti_txt",
+            "redirect": "https://webcat.eurid.eu/_vti_txt",
+            "status": 301
+        },
+        {
+            "content-length": 240,
+            "path": "adminphp",
+            "redirect": "https://webcat.eurid.eu/adminphp",
+            "status": 301
+        },
+        {
+            "content-length": 239,
+            "path": "adminjs",
+            "redirect": "https://webcat.eurid.eu/adminjs",
+            "status": 301
+        },
+        {
+            "content-length": 240,
+            "path": "admintxt",
+            "redirect": "https://webcat.eurid.eu/admintxt",
+            "status": 301
+        },
+        {
+            "content-length": 240,
+            "path": "adminyml",
+            "redirect": "https://webcat.eurid.eu/adminyml",
+            "status": 301
+        },
+        {
+            "content-length": 240,
+            "path": "admin_js",
+            "redirect": "https://webcat.eurid.eu/admin_js",
+            "status": 301
+        },
+        {
+            "content-length": 242,
+            "path": "myadminphp",
+            "redirect": "https://webcat.eurid.eu/myadminphp",
+            "status": 301
+        },
+        {
+            "content-length": 241,
+            "path": "myadminjs",
+            "redirect": "https://webcat.eurid.eu/myadminjs",
+            "status": 301
+        },
+        {
+            "content-length": 242,
+            "path": "myadmintxt",
+            "redirect": "https://webcat.eurid.eu/myadmintxt",
+            "status": 301
+        },
+        {
+            "content-length": 242,
+            "path": "myadminyml",
+            "redirect": "https://webcat.eurid.eu/myadminyml",
+            "status": 301
+        }
+    ]
+}

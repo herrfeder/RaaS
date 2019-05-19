@@ -1,0 +1,1186 @@
+{
+    "https://webawards.eurid.eu:443/": [
+        {
+            "content-length": 0,
+            "path": "admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/.config",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/.htaccess",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/?/login",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/access-log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/access.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/access_log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/err.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/error-log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/error.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/error_log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/_logs/login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/access.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/access_log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/access.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/account.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/account",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/account.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/account.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/account.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin-login",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin-login.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/account.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin-login.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin-login.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin-login.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin-login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin.shtml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin_login",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin/login",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin_login.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin_login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin_login.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin_login.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/admin_login.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/adminLogin.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/adminLogin.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/adminLogin",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/adminLogin.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/adminLogin.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/backup/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/adminLogin.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/adminLogin.htm",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/controlpanel",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/config.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/controlpanel.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/controlpanel.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/controlpanel.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/controlpanel.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/cp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/cp.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/cp.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/cp.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/cp.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/controlpanel.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/db/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/controlpanel.htm",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/default.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/cp.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/backups/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/default",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/default/admin.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/default/login.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/error.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/dumper/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/export.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/error.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/error_log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/browser/default/connectors/aspx/connector.aspx",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/download.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/FCKeditor",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/browser/default/connectors/asp/connector.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/browser/default/connectors/php/connector.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/connectors/aspx/connector.aspx",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/connectors/asp/upload.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/connectors/php/connector.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/connectors/asp/connector.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/connectors/aspx/upload.aspx",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/connectors/php/upload.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/upload/asp/upload.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/upload/aspx/upload.aspx",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/home",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/home.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/home.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/home.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/fckeditor/editor/filemanager/upload/php/upload.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/home.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/includes/configure.php~",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/index",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/index.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/files.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/index.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/file.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/index.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/home.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/js/tiny_mce",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/js/tiny_mce/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/index.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/js/tinymce/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/index.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/index.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/js/tinymce",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.do",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.py",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.rb",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.jsp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/login.htm",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logon.jsp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/err.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/access-log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/access.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/access_log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/error.log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/error_log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/manage.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/logs/error-log",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/manage",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/phpMyAdmin",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/phpmyadmin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/manage/login.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/mysql/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/pma/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/pol_log.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/pMA/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/release",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/manage/admin.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/scripts/fckeditor",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/private/logs",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/signin",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/phpMyAdmin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/sxd/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/tiny_mce",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/sqladmin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/tinymce",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/sysadmin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/uploads.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/secure/logon.jsp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/web/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/upload.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin/user_count.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "administrator/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "api",
+            "redirect": "/api/",
+            "status": 301
+        },
+        {
+            "content-length": 58,
+            "path": "api/",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 0,
+            "path": "article/admin/admin.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "bbs/admin/login",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "bitrix/admin/help.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "bitrix/admin/index.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "bitrix/modules/main/admin/restore.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 210,
+            "path": "cgi-bin/",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 0,
+            "path": "docs/html/admin/ch01.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "docs/html/admin/ch03s07.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "docs/html/admin/ch01s04.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "docs/html/admin/index.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "en/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "forum/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "login/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "login/admin/admin.asp",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 241,
+            "path": "media",
+            "redirect": "https://webawards.eurid.eu/media/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "modules/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "mysql/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "nsw/admin/login.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "nsw/admin/login.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "nsw/admin/login.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "nsw/admin/login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "pages/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "pages/admin/admin-login",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "pages/admin/admin-login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "pages/admin/admin-login.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "pages/admin/admin-login.html",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "pages/admin/admin-login.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "pages/admin/admin-login.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "rcjakar/admin/login.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "rcjakar/admin/login.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "rcjakar/admin/login.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "rcjakar/admin/login.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "SiteServer/admin/findvserver.php",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "SiteServer/admin/findvserver.js",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "SiteServer/admin/findvserver.yml",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "SiteServer/admin/findvserver.txt",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "solr/admin/",
+            "redirect": "https://webawards.eurid.eu:443",
+            "status": 302
+        },
+        {
+            "content-length": 242,
+            "path": "static",
+            "redirect": "https://webawards.eurid.eu/static/",
+            "status": 301
+        }
+    ]
+}

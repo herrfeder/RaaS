@@ -1,0 +1,94 @@
+{
+    "https://whois.eurid.eu:443/": [
+        {
+            "content-length": 0,
+            "path": "%ff/",
+            "redirect": null,
+            "status": 400
+        },
+        {
+            "content-length": 210,
+            "path": "cgi-bin/",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 0,
+            "path": "cs",
+            "redirect": "/cs/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "de",
+            "redirect": "/de/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "en",
+            "redirect": "/en/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "es",
+            "redirect": "/es/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "fr",
+            "redirect": "/fr/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "it",
+            "redirect": "/it/",
+            "status": 301
+        },
+        {
+            "content-length": 237,
+            "path": "media",
+            "redirect": "https://whois.eurid.eu/media/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "mt",
+            "redirect": "/mt/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "nl",
+            "redirect": "/nl/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "pl",
+            "redirect": "/pl/",
+            "status": 301
+        },
+        {
+            "content-length": 733,
+            "path": "robots.txt",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 0,
+            "path": "search",
+            "redirect": "/en/search",
+            "status": 302
+        },
+        {
+            "content-length": 238,
+            "path": "static",
+            "redirect": "https://whois.eurid.eu/static/",
+            "status": 301
+        }
+    ]
+}

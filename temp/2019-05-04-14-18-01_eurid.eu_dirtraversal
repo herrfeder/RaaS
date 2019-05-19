@@ -1,0 +1,88 @@
+{
+    "http://webawards.lu.eurid.eu:80/": [
+        {
+            "content-length": 0,
+            "path": "php",
+            "redirect": "https://webawards.lu.eurid.eu/php",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "js",
+            "redirect": "https://webawards.lu.eurid.eu/js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "yml",
+            "redirect": "https://webawards.lu.eurid.eu/yml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "txt",
+            "redirect": "https://webawards.lu.eurid.eu/txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "_vti_txt",
+            "redirect": "https://webawards.lu.eurid.eu/_vti_txt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminphp",
+            "redirect": "https://webawards.lu.eurid.eu/adminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminjs",
+            "redirect": "https://webawards.lu.eurid.eu/adminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admintxt",
+            "redirect": "https://webawards.lu.eurid.eu/admintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "adminyml",
+            "redirect": "https://webawards.lu.eurid.eu/adminyml",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "admin_js",
+            "redirect": "https://webawards.lu.eurid.eu/admin_js",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminphp",
+            "redirect": "https://webawards.lu.eurid.eu/myadminphp",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminjs",
+            "redirect": "https://webawards.lu.eurid.eu/myadminjs",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadmintxt",
+            "redirect": "https://webawards.lu.eurid.eu/myadmintxt",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "myadminyml",
+            "redirect": "https://webawards.lu.eurid.eu/myadminyml",
+            "status": 302
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+{
+    "https://webapps2.eurid.eu:443/": [
+        {
+            "content-length": 312,
+            "path": "%2e%2e//google.com",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 3420,
+            "path": "%3f/",
+            "redirect": null,
+            "status": 400
+        },
+        {
+            "content-length": 2954,
+            "path": "error.html",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 145,
+            "path": "m",
+            "redirect": "/error.html?aspxerrorpath=/m",
+            "status": 302
+        },
+        {
+            "content-length": 145,
+            "path": "o",
+            "redirect": "/error.html?aspxerrorpath=/o",
+            "status": 302
+        },
+        {
+            "content-length": 150,
+            "path": "p/m/a/",
+            "redirect": "/error.html?aspxerrorpath=/p/m/a/",
+            "status": 302
+        },
+        {
+            "content-length": 145,
+            "path": "p",
+            "redirect": "/error.html?aspxerrorpath=/p",
+            "status": 302
+        },
+        {
+            "content-length": 2452,
+            "path": "Trace.axd",
+            "redirect": null,
+            "status": 403
+        }
+    ]
+}

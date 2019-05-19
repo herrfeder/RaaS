@@ -1,0 +1,105 @@
+{% extends "bootstrap/base.html" %}
+
+
+{% block styles %}
+	{{super()}}
+	<link rel="stylesheet" href="">
+	<link rel="stylesheet" href="{{url_for('.static', filename='css/modifications.css')}}">
+	<!-- <link rel="stylesheet" href="{{url_for('.static', filename='css/simplebar.css')}}"> -->
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{url_for('.static', filename='bootstrap/jquery.min.js')}}"></script>
+    <script src="{{url_for('.static', filename='js/modifications.js')}}"></script>
+	<!-- <script type="module" src="{{url_for('.static', filename='js/simplebar.js')}}"></script> -->
+    {{super()}}
+{% endblock %}
+
+
+{% block navbar %}
+<div class="navbar navbar-inverse" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">
+				<table><tr>
+				<td>
+				<img src="static/images/zco_brand.png" alt="logo" width="20" height="20" class="d-inline-block align-middle" alt="" />
+				</td>
+				<td>
+				RaaS
+				</td>
+					</tr>
+				</table>
+			</a>
+		</div>
+		<div class="navbar-collapse collapse">
+			<ul class="nav navbar-nav">
+				<li><a href="/">Home</a></li>
+				<li><a href="/stats">Stats</a></li>
+				<form class="navbar-form navbar-left" method="post" action="{{ url_for('getall') }}">
+					<div>
+						<input class="btn navbar-btn btn-primary" type="submit" name="search" value="Get all data"/>
+					</div>
+				</form>
+				<form class="navbar-form navbar-left" method="post" action="{{ url_for('uploadWeb') }}">
+					<div>
+						<input class="btn navbar-btn btn-warning" type="submit" name="search" value="Upload Data"/>
+					</div>
+				</form>
+				<form class="navbar-form navbar-left" method="post" action="{{ url_for('logout') }}">
+			<div>
+				<input class="btn navbar-btn btn-danger" type="submit" name="search" value="Logout"/>
+			</div>
+		</form>
+			</ul>
+		</div>
+	</div>
+
+</div>
+{% endblock %}
+<head>
+    {% if title %}
+    <title>{{ title }}</title>
+    {% else %}
+    <title>Welcome You Fool</title>
+    {% endif %}
+</head>
+<body>
+    <div><a href="/index">Insert mask</a></div>
+    <hr>
+
+
+    {% block content %}
+    <div class="container">
+      <div id="messagebox">
+		{% with messages = get_flashed_messages(with_categories=true) %}
+			<!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+			{% if messages %}
+				{% for category,message in messages %}
+				<div class="alert alert-{{ category }}">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					{{ message }}
+
+
+
+				</div>
+				{% endfor %}
+			{% endif %}
+		{% endwith %}
+      </div>
+
+        {% block app_content %}
+        {% endblock %}
+
+     </div>
+    {% endblock %}
+
+</body>

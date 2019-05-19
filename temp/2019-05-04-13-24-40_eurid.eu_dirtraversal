@@ -1,0 +1,64 @@
+{
+    "https://link.eurid.eu:443/": [
+        {
+            "content-length": 0,
+            "path": "app",
+            "redirect": "https://www.weforum.org/agenda/2018/09/the-apps-winning-the-battle-for-our-attention",
+            "status": 302
+        },
+        {
+            "content-length": 210,
+            "path": "cgi-bin/",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 0,
+            "path": "index",
+            "redirect": "https://campagne.safeonweb.be/nl/doe-de-test",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "internet",
+            "redirect": "https://www.theguardian.com/technology/2018/oct/22/what-is-the-internet-13-key-questions-answered",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "passwords/",
+            "redirect": "https://www.nzherald.co.nz/technology/news/article.cfm?c_id=5&objectid=12224973",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "security",
+            "redirect": "https://www.weforum.org/agenda/2018/06/popular-passwords-threaten-cyber-security-privacy",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "stats",
+            "redirect": "http://www.verisign.com/en_US/domain-names/dnib/index.xhtml?section=executive-summary",
+            "status": 302
+        },
+        {
+            "content-length": 237,
+            "path": "static",
+            "redirect": "https://link.eurid.eu/static/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "tips",
+            "redirect": "https://www.icann.org/news/blog/do-you-have-a-domain-name-here-s-what-you-need-to-know-part-4",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "us",
+            "redirect": "https://www.youtube.com/watch?v=VOrfe1KADPw",
+            "status": 302
+        }
+    ]
+}

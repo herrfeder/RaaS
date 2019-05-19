@@ -1,0 +1,100 @@
+{
+    "http://events.eurid.eu:80/": [
+        {
+            "content-length": 0,
+            "path": "%ff/",
+            "redirect": null,
+            "status": 400
+        },
+        {
+            "content-length": 210,
+            "path": "cgi-bin/",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 207,
+            "path": "manager",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager.php",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager/",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager/admin.asp",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager/html/",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager/html",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager/login.asp",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager/login",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 207,
+            "path": "manager/VERSION",
+            "redirect": "http://events.eurid.eu/",
+            "status": 302
+        },
+        {
+            "content-length": 237,
+            "path": "media",
+            "redirect": "http://events.eurid.eu/media/",
+            "status": 301
+        },
+        {
+            "content-length": 0,
+            "path": "search",
+            "redirect": "http://events.eurid.eu:80/",
+            "status": 302
+        },
+        {
+            "content-length": 213,
+            "path": "server-info",
+            "redirect": null,
+            "status": 403
+        },
+        {
+            "content-length": 238,
+            "path": "static",
+            "redirect": "http://events.eurid.eu/static/",
+            "status": 301
+        },
+        {
+            "content-length": 920,
+            "path": "test",
+            "redirect": null,
+            "status": 200
+        }
+    ]
+}

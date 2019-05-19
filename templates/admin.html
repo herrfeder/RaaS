@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+	<div class="inner-container col_left">
+		<h3>Click Upload!</h3>
+			<form class="form-horizontal query-form" method="post" action="{{ url_for('uploadFromFilesystem') }}">
+				<div class="form-group">
+						<div class="col-sm-10">
+							<input type="submit" name="upload" class="btn btn-success" value="Upload"/>
+							<input type="text"   name="password" placeholder="Insert Admin Password"/>
+						</div>
+				</div>
+			</form>
+	</div>
+{% endblock %}
+

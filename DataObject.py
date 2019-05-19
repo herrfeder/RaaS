@@ -1,0 +1,98 @@
+import pandas as pd
+import sqlite3
+import glob
+import time
+import datetime
+from IPython.core.debugger import Tracer; debug_here = Tracer()
+
+class DataObject():
+
+    def __init__(self,columns,env):
+
+        if columns:
+            self.df = pd.DataFrame(columns=columns)
+
+        self.dftype = env['dftype']
+        self.project = env['project']
+
+    def CreateFromDictList(self,result_list):
+        self.df = pd.DataFrame()
+        for result in result_list:
+            if isinstance(result,list) and (len(result) > 1):
+                for entry in result:
+                    self.df = self.df.append(entry, ignore_index=True)
+            elif isinstance(result,list) and (len(result) == 1):
+                self.df = self.df.append(result, ignore_index=True)
+        debug_here()
+
+    def append(self, new_entry):
+        self.df = self.df.append(new_entry, ignore_index=True)
+
+    def dropIndex(self, index):
+        self.df.drop(index, inplace=True)
+
+    def saveToCSV(self):
+
+        timedate = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        self.df.to_csv("data/"+timedate+self.project+"_"+self.dftype+".csv")
+
+    def saveToSqlite(self,append=False):
+
+        try:
+            conn = sqlite3.connect("data/"+self.project)
+            if append:
+                self.df.to_sql(self.dftype, con=conn, if_exists='append')
+            else:
+                self.df.to_sql(self.dftype, con=conn)
+
+        except Error as e:
+            print(e)
+
+    def loadFromCSV(self):
+
+        files = sorted(glob.glob("data/*"+self.project+"_"+self.dftype+".csv"))
+        if len(files) < 1:
+            print("No CSV files to load from")
+            return
+        load_file = files.pop() 
+        self.df = pd.read_csv(load_file)
+        self.df.fillna('',inplace=True)
+
+    def loadFromSqlite(self,append=False):
+
+        try:
+            conn = sqlite3.connect("data/"+self.project)
+            self.df = pd.read_sql_table(self.dftype, con=conn)
+
+        except Error as e:
+            print(e)
+
+    def CheckExistence(self, filtercol, filterval, checkcol='', checkval=''):
+
+        if checkval == '':
+            if self.df[filtercol == filterval][checkcol] == None:
+                return False
+            else:
+                return True
+        else:
+            if self.df[filtercol == filterval][checkcol] == checkval:
+                return True
+            else:
+                return False
+
+    def removeDuplicatesCol(self,row, column):
+
+        duplicates = self.df[self.sub_df[column] == row[column]]
+
+        for dup in duplicates.iterrows():
+            pass
+
+
+
+if __name__ == "__main__":
+    do = DataObject(["blah"],"blah","blah")
+    for i in range(1,10):
+        do.saveToCSV()
+        time.sleep(2)
+    debug_here()
+

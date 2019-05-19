@@ -1,0 +1,14 @@
+{% extends "bootstrap/base.html" %}
+
+{% block content %}
+<h4 id="DownloadReady" style="visibility:hidden"> </h4>
+
+    <table class="table table-hover">
+        {% for line in ESResult %}
+
+           <tr>
+                <td> {{ " : ".join(line.split(":")) }} </td>
+           </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

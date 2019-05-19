@@ -1,0 +1,28 @@
+{
+    "https://cryptshare.eurid.eu:443/": [
+        {
+            "content-length": 50,
+            "path": "%2e%2e//google.com",
+            "redirect": null,
+            "status": 400
+        },
+        {
+            "content-length": 74886,
+            "path": "favicon.ico",
+            "redirect": null,
+            "status": 200
+        },
+        {
+            "content-length": 0,
+            "path": "images",
+            "redirect": "https://cryptshare.eurid.eu/images/",
+            "status": 302
+        },
+        {
+            "content-length": 0,
+            "path": "service",
+            "redirect": "https://cryptshare.eurid.eu/service/",
+            "status": 302
+        }
+    ]
+}
