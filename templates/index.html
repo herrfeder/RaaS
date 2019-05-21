@@ -3,117 +3,35 @@
 
 {% block app_content %}
 	<div class="content inner-container col_left">
-		<h3>Options to request Queries</h3>
+		<h3>Left</h3>
+              <form id="searchsubmit" class="form-horizontal query-form" method="post" action="{{ url_for('get_data') }}">
 
-
-
-		<form id="searchsubmit" class="form-horizontal query-form" method="post" action="{{ url_for('search') }}">
-
-			<div class="form-group">
-				<div class="col-sm-10">
-						<input type="submit" name="search" class="btn btn-success" value="Start Search"/>
-							<div class="btn-group" role="group">
-								<button id="optionsbutton" id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									Options <i class="arrow down"></i>
-								</button>
-								<div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-										<input id="checkusername" type="checkbox" name="checkusername" value="true" checked>Take username<br>
-										<input id="checkpassword" type="checkbox" name="checkpassword" value="true" checked>Take password<br>
-										<input id="checkservice" type="checkbox" name="checkservice" value="true">Take Service-Type<br>
-										<input id="checkdate_added" type="checkbox" name="checkdate_added" value="true">Take Date Added<br>
-										<input id="checkregcode" type="checkbox" name="checkregcode" value="true">Take Regioncode<br>
-										<input id="checkcoucode" type="checkbox" name="checkcoucode" value="true">Take Countrycode<br>
-										<input id="checksource" type="checkbox" name="checksource" value="true">Take Source<br>
+                        <div class="form-group">
+                                <div class="col-sm-10">
+                                                <input type="submit" name="search" class="btn btn-success" value="Load Data"/>
+                                                        <div class="btn-group" role="group">
+                                                                <button id="optionsbutton" id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                        Options <i class="arrow down"></i>
+                                                                </button>
+                                                                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+									<input id="subdomainradio" type="radio" name="datatype" value="subdomain" checked>Subdomain<br>
+									<input id="portscanradio" type="radio" name="datatype" value="portscan">Portscan<br>
+									<input id="loadcheckbox" type="checkbox" name="load" value="true" checked>Load<br>
 								</div>
-							</div>
-				</div>
-			</div>
-
-
-			<div class="form-group">
-				<label class="control-label col-sm-2" for="username">Username:</label>
-					<div class="col-sm-10">
-						<input type="text" name="username" placeholder="ronny@ronny.net"/>
-					</div>
-			</div>
-
-			<div class="form-group">
-				<label class="control-label col-sm-2" for="password">Password:</label>
-					<div class="col-sm-10">
-					<input type="text" name="password" placeholder="auto123"/>
-					</div>
-			</div>
-
-
-			<div class="form-group">
-				<label class="control-label col-sm-2" for="and-radio">How concat queries:</label>
-					<div class="col-sm-10 radio">
-						<label><input checked type="radio" name="mode" id="mode1" value="mode1">AND</label>
-						<label><input type="radio" name="mode" id="mode2" value="mode2">OR</label>
-					</div>
-			</div>
-
-
-
-
-
-			<div class="form-group">
-				<label class="control-label col-sm-2" for="emprov">Email-Provider:</label>
-					<div class="col-sm-10">
-					<input type="text" name="emprov" placeholder="yahoo"/>
-					</div>
-			</div>
-
-			<div class="form-group">
-				<label class="control-label col-sm-2" for="service">Service:</label>
-					<div class="col-sm-10">
-					<input type="text" name="service" placeholder="ssh"/>
-					</div>
-			</div>
-
-
-			<div class="form-group">
-				<label class="control-label col-sm-2" for="pwdlength">Minimum Password-Length:</label>
-					<div class="col-sm-10">
-					<input type="text" name="pwdlength" placeholder="8"/>
-					</div>
-			</div>
-
-			<div class="form-group">
-				<label class="control-label col-sm-2" for="date_added">Date Added:</label>
-					<div class="col-sm-10">
-					<input type="text" name="date_added" placeholder="2019-04-21"/>
-					</div>
-			</div>
-
-
-
-			<a class="btn btn-info" data-toggle="collapse" href="#operational">Expand Operational Queries</a>
-
-			<div id="operational" class="collapse">
-				<div class="form-group">
-					<label class="control-label col-sm-2" for="oprel">Op Relevance:</label>
-					<div class="col-sm-10">
-					<input class="form-check-input" type="checkbox" name="oprel" id="oprelcheck"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-sm-2" for="regcode">Region Code:</label>
-					<div class="col-sm-10">
-					<input type="text" name="regcode" placeholder="01"/>
-					</div>
-				</div>
-				<div class="form-group">
-					<label class="control-label col-sm-2" for="coucode">Country Code:</label>
-					<div class="col-sm-10">
-					<input type="text" name="coucode" placeholder="00"/>
-					</div>
-				</div>
-			</div>
-
+                                                        </div>
+                                </div>
+                        </div>
 
 		</form>
+
+		<div class="leftoutput">
+			<div id="downloadlink"></div>
+			<iframe id="leftiframe" class="embed-responsive-item raas-iframe" src="{{ leftiframe }}" frameBorder=0></iframe>
 		</div>
+
+
+
+	</div>
 
 
 
@@ -140,14 +58,14 @@
 			<tr>
 			<td class="tableparams" colspan="2">
 				<div class="visibleparams">
-					<span id="totalhits">Total Hits:{{Params[1]}}</span>
+					<span id="totalhits">Total Hits:{{env.get('hits',"")}}</span>
 				</div>
 			</td>
 			</tr>
 			</table>
 			<div class="hiddenparams">
-				<span id="hiddensessionid">{{Params[0]}}</span>
-				<span id="hiddentotalhits">{{Params[1]}}</span>
+				<span id="hiddensessionid">{{env.get('hits',"")}}</span>
+				<span id="hiddentotalhits">{{env.get('hits',"")}}</span>
 			</div>
 		</div>
 

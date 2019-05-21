@@ -4,20 +4,37 @@ from werkzeug.datastructures import ImmutableMultiDict
 from utility import get_env
 import ThreadManager
 from flask_bootstrap import Bootstrap
-
+import os
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 
-@app.route('/getdata', methods=['GET', 'POST'])
-def getdata():
- 
-    datatype = request.args.get('type')
-    load = request.args.get('load')
+global df
+global env
 
-    print(datatype)
-    print(load)
-    env = get_env(datatype, "eurid.eu")
+
+def get_project_list(argpath=""):
+
+    if not argpath:
+        path = "data/db/"
+    else:
+        path = argpath
+
+    project_files = [x.rstrip(".db") for x in os.listdir("data/db/")]
+    return project_files    
+
+
+@app.route('/get_data', methods=['GET', 'POST'])
+def get_data():
+
+    global df
+    global env
+
+    datatype = request.form.get('datatype',"")
+    load = request.form.get('load',"")
+
+
+    env["datatype"] = datatype
 
     if load:
         mt = ThreadManager.threadManager.newMergeResults(env, load=True)
@@ -25,20 +42,48 @@ def getdata():
     else:
         pass
 
-    return render_template("data.html", tables=[df.to_html()])
+    iframe= "/insert_data"
+
+    return render_template( "index.html",
+                            leftiframe=iframe,
+                            title="RaaS",
+                            env=env)
+
+@app.route('/change_project')
+def change_project():
+
+    global env
+
+    project = request.form.get('project', "")
+    env["project"] = project
+
+
+    return render_template("index.html",
+                           env = env)
+   
+
+@app.route('/insert_data')
+def insert_data():
+    
+    global df
+    return render_template( "data.html",
+                            tables=[df.to_html()],
+                            env=env)
+
 
 @app.route('/')
 @app.route('/index', methods=['GET', 'POST'])
 def index():
-    #if 'username' in session:
-    #    username = session['username']
-    #else:
-    #    return render_template('login.html')
-        
+
+    env = get_env("", "")
+    env['projectlist'] = get_project_list()
     return render_template('index.html',
                            title='RaaS',
                            #possible_calls=possible_calls,
-                           Params=["",""])
+                           env=env)
+
+
+
 
 @app.route('/search', methods=['POST'])
 def search():

@@ -12,16 +12,8 @@ def get_env(dftype, project=""):
         env_skeleton["project"] = project
     elif os.getenv("PROJECT"):
         env_skeleton["project"] = os.getenv("PROJECT")
-    else:
-        print(env_skeleton)
-        raise WrongProjectEnvironment
 
-    if not dftype in allowed_dftypes:
-        print(env_skeleton)
-        raise WrongProjectEnvironment
-    else:
-        env_skeleton["dftype"] = dftype
-        return env_skeleton
+    return env_skeleton
 
 
 def getIPfromDomain(domain):

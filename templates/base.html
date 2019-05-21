@@ -11,7 +11,6 @@
 {% block scripts %}
     <script src="{{url_for('.static', filename='bootstrap/jquery.min.js')}}"></script>
     <script src="{{url_for('.static', filename='js/modifications.js')}}"></script>
-	<!-- <script type="module" src="{{url_for('.static', filename='js/simplebar.js')}}"></script> -->
     {{super()}}
 {% endblock %}
 
@@ -29,7 +28,7 @@
 			<a class="navbar-brand" href="#">
 				<table><tr>
 				<td>
-				<img src="static/images/zco_brand.png" alt="logo" width="20" height="20" class="d-inline-block align-middle" alt="" />
+				<img src="" alt="logo" width="20" height="20" class="d-inline-block align-middle" alt="" />
 				</td>
 				<td>
 				RaaS
@@ -40,23 +39,31 @@
 		</div>
 		<div class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
-				<li><a href="/">Home</a></li>
-				<li><a href="/stats">Stats</a></li>
+				<form class="navbar-form navbar-left" method="post" action="{{ url_for('change_project') }}">
+					<div class="input-group mb-3">
+					  <div class="input-group-prepend">
+					    <button class="btn btn-outline-secondary" type="button">Button</button>
+					  </div>
+					  <select class="custom-select" id="inputGroupSelect03">
+					    <option selected>Choose...</option>
+					    {% for x in env.get('projectlist',"") %}
+					    <option value={{ x.rstrip(".db")}}>{{ x.rstrip(".db") }}</option>
+					    {% endfor %}
+					  </select>
+					</div>
+				</form>
+
 				<form class="navbar-form navbar-left" method="post" action="{{ url_for('getall') }}">
 					<div>
-						<input class="btn navbar-btn btn-primary" type="submit" name="search" value="Get all data"/>
+						<input class="btn navbar-btn btn-primary" type="submit" name="search" value="Settings"/>
 					</div>
 				</form>
-				<form class="navbar-form navbar-left" method="post" action="{{ url_for('uploadWeb') }}">
+								<form class="navbar-form navbar-left" method="post" action="{{ url_for('logout') }}">
 					<div>
-						<input class="btn navbar-btn btn-warning" type="submit" name="search" value="Upload Data"/>
+						<input class="btn navbar-btn btn-danger" type="submit" name="search" value="Logout"/>
 					</div>
 				</form>
-				<form class="navbar-form navbar-left" method="post" action="{{ url_for('logout') }}">
-			<div>
-				<input class="btn navbar-btn btn-danger" type="submit" name="search" value="Logout"/>
-			</div>
-		</form>
+
 			</ul>
 		</div>
 	</div>
