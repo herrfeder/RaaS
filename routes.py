@@ -5,6 +5,7 @@ from utility import get_env
 import ThreadManager
 from flask_bootstrap import Bootstrap
 import os
+from pandas.io.formats.style import Styler
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -12,6 +13,7 @@ bootstrap = Bootstrap(app)
 global df
 global env
 
+easystyler = Styler.from_custom_template("templates/tpl", "dataframe_button.tpl")
 
 def get_project_list(argpath=""):
 
@@ -21,7 +23,7 @@ def get_project_list(argpath=""):
         path = argpath
 
     project_files = [x.rstrip(".db") for x in os.listdir("data/db/")]
-    return project_files    
+    return project_files
 
 
 @app.route('/get_data', methods=['GET', 'POST'])
@@ -35,7 +37,8 @@ def get_data():
 
 
     env["datatype"] = datatype
-
+    env["dftype"] = datatype
+    print(env)
     if load:
         mt = ThreadManager.threadManager.newMergeResults(env, load=True)
         df = mt.do.df
@@ -54,9 +57,9 @@ def change_project():
 
     global env
 
-    project = request.form.get('project', "")
+    project = request.args.get('project', "")
     env["project"] = project
-
+    print(env)
 
     return render_template("index.html",
                            env = env)
@@ -67,13 +70,16 @@ def insert_data():
     
     global df
     return render_template( "data.html",
-                            tables=[df.to_html()],
+                            tables=[easystyler(df).render()],
                             env=env)
 
 
 @app.route('/')
 @app.route('/index', methods=['GET', 'POST'])
 def index():
+
+    global env
+
 
     env = get_env("", "")
     env['projectlist'] = get_project_list()

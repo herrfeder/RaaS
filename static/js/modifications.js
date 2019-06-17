@@ -8,6 +8,7 @@ $(".alert").delay(4000).slideUp(200, function() {
 
 $(document).ready (function() {
     $(".alert").alert();
+    change_project();
     setTimeout(function() {
         $(".alert").slideUp(500);
         }, 3000);
@@ -25,7 +26,20 @@ function flash(message, category) {
         }, 3000);
  };
 
+function get_dataframerow() {
 
+	console.log("blah");
+
+};
+
+function change_project() {
+
+    var proj_inp = document.getElementById("input_project_select");
+    var proj_value = proj_inp.options[proj_inp.selectedIndex].value;
+    $.ajax({url:"/change_project?project="+proj_value, type: 'GET', success: function(result){
+            console.log("success");
+    }});
+}
 
 function setProgressbar(progress,totalHits) {
 
