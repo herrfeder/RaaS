@@ -4,25 +4,33 @@
 {% block app_content %}
 	<div class="content inner-container col_left">
 		<h3>Left</h3>
-              <form id="searchsubmit" class="form-horizontal query-form" method="post" action="{{ url_for('get_data') }}">
 
                         <div class="form-group">
                                 <div class="col-sm-10">
+              				<form id="searchsubmit" class="form-horizontal query-form" method="post" action="{{ url_for('get_data') }}">
                                                 <input type="submit" name="search" class="btn btn-success" value="Load Data"/>
                                                         <div class="btn-group" role="group">
-                                                                <button id="optionsbutton" id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                                        Options <i class="arrow down"></i>
+                                                                <button id="loadoptionsbutton" id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                                        Load Options <i class="arrow down"></i>
                                                                 </button>
                                                                 <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
 									<input id="subdomainradio" type="radio" name="datatype" value="subdomain" checked>Subdomain<br>
 									<input id="portscanradio" type="radio" name="datatype" value="portscan">Portscan<br>
 									<input id="loadcheckbox" type="checkbox" name="load" value="true" checked>Load<br>
 								</div>
+								
                                                         </div>
+					</form>
                                 </div>
                         </div>
+		<div class="btn-group" role="group">
+			<button id="viewoptionsbutton" id="btnGroupDrop2" type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				View Options <i class="arrow down"></i>
+			</button>
 
-		</form>
+			<div id="viewoptionsdropdown" class="dropdown-menu" aria-labelledby="btnGroupDrop2">
+			</div>
+		</div>
 
 		<div class="leftoutput">
 			<div id="downloadlink"></div>

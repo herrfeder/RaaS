@@ -24,12 +24,12 @@
  th {background-color: #e7ebf6;}
  tr:hover {background-color: #f5f5f5;} 
  tr {border-bottom: 1px solid #ddd;}
- 
+ td:hover {background-color: #F5D6C6;} 
 </style>
 {%- endblock style %}
 {%- block before_table %}{% endblock before_table %}
 {%- block table %}
-<table id="T_{{uuid}}" {% if table_attributes %}{{ table_attributes }}{% endif %}>
+<table id="table_leftiframe" {% if table_attributes %}{{ table_attributes }}{% endif %}>
 {%- block caption %}
 {%- if caption -%}
     <caption>{{caption}}</caption>
@@ -43,7 +43,7 @@
     <tr>
         {%- for c in r %}
         {%- if c.is_visible != False %}
-        <{{ c.type }} class="{{c.class}}" {{ c.attributes|join(" ") }}>{{c.value}}</{{ c.type }}>
+        <{{ c.type }} val={{loop.index}} class="{{c.class}}" {{ c.attributes|join(" ") }}>{{c.value}} <input type="checkbox" </input></{{ c.type }}>
         {%- endif %}
         {%- endfor %}
     </tr>

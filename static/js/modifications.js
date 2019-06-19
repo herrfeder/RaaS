@@ -64,19 +64,6 @@ function activateControl() {
 };
 
 
-function serveCopy() {
-
-        console.log("serve raw in clipboard");
-        /* need to find out how to copy content into clipboard */
-  //      document.execCommand('copy');
-
-
-        //$.ajax({url:"/ServeResults?type=copy&sessionID="+sessionID, type: 'GET', success: function(result){
-//
-    //}});
-};
-
-
 function serveDownload() {
 
         console.log("serve download");
@@ -86,8 +73,62 @@ function serveDownload() {
 };
 
 
+function getTableHeadings(iframe){
+		
+	var col_heads = iframe.getElementsByClassName("col_heading");
+	var col_names = [];
+	for (i=0; i < col_heads.length; i++){
+		col_names.push(col_heads[i].innerHTML);
+	}
+	return col_names
+}
 
 
+function hideshowCol(checkbox) {
+    
+	var col = checkbox.value;
+	var ifr_con = $("iframe#leftiframe").contents();
+	var display_status = ifr_con.find("td:nth-child("+col+")").css("display");
+	if (display_status == "none") {
+		ifr_con.find("td:nth-child("+col+")").css("display", "table-cell");
+		ifr_con.find("th:nth-child("+col+")").css("display", "table-cell");
+		}
+	else {
+		ifr_con.find("td:nth-child("+col+")").css("display", "none");
+		ifr_con.find("th:nth-child("+col+")").css("display", "none");
+		}
+
+}
+
+
+function createViewSelect(col_names, viewoptions) {
+
+	for (i=0;i < col_names.length; i++) {
+		var input = $('<input/>').attr({type:'checkbox',
+				    name:col_names[i], 
+			 	    value:i+2,
+				    "checked":"checked",
+				    id:"tablecheck_"+col_names[i]}).add("<span>"+col_names[i]+"</span>").add("<br>").change(function(e) { hideshowCol(this); }).appendTo(viewoptions);
+	}
+}
+
+function getIframeDocument(id) {
+
+	var iframe = document.getElementById(id);
+	var iframedoc = iframe.contentWindow.document;
+	return iframedoc
+}
+
+$('#leftiframe').load(function() {
+
+	var viewoptions = document.getElementById("viewoptionsdropdown");
+	var lifr_con = getIframeDocument("leftiframe");
+	
+	col_names = getTableHeadings(lifr_con);
+	createViewSelect(col_names, viewoptions);
+	//<input id="portscanradio" type="radio" name="datatype" value="portscan">Portscan</input>	
+
+})
 
 
 $('#if').load(function() {
