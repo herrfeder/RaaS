@@ -10,6 +10,7 @@
 {% block scripts %}
     <script src="{{url_for('.static', filename='bootstrap/jquery.min.js')}}"></script>
     <script src="{{url_for('.static', filename='js/modifications.js')}}"></script>
+    <script src="{{url_for('.static', filename='js/jquery-ui.min.js')}}"></script>
     {{super()}}
 {% endblock %}
 
@@ -96,7 +97,7 @@
 		{% endwith %}
       </div>
 
-        {% block app_content %}
+        {% block tab_content %}
         {% endblock %}
 
      </div>

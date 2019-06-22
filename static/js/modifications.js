@@ -6,13 +6,33 @@ $(".alert").delay(4000).slideUp(200, function() {
 
 
 
+function nextTab(){
+    var navtabsli = $('#navtabs li');
+    for (i=0; i< navtabsli.length; i++) {
+	if (navtabsli[i].getAttribute("class") == "active") {
+		console.log(i);
+		if (navtabsli[i].nextElementSibling == null) {
+			navtabsli[0].children[0].click();
+			return;
+		} else {
+			navtabsli[i].nextElementSibling.children[0].click();
+			return;
+		}
+	}
+    }
+};
+
 $(document).ready (function() {
-    $(".alert").alert();
+    $(document).keydown( function (e) {
+	if (e.ctrlKey && e.keyCode == 39) {
+		nextTab();
+	}
+    });
     change_project();
-    setTimeout(function() {
+   	setTimeout(function() {
         $(".alert").slideUp(500);
         }, 3000);
- })
+ });
 
 
 
@@ -26,10 +46,26 @@ function flash(message, category) {
         }, 3000);
  };
 
-function get_dataframerow() {
-
+function get_dataframerow(object) {
+	row = object;
 	console.log("blah");
 
+};
+
+function get_dataframefield(object) {
+	var field = object;
+	var fieldid = field.id.split("_");
+	var headfields = field.parentElement.parentElement.previousElementSibling.children[0].children;
+	for (i = 0; i<headfields.length; i++) {
+		var s_headfield = headfields[i];
+		var headclass = s_headfield.getAttribute("class");
+		var headcol = headclass.split(" ")[2];
+		if (headcol == fieldid[2]) {
+			var column_name = s_headfield.innerHTML.split("<")[0];
+		}
+	}
+	
+	console.log(column_name + "==" + field.innerHTML);
 };
 
 function change_project() {
@@ -126,7 +162,17 @@ $('#leftiframe').load(function() {
 	
 	col_names = getTableHeadings(lifr_con);
 	createViewSelect(col_names, viewoptions);
-	//<input id="portscanradio" type="radio" name="datatype" value="portscan">Portscan</input>	
+
+})
+
+$('#rightiframe').load(function() {
+
+	var viewoptions = document.getElementById("viewoptionsdropdown");
+	var lifr_con = getIframeDocument("rightiframe");
+	
+	col_names = getTableHeadings(lifr_con);
+	createViewSelect(col_names, viewoptions);
+
 
 })
 

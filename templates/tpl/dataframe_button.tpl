@@ -43,7 +43,7 @@
     <tr>
         {%- for c in r %}
         {%- if c.is_visible != False %}
-        <{{ c.type }} val={{loop.index}} class="{{c.class}}" {{ c.attributes|join(" ") }}>{{c.value}} <input type="checkbox" </input></{{ c.type }}>
+        <{{ c.type }} class="{{c.class}}" {{ c.attributes|join(" ") }}>{{c.value}} {%- if loop.index > 1 -%}<input type="checkbox" value={{loop.index}} onchange="parent.hideshowCol(this)">{%- endif -%}</{{ c.type }}>
         {%- endif %}
         {%- endfor %}
     </tr>
@@ -57,10 +57,10 @@
     {% block before_rows %}{% endblock before_rows %}
     {% for r in body %}
     {% block tr scoped %}
-    <tr onclick="parent.get_dataframerow()">
+    <tr onclick="parent.get_dataframerow(this)">
         {% for c in r %}
         {% if c.is_visible != False %}
-        <{{ c.type }} {% if c.id is defined -%} id="T_{{ uuid }}{{ c.id }}" {%- endif %} class="{{ c.class }}" {{ c.attributes|join(" ") }}>{{ c.display_value }}</{{ c.type }}>
+        <{{ c.type }} {% if c.id is defined -%} id="T_{{ c.id }}" {%- endif %} onclick="parent.get_dataframefield(this)" class="{{ c.class }}" {{ c.attributes|join(" ") }}>{{ c.display_value }}</{{ c.type }}>
         {% endif %}
         {%- endfor %}
     <td><button>Action</button></td></tr>
