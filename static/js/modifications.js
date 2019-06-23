@@ -28,6 +28,12 @@ $(document).ready (function() {
 		nextTab();
 	}
     });
+
+    $('#leftiframe').contents().on('mouseenter', '.datafield', function () {
+    	$(this).find("#datafieldbutton").show();
+    }).on('mouseleave', '.datafield', function () {
+        $(this).find("#datafieldbutton").hide();
+    });
     change_project();
    	setTimeout(function() {
         $(".alert").slideUp(500);

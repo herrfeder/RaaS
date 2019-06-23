@@ -60,7 +60,13 @@
     <tr onclick="parent.get_dataframerow(this)">
         {% for c in r %}
         {% if c.is_visible != False %}
-        <{{ c.type }} {% if c.id is defined -%} id="T_{{ c.id }}" {%- endif %} onclick="parent.get_dataframefield(this)" class="{{ c.class }}" {{ c.attributes|join(" ") }}>{{ c.display_value }}</{{ c.type }}>
+        <{{ c.type }} {% if c.id is defined -%} id="T_{{ c.id }}" {%- endif %} onclick="parent.get_dataframefield(this)" class="{{ c.class }} datafield" {{ c.attributes|join(" ") }}>{{ c.display_value }} 
+	  <div class="btn-group-sm" id="datafieldbutton" role="group" aria-label="Basic example" style="display: None;">
+	  	<button type="button" class="btn btn-secondary">&&</button>
+	  	<button type="button" class="btn btn-secondary">||</button>
+	  	<button type="button" class="btn btn-secondary">!=</button>
+	  </div>
+	</{{ c.type }}>
         {% endif %}
         {%- endfor %}
     <td><button>Action</button></td></tr>
