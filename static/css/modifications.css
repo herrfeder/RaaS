@@ -24,7 +24,7 @@
 
 .col_left {
     float: left;
-    width: 45%;
+    width: 70%;
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
     padding: 10px
@@ -35,7 +35,7 @@
     float: left;
     vertical-align: top;
     border-right: 1px solid #ddd;
-    width: 45%;
+    width: 25%;
     height: 100%;
     }
 

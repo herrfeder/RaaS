@@ -42,19 +42,8 @@ $(document).ready (function() {
 
 
 
-function flash(message, category) {
-
-    var message = '<div class="alert alert-'+category+'"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+message+'</div>';
-    $('#messagebox').append(message);
-    setTimeout(function() {
-
-        $(".alert").slideUp(500);
-        }, 3000);
- };
-
 function get_dataframerow(object) {
 	row = object;
-	console.log("blah");
 
 };
 
@@ -68,11 +57,25 @@ function get_dataframefield(object) {
 		var headcol = headclass.split(" ")[2];
 		if (headcol == fieldid[2]) {
 			var column_name = s_headfield.innerHTML.split("<")[0];
+			var field_value = field.innerHTML.split("<")[0];
 		}
 	}
 	
-	console.log(column_name + "==" + field.innerHTML);
+	console.log(column_name + "==" + field_value);
+	var return_arr = [];
+	return_arr[0] = column_name;
+	return_arr[1] = field_value;
+	return return_arr	
 };
+
+function send_filter(operator, object) {
+
+	var filterinput = document.getElementById("filterinput");
+	var return_arr = get_dataframefield(object.parentElement.parentElement);
+	
+	filterinput.value = filterinput.value + return_arr[0] +" "+operator +" "+ return_arr[1];
+
+};	
 
 function change_project() {
 
@@ -127,8 +130,7 @@ function getTableHeadings(iframe){
 
 
 function hideshowCol(checkbox) {
-    
-	var col = checkbox.value;
+	var col = checkbox.getAttribute("value");
 	var ifr_con = $("iframe#leftiframe").contents();
 	var display_status = ifr_con.find("td:nth-child("+col+")").css("display");
 	if (display_status == "none") {
@@ -209,4 +211,14 @@ $('#if').load(function() {
 
 
 });
+function flash(message, category) {
+
+    var message = '<div class="alert alert-'+category+'"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+message+'</div>';
+    $('#messagebox').append(message);
+    setTimeout(function() {
+
+        $(".alert").slideUp(500);
+        }, 3000);
+ };
+
 

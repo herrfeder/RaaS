@@ -22,6 +22,7 @@
 {%- endfor -%}
 {%- endblock cellstyle %}
  th {background-color: #e7ebf6;}
+ th:hover {background-color: #3D9970;} 
  tr:hover {background-color: #f5f5f5;} 
  tr {border-bottom: 1px solid #ddd;}
  td:hover {background-color: #F5D6C6;} 
@@ -43,7 +44,8 @@
     <tr>
         {%- for c in r %}
         {%- if c.is_visible != False %}
-        <{{ c.type }} class="{{c.class}}" {{ c.attributes|join(" ") }}>{{c.value}} {%- if loop.index > 1 -%}<input type="checkbox" value={{loop.index}} onchange="parent.hideshowCol(this)">{%- endif -%}</{{ c.type }}>
+        <{{ c.type }} class="{{c.class}}" {{ c.attributes|join(" ") }} {%- if loop.index > 1 -%} value={{loop.index}} onclick="parent.hideshowCol(this)"{%- endif -%}>{{ c.value
+}}</{{ c.type }}>
         {%- endif %}
         {%- endfor %}
     </tr>
@@ -60,11 +62,11 @@
     <tr onclick="parent.get_dataframerow(this)">
         {% for c in r %}
         {% if c.is_visible != False %}
-        <{{ c.type }} {% if c.id is defined -%} id="T_{{ c.id }}" {%- endif %} onclick="parent.get_dataframefield(this)" class="{{ c.class }} datafield" {{ c.attributes|join(" ") }}>{{ c.display_value }} 
+        <{{ c.type }} {% if c.id is defined -%} id="T_{{ c.id }}" {%- endif %} class="{{ c.class }} datafield" {{ c.attributes|join(" ") }}>{{ c.display_value }} 
 	  <div class="btn-group-sm" id="datafieldbutton" role="group" aria-label="Basic example" style="display: None;">
-	  	<button type="button" class="btn btn-secondary">&&</button>
-	  	<button type="button" class="btn btn-secondary">||</button>
-	  	<button type="button" class="btn btn-secondary">!=</button>
+	  	<button type="button" class="btn btn-secondary" value={{ c.display_value}} onclick="parent.send_filter('=',this)">=</button>
+	  	<button type="button" class="btn btn-secondary" value={{ c.display_value}} onclick="parent.send_filter('<', this)">"<"</button>
+	  	<button type="button" class="btn btn-secondary" value={{ c.display_value}}  onclick="parent.send_filter('>', this)">">"</button>
 	  </div>
 	</{{ c.type }}>
         {% endif %}
