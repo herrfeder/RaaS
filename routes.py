@@ -47,7 +47,7 @@ def get_data():
 
     iframe= "/insert_data"
 
-    return render_template( "index.html",
+    return render_template( "tablepill.html",
                             leftiframe=iframe,
                             title="RaaS",
                             env=env)
@@ -83,7 +83,7 @@ def index():
 
     env = get_env("", "")
     env['projectlist'] = get_project_list()
-    return render_template('index.html',
+    return render_template('tablepill.html',
                            title='RaaS',
                            #possible_calls=possible_calls,
                            env=env)

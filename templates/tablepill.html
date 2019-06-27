@@ -1,0 +1,54 @@
+{% extends "index.html" %}
+
+{% block tablepill_content %}
+<ul class="nav nav-pills nav-justified">
+  <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Subdomain
+    <span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      <li><a data-toggle="pill" href="#subdomain0">Submenu 1-1</a></li>
+      <li><a data-toggle="pill" href="#subdomain1">Submenu 1-2</a></li>
+      <li><a data-toogle="pill" href="#subdomain2">Submenu 1-3</a></li>
+    </ul>
+  </li>
+  <li class="dropdown">
+	<a class="dropdown-toggle" data-toggle="dropdown" href="#">Dirtraversal
+  	<span class="caret"></span></a>
+    	<ul class="dropdown-menu">
+      		<li><a data-toogle="pill" href="#">Submenu 1-1</a></li>
+      		<li><a data-toogle="pill" href="#">Submenu 1-2</a></li>
+      		<li><a data-toogle="pill" href="#">Submenu 1-3</a></li>
+    	</ul>
+  </li>
+  <li class="dropdown">
+	<a class="dropdown-toggle" data-toggle="dropdown" href="#">Portscan
+   	<span class="caret"></span></a>
+    	<ul class="dropdown-menu">
+      		<li><a data-toogle="pill" href="#">Submenu 1-1</a></li>
+      		<li><a data-toogle="pill" href="#">Submenu 1-2</a></li>
+      		<li><a data-toogle="pill" href="#">Submenu 1-3</a></li>
+    	</ul>
+</li>
+</ul>
+
+<div class="tab-content">
+  <div id="subdomain0" class="tab-pane fade">
+	<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ leftiframe }}" frameBorder=0></iframe>
+  </div>
+   <div id="subdomain1" class="tab-pane fade">
+	<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ subdomain1 }}" frameBorder=0></iframe>
+  </div>
+  <div id="subdomain2" class="tab-pane fade">
+	<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ subdomain2 }}" frameBorder=0></iframe>
+  </div>
+
+  <div id="dirtraversal0" class="tab-pane fade in active">
+    <h3>Menu 1</h3>
+    <p>Some content in menu 1.</p>
+  </div>
+  <div id="portscan0" class="tab-pane fade">
+    <h3>Menu 2</h3>
+    <p>Some content in menu 2.</p>
+  </div>
+</div>
+{% endblock %}
