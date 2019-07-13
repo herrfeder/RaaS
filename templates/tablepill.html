@@ -6,9 +6,9 @@
     <a class="dropdown-toggle" data-toggle="dropdown" href="#">Subdomain
     <span class="caret"></span></a>
     <ul class="dropdown-menu">
-      <li><a data-toggle="pill" href="#subdomain0">Submenu 1-1</a></li>
-      <li><a data-toggle="pill" href="#subdomain1">Submenu 1-2</a></li>
-      <li><a data-toogle="pill" href="#subdomain2">Submenu 1-3</a></li>
+      <li><a data-toggle="pill" href="#subdomain0">{{df_dict.get('subdomain_master_name','None')}} <div class="numbercircle">{{df_dict.get('subdomain_master_size','')}}</div></a></li>
+      <li><a data-toggle="pill" href="#subdomain1">{{df_dict.get('subdomain_new_name','None')}} <div class="numbercircle">{{df_dict.get('subdomain_new_size','')}}</div></a></li>
+      <li><a data-toogle="pill" href="#subdomain2">{{df_dict.get('subdomain_temp_name','None')}} <div class="numbercircle">{{df_dict.get('subdomain_temp_size','')}}</div></a></li>
     </ul>
   </li>
   <li class="dropdown">

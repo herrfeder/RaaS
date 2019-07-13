@@ -29,7 +29,7 @@ class MergeResults(threading.Thread):
         self.do = DataObject(columns, env)
         print(load)
         if load:
-            self.do.loadFromCSV()
+            self.do.load_from_csv()
  
     def run(self):
         if self.env['dftype'] == "subdomain":

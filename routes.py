@@ -31,26 +31,44 @@ def get_data():
 
     global df
     global env
+    global df_dict
 
-    datatype = request.form.get('datatype',"")
+    df_dict = {}
+
+    datatypes_client = request.form.get('datatype',"")
     load = request.form.get('load',"")
 
+    #datatypes = datatypes_client.split(",")
 
-    env["datatype"] = datatype
-    env["dftype"] = datatype
-    print(env)
-    if load:
-        mt = ThreadManager.threadManager.newMergeResults(env, load=True)
-        df = mt.do.df
-    else:
-        pass
+    #df_dict["dftypes"] = [x for x in datatypes]
 
-    iframe= "/insert_data"
+    for datatype in datatypes:
+        env["datatype"] = datatype
+        env["dftype"] = datatype
+        print(env)
+        if load:
+            mt = ThreadManager.threadManager.newMergeResults(env, load=True)
+            df = mt.do.df
+        else:
+            pass
+
+            iframe= "/insert_data"
 
     return render_template( "tablepill.html",
                             leftiframe=iframe,
                             title="RaaS",
                             env=env)
+
+@app.route('/insert_data')
+def insert_data():
+    
+    global df
+    #### insert data here
+
+    return render_template( "data.html",
+                            tables=[easystyler(df).render()],
+                            env=env)
+
 
 @app.route('/change_project')
 def change_project():
@@ -64,14 +82,6 @@ def change_project():
     return render_template("index.html",
                            env = env)
    
-
-@app.route('/insert_data')
-def insert_data():
-    
-    global df
-    return render_template( "data.html",
-                            tables=[easystyler(df).render()],
-                            env=env)
 
 
 @app.route('/')

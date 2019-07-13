@@ -4,27 +4,28 @@ import glob
 import time
 import datetime
 import sqlalchemy
+from sqlalchemy import MetaData
 from IPython.core.debugger import Tracer; debug_here = Tracer()
 
 class DataObject():
 
-    def __init__(self,columns,env, datascope):
+    def __init__(self,columns,env, datascope=""):
 
         if columns:
             self.df = pd.DataFrame(columns=columns)
 
         self.dftype = env['dftype']
         self.project = env['project']
-
-		self.conn = sqlalchemy.create_engine("sqlite:///data/"+self.project+".db")
+        pass
+        self.conn = sqlalchemy.create_engine("sqlite:///data/"+self.project+".db")
         self.meta = MetaData(self.conn,reflect=True)
-        self.portscan = self.meta.tables['portscan']
-		self.dirtraversal = self.meta.tables['dirtraversal']
-		self.table_types = ["master","temp"]
-		self.time_stamp = "%Y%m%d%H%M"
-		self.table_name_tpl = "{dftype}_{tabletype}_{timestamp}"
+        #self.portscan = self.meta.tables['portscan']
+        #self.dirtraversal = self.meta.tables['dirtraversal']
+        self.table_types = ["master", "new", "temp",]
+        self.time_stamp = "%Y%m%d%H%M"
+        self.table_name_tpl = "{dftype}_{tabletype}_{timestamp}"
 
-    def CreateFromDictList(self,result_list):
+    def create_from_dict_list(self,result_list):
         self.df = pd.DataFrame()
         for result in result_list:
             if isinstance(result,list) and (len(result) > 1):
@@ -37,12 +38,12 @@ class DataObject():
     def append(self, new_entry):
         self.df = self.df.append(new_entry, ignore_index=True)
 
-    def dropIndex(self, index):
+    def drop_index(self, index):
         self.df.drop(index, inplace=True)
 
-	def get_table_name(self, name):
+    def get_table_name(self, name):
 
-		pass	
+        table_names = self.meta.keys()	
 
     def save_to_csv(self):
 
@@ -80,7 +81,7 @@ class DataObject():
         except Error as e:
             print(e)
 
-    def CheckExistence(self, filtercol, filterval, checkcol='', checkval=''):
+    def check_existence(self, filtercol, filterval, checkcol='', checkval=''):
 
         if checkval == '':
             if self.df[filtercol == filterval][checkcol] == None:
@@ -93,7 +94,7 @@ class DataObject():
             else:
                 return False
 
-    def removeDuplicatesCol(self,row, column):
+    def remove_duplicates_col(self,row, column):
 
         duplicates = self.df[self.sub_df[column] == row[column]]
 
@@ -150,37 +151,32 @@ class DataObject():
         result = pd.read_sql(s, self.conn)
         if result.shape[0] > 1:
             df = extract_scan(result.iloc[0])
-            
-			stats_result['open'] = df[df.state == "open"].shape[0]
+            stats_result['open'] = df[df.state == "open"].shape[0]
             stats_result['filtered'] = df[df.state == "filtered"].shape[0]
-            
             overview_ps = overview_ps_t.format(ip,
                                                stats_result['open'],
                                                stats_result['filtered'])
-            
+
             return (df, overview_ps)
-        
+
         elif result.shape[0] == 0:
             return pd.DataFrame()
-        
+
         else:
             df = extract_scan(result)
-            
+
             stats_result['open'] = df[df.status == "open"].shape[0]
             stats_result['filtered'] = df[df.status == "filtered"].shape[0]
-            
+
             overview_ps = overview_ps_t.format(ip,
                                                stats_result['open'],
                                                stats_result['filtered'])
-            
-            
             return (df, overview_ps)
-            
-        
+
     def ip_to_domain(self, ip):
-        
+
         df = self.return_table("subdomain")
-        
+
         if not df.empty:
             return list(df.query("ip4_1==@ip")["domain"].values)
         else:
@@ -193,7 +189,7 @@ class DataObject():
         if not df.empty:
             return df.query("domain==@domain")["ip4_1"].values
         else:
-return ""
+            return ""
 
 if __name__ == "__main__":
     do = DataObject(["blah"],"blah","blah")
