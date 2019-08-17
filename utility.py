@@ -1,22 +1,12 @@
 import socket
 import re
-from exceptions import WrongDomainSyntax, DomainNoIp, WrongProjectEnvironment
-import sys
+from exceptions import WrongDomainSyntax, DomainNoIp
 import os
 
-allowed_dftypes = ["subdomain", "portscan", "dirtraversal"]
-
-def get_env(dftype, project=""):
-    env_skeleton = {"dftype":"", "project":""}
-    if project:
-        env_skeleton["project"] = project
-    elif os.getenv("PROJECT"):
-        env_skeleton["project"] = os.getenv("PROJECT")
-
-    return env_skeleton
+ssl_ports = ["443","8443","8080"]
 
 
-def getIPfromDomain(domain):
+def get_ip_from_domain(domain):
     ip = ''
 
     try:
@@ -27,7 +17,7 @@ def getIPfromDomain(domain):
     return ip
 
 
-def evalTarget(target):
+def eval_target(target):
     print(target)
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}",target)
     if len(result) == 1:
@@ -48,66 +38,93 @@ def evalTarget(target):
         return "invalid"
 
 
+def join_url(base_url,uri,urleval=False):
+
+    base_url = base_url.rstrip("/")
+    uri = uri.lstrip("/")
+    if (base_url.replace("http://","").replace("https://","") in uri ):
+        return eval_url(uri)[0]
+
+
+    if urleval==False:
+        return os.path.join(base_url,uri)
+    else:
+        return eval_url(os.path.join(base_url,uri))[0]
+
+
 def return_url(dic):
+    return dic['final_url']
 
-    dom_split = dic['domain'].split("/")
+def eval_url(domain, port="", check_online=False):
 
-    return dic['ssl']+"://"+dom_split[0]+":"+dic['port']+"/"+"/".join(dom_split[1:])
+    result_dict = {'final_url':'',
+                   'port':'',
+                   'ssl':'http',
+                   'uri': '',
+                   'base_url':'',
+                   'ip': ''}
 
-def eval_url(domain, port=""):
-
-    result_dict = {'domain':'','port':'','ssl':'http'}
     dom_split = domain.split(":")
 
     if len(dom_split) == 3:
         if dom_split[0] == "https":
             result_dict['ssl'] = dom_split[0]
         elif dom_split[0] == "http":
-            pass
+            result_dict['ssl'] = "http"
         else:
             raise WrongDomainSyntax
-            return -1
-        result_dict['port'] = dom_split[2].split("/")[0]
-        try:
-            result_dict['domain'] = dom_split[1].split("//")[1]+\
-                                    "/"+"/".join(dom_split[2].split("/")[1:])
-        except:
+        if dom_split[1].startswith("//"):
+            result_dict['base_url'] = dom_split[1].lstrip("//")
+        else:
             raise WrongDomainSyntax
-            return -1
+        port_uri = dom_split[2].split("/")
+        if re.match("[0-9]{1,5}",port_uri[0]):
+            result_dict["port"] = port_uri[0]
+            if len(port_uri) > 1:
+                result_dict["uri"] = port_uri[1]
+        else:
+            raise WrongDomainSyntax
 
     elif len(dom_split) == 2:
-        if dom_split[0] == "https":
-            result_dict['ssl'] = dom_split[0]
-            result_dict['port'] = "443"
-        elif dom_split[0] == "http":
-            result_dict['port'] = "80"
+        # Pattern: test.de:80/blah
+        port_uri = dom_split[1].split("/")
+        if re.match("[0-9]{1,5}",port_uri[0]):
+            result_dict["port"] = port_uri[0]
+            if result_dict["port"] in ssl_ports:
+                result_dict["ssl"] = "https"
+            else:
+                result_dict["ssl"] = "http"
+            if len(port_uri) > 1:
+                result_dict["uri"] = port_uri[1]
+            result_dict["base_url"] = dom_split[0]
+        # Pattern: http://test.de
+        elif dom_split[0].startswith("http"):
+            if dom_split[0] == "https":
+                result_dict['ssl'] = "https"
+                result_dict['port'] = "443"
+            else:
+                result_dict['ssl'] = "http"
+                result_dict['port'] = "80"
+            # Pattern: http://test.de/blah
+            if dom_split[1].startswith("//"):
+                result_dict['base_url'] = dom_split[1].lstrip("//").split("/")[0]
+                result_dict['uri'] = "/".join(dom_split[1].lstrip("//").split("/")[1:])
+            else:
+                raise WrongDomainSyntax
         else:
             raise WrongDomainSyntax
-            return -1
-        try:
-            result_dict['domain'] = dom_split[1].split("//")[1]
-        except:
-            raise WrongDomainSyntax
-            return -1
 
     elif len(dom_split) == 1:
         if "." in dom_split[0]:
-            result_dict['domain'] = dom_split[0]
+            result_dict['base_url'] = dom_split[0]
             result_dict['port'] = "80"
         else:
             raise WrongDomainSyntax
-            return -1
 
-    else:
-        raise WrongDomainSyntax
-        return -1
+   
+    result_dict['final_url'] = result_dict['ssl']+"://"+result_dict['base_url']+":"+result_dict['port']+"/"+result_dict['uri']
+    
+    if check_online==True:
+        result_dict['ip'] = get_ip_from_domain(return_url(result_dict))
 
-    if not getIPfromDomain(result_dict['domain'].split("/")[0]):
-            raise DomainNoIp
-            return -1
-
-    if port:
-        result_dict['port'] = port
-        if port in ["443","8443","4443"]:
-            result_dict['ssl'] = "https"
     return return_url(result_dict),result_dict

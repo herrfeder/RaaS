@@ -16,7 +16,7 @@ class DataObject():
 
         self.dftype = env['dftype']
         self.project = env['project']
-        pass
+        self.df_dict = {}
         self.conn = sqlalchemy.create_engine("sqlite:///data/"+self.project+".db")
         self.meta = MetaData(self.conn,reflect=True)
         #self.portscan = self.meta.tables['portscan']
@@ -40,11 +40,7 @@ class DataObject():
 
     def drop_index(self, index):
         self.df.drop(index, inplace=True)
-
-    def get_table_name(self, name):
-
-        table_names = self.meta.keys()	
-
+	
     def save_to_csv(self):
 
         timedate = datetime.datetime.now().strftime(self.time_stamp)
@@ -75,8 +71,8 @@ class DataObject():
     def load_from_sqlite(self, name, append=False):
 
         try:
-            conn = sqlite3.connect("data/"+self.project+".db")
-            self.df = pd.read_sql_table(self.get_table_name(name), con=conn)
+            conn = sqlite3.connect("data/db/"+self.project+".db")
+            self.df = pd.read_sql_table(self.return_table_name(self.dftype+"_"+"master"), con=self.conn)
 
         except Error as e:
             print(e)
@@ -102,9 +98,13 @@ class DataObject():
             pass
 
     def return_table(self, table_name):
-        
+
         if table_name not in self.conn.table_names():
-            return "Wrong tablename"
+            possible_names = [x for x in self.conn.table_names() if x.startswith(table_name)]
+            if len(possible_names) < 1:
+                return ""
+            else:
+                return pd.read_sql_table(possible_names, self.conn)
         else:
             return pd.read_sql_table(table_name, self.conn)
         

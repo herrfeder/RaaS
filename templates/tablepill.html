@@ -1,54 +1,35 @@
 {% extends "index.html" %}
 
 {% block tablepill_content %}
+{{title}}
 <ul class="nav nav-pills nav-justified">
-  <li class="dropdown">
-    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Subdomain
+    {% for x in range(df_dict.get('number_types',1)) %}
+    <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{df_dict.get('type_'+x|string,'')}}
     <span class="caret"></span></a>
     <ul class="dropdown-menu">
-      <li><a data-toggle="pill" href="#subdomain0">{{df_dict.get('subdomain_master_name','None')}} <div class="numbercircle">{{df_dict.get('subdomain_master_size','')}}</div></a></li>
-      <li><a data-toggle="pill" href="#subdomain1">{{df_dict.get('subdomain_new_name','None')}} <div class="numbercircle">{{df_dict.get('subdomain_new_size','')}}</div></a></li>
-      <li><a data-toogle="pill" href="#subdomain2">{{df_dict.get('subdomain_temp_name','None')}} <div class="numbercircle">{{df_dict.get('subdomain_temp_size','')}}</div></a></li>
+      <li><a data-toggle="pill" href="#{{df_dict.get('master_name_'+x|string,'None')}}">{{df_dict.get('master_name_'+x|string,'None')}}<div class="numbercircle">{{df_dict.get('master_size_'+str(x),'')}}</div></a></li>
+      <li><a data-toggle="pill" href="#{{df_dict.get('new_name_'+str(x),'None')}}">{{df_dict.get('new_name_'+str(x),'None')}}<div class="numbercircle">{{df_dict.get('new_size_'+str(x),'')}}</div></a></li>
+      <li><a data-toogle="pill" href="#{{df_dict.get('temp_name_'+str(x),'None')}}">{{df_dict.get('temp_name_'+str(x),'None')}}<div class="numbercircle">{{df_dict.get('temp_size'+str(x),'')}}</div></a></li>
     </ul>
   </li>
-  <li class="dropdown">
-	<a class="dropdown-toggle" data-toggle="dropdown" href="#">Dirtraversal
-  	<span class="caret"></span></a>
-    	<ul class="dropdown-menu">
-      		<li><a data-toogle="pill" href="#">Submenu 1-1</a></li>
-      		<li><a data-toogle="pill" href="#">Submenu 1-2</a></li>
-      		<li><a data-toogle="pill" href="#">Submenu 1-3</a></li>
-    	</ul>
-  </li>
-  <li class="dropdown">
-	<a class="dropdown-toggle" data-toggle="dropdown" href="#">Portscan
-   	<span class="caret"></span></a>
-    	<ul class="dropdown-menu">
-      		<li><a data-toogle="pill" href="#">Submenu 1-1</a></li>
-      		<li><a data-toogle="pill" href="#">Submenu 1-2</a></li>
-      		<li><a data-toogle="pill" href="#">Submenu 1-3</a></li>
-    	</ul>
-</li>
+  {% endfor %}
 </ul>
 
 <div class="tab-content">
-  <div id="subdomain0" class="tab-pane fade">
-	<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ leftiframe }}" frameBorder=0></iframe>
-  </div>
-   <div id="subdomain1" class="tab-pane fade">
-	<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ subdomain1 }}" frameBorder=0></iframe>
-  </div>
-  <div id="subdomain2" class="tab-pane fade">
-	<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ subdomain2 }}" frameBorder=0></iframe>
-  </div>
 
-  <div id="dirtraversal0" class="tab-pane fade in active">
-    <h3>Menu 1</h3>
-    <p>Some content in menu 1.</p>
-  </div>
-  <div id="portscan0" class="tab-pane fade">
-    <h3>Menu 2</h3>
-    <p>Some content in menu 2.</p>
-  </div>
+  {% for x in range(df_dict.get('number_types',1)) %}
+	<div id="#{{df_dict.get('master_name_'+str(x),'None')}}" class="tab-pane fade">
+		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('master_html_'+str(x),'') }}" frameBorder=0></iframe>
+	</div>
+	<div id="#{{df_dict.get('new_name_'+str(x),'None')}}" class="tab-pane fade">
+		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('new_html_'+str(x),'') }}" frameBorder=0></iframe>
+	</div>
+        <div id="#{{df_dict.get('master_name_'+str(x),'None')}}" class="tab-pane fade">
+		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('temp_html_'+str(x),'') }}" frameBorder=0></iframe>
+	</div>
+
+
+  {% endfor %}
 </div>
 {% endblock %}

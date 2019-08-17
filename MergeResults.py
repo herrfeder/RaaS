@@ -27,9 +27,8 @@ class MergeResults(threading.Thread):
         self.fin = 0
         self.env = env
         self.do = DataObject(columns, env)
-        print(load)
         if load:
-            self.do.load_from_csv()
+            self.do.load_from_sqlite()
  
     def run(self):
         if self.env['dftype'] == "subdomain":

@@ -49,18 +49,21 @@ def get_data():
         if load:
             mt = ThreadManager.threadManager.newMergeResults(env, load=True)
             df = mt.do.df
+            print(df)
         else:
             pass
 
-            iframe= "/insert_data"
+        
+    iframe= "/insert_data"
 
     return render_template( "tablepill.html",
                             leftiframe=iframe,
                             title="RaaS",
+                            df_dict = {"blah":"blah"},
                             env=env)
 
-@app.route('/insert_data')
-def insert_data():
+@app.route('/insert_data/<filename>')
+def insert_data(filename):
     
     global df
     #### insert data here
@@ -96,6 +99,7 @@ def index():
     return render_template('tablepill.html',
                            title='RaaS',
                            #possible_calls=possible_calls,
+                           df_dict = {},
                            env=env)
 
 
