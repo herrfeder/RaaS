@@ -1,8 +1,8 @@
 from logging.config import dictConfig
 import os
 
-if not os.path.exists("log"):
-	os.mkdir("log")
+if not os.path.exists("raaslog"):
+	os.mkdir("raaslog")
 
 
 raas_dictconfig = {
@@ -15,12 +15,13 @@ raas_dictconfig = {
     'handlers': {'stdout_handle': {
 					'class': 'logging.StreamHandler',
 					'stream': 'ext://sys.stdout',
+                    'level': 'DEBUG',
 					'formatter': 'default'
 					},
 				'file_handle_info': {
 					'class': 'logging.handlers.RotatingFileHandler',
 					'formatter': 'default',
-					'filename': 'log/log_info.log',
+					'filename': 'raaslog/log_info.log',
 					'maxBytes': 1024,
 					'backupCount': 3
 					},
@@ -28,7 +29,7 @@ raas_dictconfig = {
 					'class': 'logging.handlers.RotatingFileHandler',
 					'formatter': 'default',
                     'level':'ERROR',
-					'filename': 'log/log_error.log',
+					'filename': 'raaslog/log_error.log',
 					'maxBytes': 1024,
 					'backupCount': 3
 					},
@@ -36,7 +37,7 @@ raas_dictconfig = {
 					'class': 'logging.handlers.RotatingFileHandler',
 					'formatter': 'default',
                     'level':'ERROR',
-					'filename': 'log/log_error.log',
+					'filename': 'raaslog/log_error.log',
 					'maxBytes': 1024,
 					'backupCount': 3
 					},

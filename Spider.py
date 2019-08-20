@@ -16,7 +16,7 @@ import urllib3
 import urllib3.exceptions as urllib3_exc
 import pickle
 
-from utility import eval_url, join_url, checkdir
+from utility import eval_url, join_url, checkdir, checkfile, url_to_filename
 from misc.settings import raas_dictconfig
 import logging
 import os
@@ -43,11 +43,12 @@ service_args = [
 
 class Spider(object):
 
-    def __init__(self, base_url, base_dir="raas_input"):
+    def __init__(self, base_url, base_dir="raas_output"):
         self.useragent = "Mozilla/5.0"
 
-        self.lgg = logging.config.dictConfig(raas_dictconfig)
- 
+        logging.config.dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_spider")
+        self.lgg.debug("Starting Spider") 
         try:
                 options = Options()
                 options.add_argument('--headless')
@@ -76,7 +77,7 @@ class Spider(object):
 
         self.base_dir = checkdir(base_dir)
         self.tool_dir = checkdir(os.path.join(base_dir,"spider"))
-        self.session_dir = checkdir(os.path.join(self.tool_dir,self.base_url))
+        self.session_dir = checkdir(os.path.join(self.tool_dir,url_to_filename(self.base_url)))
         self.restore_file = os.path.join(self.session_dir,"session.p")
    
         if os.path.exists(self.restore_file):
@@ -98,18 +99,18 @@ class Spider(object):
 
         self.base_url = url
 
-    def process_link_response(result_dict, method="GET"):
+    def process_link_response(self, result_dict, method="GET"):
 
-        checkdir(os.path.join(self.session_dir,result_dict["url"]))
+        sitedir =  checkdir(os.path.join(self.session_dir,url_to_filename(result_dict["url"])))
         if method == "GET":
-            result_dict["source_path"] = method+"_response_"+result_dict["status"]+"_"+result_dict["url"]
+            result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"]+"_"+checkfile(result_dict["url"]))
             with open(result_dict["source_path"], "w") as f:
-                f.write(result_dict["headers"]+"\n")
+                f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
                 f.write("\n\n")
                 f.write(result_dict["page_source"]+"\n")
             result_dict["page_source"] = ""
             if not result_dict["status"] in ["404", "403"]:
-                result_dict["screenshot_path"] = method+"_screenshot_"+result_dict["status"]+"_"+result_dict["url"]
+                result_dict["screenshot_path"] = os.path.join(sitedir,method+"_screenshot_"+result_dict["status"]+"_"+checkfile(result_dict["url"])+".png")
                 self.br.save_screenshot(result_dict["screenshot_path"])
 
         return result_dict
@@ -121,48 +122,50 @@ class Spider(object):
             bsoup = self.parse_html_to_bs(self.last_html)
         if self.logged_in == True:
             if re.match("[Ll]ogout",url):
-                self.lgg.WARNING("Found logout in logged in session in URL {}. Dismiss!".format(url))
+                self.lgg.warning("Found logout in logged in session in URL {}. Dismiss!".format(url))
                 return None
 
-            result_dict = self.get_link_wrap(url)
-            if result_dict["result"] == "exit":
-                return "exit"
-            result_entry = None
-            if result_dict["result"] == "success":
-                result_entry = self.process_link_response(result_dict)
-                bsoup = self.parse_html_to_bs(result['page_source'])
-                templinks = [bsoup.findAll(x) for x in tag_list]
-                templinks = reduce(operator.add, templinks)
-                self.get_input_attr_raw(inputdata=templinks,keys=attr_list)
-                number_links = self.extract_link(keys=attr_list)
-                return number_links
+        result_dict = self.get_link_wrap(url)
+        if result_dict["result"] == "exit":
+            return "exit"
+        result_entry = None
+        if result_dict["result"] == "success":
+            result_entry = self.process_link_response(result_dict)
+            bsoup = self.parse_html_to_bs(result_dict['page_source'])
+            templinks = [bsoup.findAll(x) for x in tag_list]
+            templinks = reduce(operator.add, templinks)
+            self.get_input_attr_raw(inputdata=templinks,keys=attr_list)
+            number_links = self.extract_link(keys=attr_list)
+            return number_links
 
-            elif (result_dict["result"] != "unknown_domain") and not (result_dict["result"] == "sucess"):
-                result_entry = self.process_link_response(result_dict)
-            
-            if result_entry != None:
-                self.result_list.append(result_entry)
+        elif (result_dict["result"] != "unknown_domain") and not (result_dict["result"] == "sucess"):
+            result_entry = self.process_link_response(result_dict)
+        
+        if result_entry != None:
+            self.result_list.append(result_entry)
 
-                return None
+            return None
 
    
     def collect_all_links(self, url="",limit=0):
-        if not self.links:
+        if len(self.links) == 0:
             url = eval_url(url)[0]
             return_val = self.collect_links(url=url)
-        else:
-            while(True):
-                for link in self.links:
-                    if link not in self.visited:
-                        self.lgg.DEBUG("[+] added link:".format(link))
-                        return_val = self.collect_link(link)
-                        if return_val == "exit":
-                            return
-                        self.visited.append(link)
-                if limit != 0:
-                    if len(self.links)>=limit:
-                        self.lgg.INFO("[*] We have %s links, thats enough"%(str(limit)))
-                        return
+        while(True):
+            link = self.links.pop()
+            if link not in self.visited:
+                self.lgg.debug("[+] added link:".format(link))
+                return_val = self.collect_link(link)
+                if return_val == "exit":
+                    return
+                self.visited.append(link)
+            if len(self.links) == 0:
+                break
+
+            if limit != 0:
+                if len(self.links)>=limit:
+                    self.lgg.info("[*] We have %s links, thats enough"%(str(limit)))
+                    return
 
     def get_link(self,url):
 
@@ -171,14 +174,14 @@ class Spider(object):
         try:
             url = eval_url(url)[0]
         except (WrongDomainSyntax,DomainNoIp) as e:
-            print(e)
+            self.lgg.exception("WrongDomainSyntax or DomainNoIp")
 
         if not url.split(".")[-1] in notcrawlext_list:
-            print("URL to get: {}".format(url))
+            self.lgg.debug("URL to get: {}".format(url))
             try:
                 resp = self.httpreq.request("GET",url)
                 return_vals["headers"] = dict(resp.headers)
-                return_vals["status"] = resp.status
+                return_vals["status"] = str(resp.status)
                 return_vals["url"] = url
             except urllib3_exc.MaxRetryError:
                 return_vals["result"] = "unknown_domain"
@@ -208,7 +211,7 @@ class Spider(object):
                 if return_vals["result"] == "success":
                     return return_vals
                 elif return_vals["result"] == "too_many_requests":
-                    self.lgg.WARNING("We've send too many requests, the webserver enables mechanisms to protect from crawling.") 
+                    self.lgg.warning("We've send too many requests, the webserver enables mechanisms to protect from crawling.") 
                     time.sleep(5)
                     # improve to :change useragent and openvpn
                     return_vals = self.get_link(url)
@@ -244,10 +247,7 @@ class Spider(object):
         for inputfield in process_data:
             for attr in inputfield.attrs:
                 if str(attr) == key:
-                    try:
-                        self.input_pairs.append({key:inputfield.attrs[key]})
-                    except Exception as e:
-                        print(e)
+                    self.input_pairs.append({key:inputfield.attrs[key]})
 
         return self.input_pairs
 
@@ -267,6 +267,7 @@ class Spider(object):
                 ((re.search("^[a-zA-Z0-9]",value) and not (re.search("^(http)",value)))) or \
                 (value.endswith("php")):
                     new_link = join_url(self.base_url,value)
+                    print(new_link)
                     if new_link not in self.links:
                         number_links += 1
                         self.links.append(new_link)
@@ -282,9 +283,8 @@ class Spider(object):
         return temp_bs
 
 if __name__ == "__main__":
-
+    spider = Spider("https://eurid.eu")
     try:
-        spider = Spider("https://eurid.eu")
         spider.collect_all_links(url="https://eurid.eu")
     except:
         spider.br.close()

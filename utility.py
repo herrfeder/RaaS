@@ -4,6 +4,15 @@ from exceptions import WrongDomainSyntax, DomainNoIp
 import os
 
 ###### Filesystem
+def url_to_filename(name):
+    return name.replace("//","").\
+                replace("/","_").\
+                replace(":","_").\
+                replace("?","_").\
+                replace("&","_")
+
+def checkfile(filename):
+    return url_to_filename(filename)
 
 def checkdir(dirname):
     if not os.path.exists(dirname):
@@ -11,6 +20,7 @@ def checkdir(dirname):
     return dirname
 ###### IP and DOMAIN
 ssl_ports = ["443","8443","8080"]
+
 
 def get_ip_from_domain(domain):
     ip = ''
