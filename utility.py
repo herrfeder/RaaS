@@ -3,8 +3,14 @@ import re
 from exceptions import WrongDomainSyntax, DomainNoIp
 import os
 
-ssl_ports = ["443","8443","8080"]
+###### Filesystem
 
+def checkdir(dirname):
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+    return dirname
+###### IP and DOMAIN
+ssl_ports = ["443","8443","8080"]
 
 def get_ip_from_domain(domain):
     ip = ''
