@@ -18,12 +18,14 @@ import pickle
 
 from utility import eval_url, join_url, checkdir, checkfile, url_to_filename
 from misc.settings import raas_dictconfig
+from misc.settings import bcolors
 import logging
+from logging.config import dictConfig
 import os
 
 tag_list = ["a", "form", "option","script","img"]
 attr_list = ["href","type","src","action"]
-notcrawlext_list = ["pdf", "docx", "php", "csv", "xls", "png", "jpg"]
+notcrawlext_list = ["pdf", "docx", "csv", "xls", "png", "jpg"]
 
 return_vals_template = {"url":"",
                        "status":"",
@@ -32,7 +34,9 @@ return_vals_template = {"url":"",
                        "cookies":"",
                        "page_source":"",
                        "source_path":"",
-                       "screenshot_path":""
+                       "screenshot_path":"",
+                       "number_links":0,
+                       "type":""
                        }
 
 
@@ -43,10 +47,10 @@ service_args = [
 
 class Spider(object):
 
-    def __init__(self, base_url, base_dir="raas_output"):
+    def __init__(self, start_url, base_dir="raas_output"):
         self.useragent = "Mozilla/5.0"
 
-        logging.config.dictConfig(raas_dictconfig)
+        dictConfig(raas_dictconfig)
         self.lgg = logging.getLogger("RAAS_spider")
         self.lgg.debug("Starting Spider") 
         try:
@@ -65,7 +69,11 @@ class Spider(object):
         self.forms_and_inputs = {}
         self.clicked_links = []
         self.last_url = ""
-        self.base_url = base_url
+        self.start_url = start_url
+        base_url, base_url_dict = eval_url(self.start_url)
+        self.base_ssl = base_url_dict["ssl"]
+        self.base_port = base_url_dict["port"]
+        self.base_url = base_url_dict["base_url"]
 
         self.last_html = ""
 
@@ -100,89 +108,102 @@ class Spider(object):
         self.base_url = url
 
     def process_link_response(self, result_dict, method="GET"):
-
-        sitedir =  checkdir(os.path.join(self.session_dir,url_to_filename(result_dict["url"])))
-        if method == "GET":
-            result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"]+"_"+checkfile(result_dict["url"]))
-            with open(result_dict["source_path"], "w") as f:
-                f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
-                f.write("\n\n")
-                f.write(result_dict["page_source"]+"\n")
-            result_dict["page_source"] = ""
-            if not result_dict["status"] in ["404", "403"]:
-                result_dict["screenshot_path"] = os.path.join(sitedir,method+"_screenshot_"+result_dict["status"]+"_"+checkfile(result_dict["url"])+".png")
-                self.br.save_screenshot(result_dict["screenshot_path"])
+        if result_dict != "nocrawlfile":
+            sitedir =  checkdir(os.path.join(self.session_dir,url_to_filename(result_dict["url"])))
+            if method == "GET":
+                result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"]+"_"+checkfile(result_dict["url"]))
+                with open(result_dict["source_path"], "w") as f:
+                    f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
+                    f.write("\n\n")
+                    f.write(result_dict["page_source"]+"\n")
+                result_dict["page_source"] = ""
+                if not result_dict["status"] in ["404", "403"]:
+                    result_dict["screenshot_path"] = os.path.join(sitedir,method+"_screenshot_"+result_dict["status"]+"_"+checkfile(result_dict["url"])+".png")
+                    self.br.save_screenshot(result_dict["screenshot_path"])
 
         return result_dict
 
+    def parse_link_response(self, result_dict):
+
+        if result_dict['page_source']:
+            bsoup = self.parse_html_to_bs(result_dict['page_source'])
+            templinks = [bsoup.findAll(x) for x in tag_list]
+            templinks = reduce(operator.add, templinks)
+            self.get_input_attr_raw(inputdata=templinks,keys=attr_list)
+            result_dict["number_links"] = self.extract_link(keys=attr_list)
+            if result_dict["number_links"] < 1:
+                self.lgg.debug("Extracted nothing on site {}".format(result_dict["url"]))
+
+        result_entry = self.process_link_response(result_dict)
+
+        return result_entry
 
 
-    def collect_links(self,url=""):
-        if url == "":
-            bsoup = self.parse_html_to_bs(self.last_html)
+    def collect_links(self,url):
         if self.logged_in == True:
             if re.match("[Ll]ogout",url):
                 self.lgg.warning("Found logout in logged in session in URL {}. Dismiss!".format(url))
                 return None
 
         result_dict = self.get_link_wrap(url)
+
         if result_dict["result"] == "exit":
             return "exit"
         result_entry = None
         if result_dict["result"] == "success":
-            result_entry = self.process_link_response(result_dict)
-            bsoup = self.parse_html_to_bs(result_dict['page_source'])
-            templinks = [bsoup.findAll(x) for x in tag_list]
-            templinks = reduce(operator.add, templinks)
-            self.get_input_attr_raw(inputdata=templinks,keys=attr_list)
-            number_links = self.extract_link(keys=attr_list)
-            return number_links
-
+            result_entry = self.parse_link_response(result_dict)
         elif (result_dict["result"] != "unknown_domain") and not (result_dict["result"] == "sucess"):
-            result_entry = self.process_link_response(result_dict)
-        
+            result_entry = self.parse_link_response(result_dict)
+        self.lgg.info("Returned from crawl:\n{cs}Result:{result}\t\tStatus:{status}\t\tLinks:{number_links}\t\tURL:{url}{ce}".format(cs=bcolors.OKGREEN, ce=bcolors.ENDC,
+                                                                                                               url=result_entry["url"],
+                                                                                                               status=result_entry["status"],
+                                                                                                               result=result_entry["result"],
+                                                                                                               number_links=result_entry["number_links"] ))
         if result_entry != None:
             self.result_list.append(result_entry)
-
             return None
 
-   
+
     def collect_all_links(self, url="",limit=0):
         if len(self.links) == 0:
             url = eval_url(url)[0]
             return_val = self.collect_links(url=url)
         while(True):
+            self.links = list(set(self.links))
+            if len(self.links) == 0:
+                self.lgg.info("No links to process. Exiting Spider.")
+                return
             link = self.links.pop()
             if link not in self.visited:
-                self.lgg.debug("[+] added link:".format(link))
-                return_val = self.collect_link(link)
+                self.lgg.debug("Insert new link {} into crawler.".format(link))
+                return_val = self.collect_links(link)
                 if return_val == "exit":
                     return
                 self.visited.append(link)
-            if len(self.links) == 0:
-                break
-
+ 
             if limit != 0:
                 if len(self.links)>=limit:
                     self.lgg.info("[*] We have %s links, thats enough"%(str(limit)))
                     return
 
-    def get_link(self,url):
+    def get_link(self,in_url):
 
         return_vals = return_vals_template
 
         try:
-            url = eval_url(url)[0]
+            url = eval_url(in_url)[0]
+            self.lgg.debug("URL before eval {} and after {}".format(in_url,url))
         except (WrongDomainSyntax,DomainNoIp) as e:
             self.lgg.exception("WrongDomainSyntax or DomainNoIp")
 
+        return_vals["url"] = url
         if not url.split(".")[-1] in notcrawlext_list:
-            self.lgg.debug("URL to get: {}".format(url))
+            return_vals["type"] = "webresource"
+            self.lgg.debug("Crawl URL: {}".format(url))
             try:
                 resp = self.httpreq.request("GET",url)
                 return_vals["headers"] = dict(resp.headers)
                 return_vals["status"] = str(resp.status)
-                return_vals["url"] = url
             except urllib3_exc.MaxRetryError:
                 return_vals["result"] = "unknown_domain"
                 return return_vals
@@ -191,22 +212,32 @@ class Spider(object):
             except sel_excepts.InvalidArgumentException:
                 return_vals["result"] = "invalid_request"
                 return return_vals
-            except sel_excepts.UnexpectedAlertPresentException: # reCAPTCHA exception
+            except (sel_excepts.UnexpectedAlertPresentException, sel_excepts.TimeoutException): # reCAPTCHA exception
                 return_vals["result"] = "too_many_requests"
                 return return_vals
+
+            try:
+                return_vals["page_source"] = self.br.page_source
+            except sel_excepts.WebDriverException:
+                return_vals["page_source"] = ""
+                return_vals["result"] = "bs_parsing_error"
+                return return_vals
+            self.last_html = return_vals["page_source"]
             return_vals["cookies"] = self.br.get_cookies()
+            return_vals["result"] = "success"
             if self.logged_in == False:
                 self.br.delete_all_cookies()
-            return_vals["page_source"] = self.br.page_source
-            return_vals["result"] = "success"
-            self.last_html = return_vals["page_source"]
-
             return return_vals
+        else:
+            return_vals["type"] = "nocrawlfile"
+            return_vals["result"] = "no_crawling_extension"
+            return return_vals 
 
 
     def get_link_wrap(self,url):
             try_index=0
             return_vals = self.get_link(url)
+            '''
             while(try_index<5):
                 if return_vals["result"] == "success":
                     return return_vals
@@ -215,7 +246,11 @@ class Spider(object):
                     time.sleep(5)
                     # improve to :change useragent and openvpn
                     return_vals = self.get_link(url)
+                else:
+                    print("IM HERE NOW")
+
                 try_index += 1
+                
                 if try_index == 5:
                     recover_dict = {'base_url': self.base_url,
                                     'links':self.links,
@@ -223,13 +258,13 @@ class Spider(object):
                     pickle.dump(recover_dict, open(self.restore_file,"wb")) 
                     return {"result":"exit"}
             return None
-
+            '''
+            return return_vals
 
 
 
     def get_input_attr_raw(self, inputdata, keys):
         self.input_pairs = []
-
         process_data = inputdata
         for inputfield in process_data:
             for attr in inputfield.attrs:
@@ -255,23 +290,25 @@ class Spider(object):
 
 
     def extract_link(self, keys):
- 
         templinks = []
         number_links = 0
         for pair in self.input_pairs:
                 key = pair[0]
                 value = pair[1]
+                new_link = ""
                 # baseURL is in link
-                if (self.base_url.replace("http://","").replace("https://","") in value) or \
-                (value.startswith("/")) or \
-                ((re.search("^[a-zA-Z0-9]",value) and not (re.search("^(http)",value)))) or \
-                (value.endswith("php")):
-                    new_link = join_url(self.base_url,value)
-                    print(new_link)
-                    if new_link not in self.links:
-                        number_links += 1
-                        self.links.append(new_link)
-
+                if (self.base_url in value):
+                    if value.startswith("//"):
+                        new_link = self.base_ssl+":"+value
+                    if value.startswith("http"):
+                        new_link = value
+                elif (value.startswith("/")) and not (value.startswith("//")):
+                    new_link = join_url(self.start_url, value, urleval=True)
+                elif (value.startswith("//")):
+                    new_link = self.base_ssl+":"+value
+                if (new_link not in self.links) and (new_link != ""):
+                    number_links += 1
+                    self.links.append(new_link)
         return number_links
 
     def parse_html_to_bs(self,data):

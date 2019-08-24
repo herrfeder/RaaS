@@ -97,7 +97,7 @@ def eval_url(domain, port="", check_online=False):
         if re.match("[0-9]{1,5}",port_uri[0]):
             result_dict["port"] = port_uri[0]
             if len(port_uri) > 1:
-                result_dict["uri"] = port_uri[1]
+                result_dict["uri"] = "/".join(port_uri[1:])
         else:
             raise WrongDomainSyntax
 
