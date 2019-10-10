@@ -152,10 +152,9 @@ class Spider(object):
 
         if result_dict['page_source']:
             bsoup = self.parse_html_to_bs(result_dict['page_source'])
-            templinks = [bsoup.findAll(x) for x in tag_list]
-            templinks = reduce(operator.add, templinks)
-            self.get_input_attr_raw(inputdata=templinks,keys=attr_list)
-            result_dict["number_links"] = self.extract_html_get_link(keys=attr_list)
+            #debughere()
+
+            result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,keys=attr_list)
             if result_dict["number_links"] < 1:
                 self.lgg.debug("Extracted nothing on site {}".format(result_dict["url"]))
 
@@ -206,7 +205,7 @@ class Spider(object):
         return {"result":"success"}
 
     def collect_links_wrap(self, url="",limit=0):
-        link = {"link":"","from":"","request":"GET"}
+        link = {"link":"", "attr":"", "tag":"", "request":"GET"}
         if len(self.links) == 0:
             link["link"] = eval_url(url)[0]
             return_val = self.collect_links(link=link)
@@ -224,7 +223,7 @@ class Spider(object):
                 return
 
             proofed_link = [vis for vis in self.visited if not ((vis['link']==link['link']) & (vis['request']==link['request']))] if self.visited else link
-            debughere()
+            #debughere()
 
             if proofed_link:
                 self.lgg.debug("Insert new link {} into crawler.".format(link["link"]))
@@ -241,8 +240,8 @@ class Spider(object):
     def get_link(self,link):
 
         return_vals = {key:"" for key,value in return_vals_template.items()}
-        return_vals["from_attrib"] = link["from"]
-        return_vals["request_type"] = link["request"]
+        return_vals["from_attrib"] = link.get("from","")
+        return_vals["request_type"] = link.get("request","")
         try:
             url = eval_url(link["link"])[0]
             self.lgg.debug("URL before eval {} and after {}".format(link["link"],url))
@@ -312,18 +311,13 @@ class Spider(object):
 
     ## optimize attribute finding and return tags and attributes for result dict
 
-    def get_input_attr_raw(self, inputdata, keys):
-        self.input_pairs = []
-        process_data = inputdata
-        for inputfield in inputdata:
-            for children in inputfield.children:
-                for attr in inputfield.attrs:
-                    for key in keys:
-                        if str(attr) == key:
-                            self.input_pairs.append((key,inputfield.attrs[key]))
+    def gen_input_attr_raw(self, inputdata, keys):
 
-        return self.input_pairs
-
+        temp_links = []
+        for key in keys:
+            found_attrs_list = [x for x in inputdata.find_all("", {key:re.compile(".*")})]
+            for found_attrs in found_attrs_list: 
+                yield (found_attrs.name, key, found_attrs.attrs[key])
 
 
     def get_input_attr_form(self, key, formindex=0):
@@ -337,22 +331,25 @@ class Spider(object):
         return self.input_pairs
 
 
-    def add_link(self, new_link, key, request):
+    def add_link(self, new_link, key, tag, request):
         if (new_link not in self.links) and (new_link != ""):
             self.lgg.debug("New link detected: {}".format(new_link))
-            self.links.append({"link":new_link,"from":key, "request":request})
+            self.links.append({"link":new_link,
+                               "attr":key,
+                               "tag":tag,
+                               "request":request})
             return 1
         else:
             return 0
 
 
-    def extract_html_get_link(self, keys):
+    def extract_html_get_link(self, inputdata, keys):
         templinks = []
         number_links = 0
-        for pair in self.input_pairs:
-                key = pair[0]
-                value = pair[1]
+        for attr_tuple in self.gen_input_attr_raw(inputdata, keys):
+                tag,key,value = attr_tuple
                 new_link = ""
+
                 # baseURL is in link
                 if (self.base_url in value):
                     if value.startswith("//"):
@@ -363,7 +360,7 @@ class Spider(object):
                     new_link = join_url(self.start_url, value, urleval=True)
                 elif (value.startswith("//")):
                     new_link = self.base_ssl+":"+value
-                number_links += self.add_link(new_link, key, "GET")
+                number_links += self.add_link(new_link, key, tag, "GET")
         return number_links
 
     def parse_html_to_bs(self,data):
