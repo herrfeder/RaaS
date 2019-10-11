@@ -156,7 +156,6 @@ class Spider(object):
 
         if result_dict['page_source']:
             bsoup = self.parse_html_to_bs(result_dict['page_source'])
-            #debughere()
 
             result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,keys=attr_list)
             if result_dict["number_links"] < 1:
@@ -228,7 +227,7 @@ class Spider(object):
 
             try:
                 link["link"] = eval_url(link["link"])[0]
-            except WrongDomainSyntax, DomainNoIp:
+            except (WrongDomainSyntax, DomainNoIp):
                 self.lgg.inf("blah")
 
 
@@ -246,11 +245,6 @@ class Spider(object):
 
     def check_visit(self, new_link, request):
         if not any(vis["link"] == new_link for vis in self.visited):
-            self.lgg.debug(new_link)
-            self.lgg.debug(request)
-            self.lgg.debug(self.visited)
-            debughere()
-            self.lgg.debug("CHECK_VISIT_RETURNED_TRUE")
             return True
         else:
             return False
@@ -262,19 +256,19 @@ class Spider(object):
         return_vals["request_type"] = link.get("request","")
 
         return_vals["url"] = link["link"]
-        if not url.split(".")[-1] in notcrawlext_list:
+        if not link["link"].split(".")[-1] in notcrawlext_list:
             self.temp_count += 1
             return_vals["type"] = "webresource"
-            self.lgg.debug("Crawl URL: {}".format(url))
+            self.lgg.debug("Crawl URL: {}".format(link["link"]))
             try:
-                resp = self.httpreq.request("GET",url)
+                resp = self.httpreq.request("GET",link["link"])
                 return_vals["headers"] = dict(resp.headers)
                 return_vals["status"] = str(resp.status)
             except urllib3_exc.MaxRetryError:
                 return_vals["result"] = "unknown_domain"
                 return return_vals
             try:
-                self.br.get(url)
+                self.br.get(link["link"])
             except sel_excepts.InvalidArgumentException:
                 return_vals["result"] = "invalid_request"
                 return return_vals
