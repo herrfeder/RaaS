@@ -23,8 +23,12 @@ import logging
 from logging.config import dictConfig
 import os
 
-tag_list = ["a", "form", "option","script","img"]
-attr_list = ["href","type","src","action"]
+tag_list = ["a", "option","script","img"] # form
+attr_list = ["href","type","src"] # action
+
+tag_list_form = ["form"]
+attr_list_form = ["action"]
+
 notcrawlext_list = ["epub", "pdf", "docx", "csv", "xls", "png", "jpg"]
 
 RETS = {"too_many_requests":-5,
@@ -222,10 +226,13 @@ class Spider(object):
                 pickle.dump(self.result_list, open(self.result_file,"wb"))
                 return
 
-            proofed_link = [vis for vis in self.visited if not ((vis['link']==link['link']) & (vis['request']==link['request']))] if self.visited else link
-            #debughere()
+            try:
+                link["link"] = eval_url(link["link"])[0]
+            except WrongDomainSyntax, DomainNoIp:
+                self.lgg.inf("blah")
 
-            if proofed_link:
+
+            if self.check_visit(link["link"],link["request"]):
                 self.lgg.debug("Insert new link {} into crawler.".format(link["link"]))
                 return_val = self.collect_links(link)
                 if return_val["result"] == "exit":
@@ -237,19 +244,24 @@ class Spider(object):
                     self.lgg.info("[*] We have %s links, thats enough"%(str(limit)))
                     return
 
+    def check_visit(self, new_link, request):
+        if not any(vis["link"] == new_link for vis in self.visited):
+            self.lgg.debug(new_link)
+            self.lgg.debug(request)
+            self.lgg.debug(self.visited)
+            debughere()
+            self.lgg.debug("CHECK_VISIT_RETURNED_TRUE")
+            return True
+        else:
+            return False
+
     def get_link(self,link):
 
         return_vals = {key:"" for key,value in return_vals_template.items()}
-        return_vals["from_attrib"] = link.get("from","")
+        return_vals["from_attrib"] = link.get("tag","")+":"+link.get("class","")+":"+link.get("attr","")
         return_vals["request_type"] = link.get("request","")
-        try:
-            url = eval_url(link["link"])[0]
-            self.lgg.debug("URL before eval {} and after {}".format(link["link"],url))
-            link["link"] = url
-        except (WrongDomainSyntax,DomainNoIp) as e:
-            self.lgg.exception("WrongDomainSyntax or DomainNoIp")
 
-        return_vals["url"] = url
+        return_vals["url"] = link["link"]
         if not url.split(".")[-1] in notcrawlext_list:
             self.temp_count += 1
             return_vals["type"] = "webresource"
@@ -312,16 +324,13 @@ class Spider(object):
     ## optimize attribute finding and return tags and attributes for result dict
 
     def gen_input_attr_raw(self, inputdata, keys):
-
-        temp_links = []
         for key in keys:
             found_attrs_list = [x for x in inputdata.find_all("", {key:re.compile(".*")})]
             for found_attrs in found_attrs_list: 
                 yield (found_attrs.name, key, found_attrs.attrs[key])
 
 
-    def get_input_attr_form(self, key, formindex=0):
-        self.input_pairs = []
+    def get_input_attr_form(self, inputdata, keys):
         process_data = self.forms_and_inputs[self.last_url][formindex][1:-1]
         for inputfield in process_data:
             for attr in inputfield.attrs:
@@ -331,8 +340,14 @@ class Spider(object):
         return self.input_pairs
 
 
+    def check_dup_link(self, new_link, key, tag, request):
+        if not any((link["link"] == new_link) & (link["request"] == request) for link in self.links):
+            return True
+        else:
+            return False
+
     def add_link(self, new_link, key, tag, request):
-        if (new_link not in self.links) and (new_link != ""):
+        if self.check_dup_link(new_link, key, tag, request):
             self.lgg.debug("New link detected: {}".format(new_link))
             self.links.append({"link":new_link,
                                "attr":key,
