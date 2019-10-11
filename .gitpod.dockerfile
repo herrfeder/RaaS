@@ -2,8 +2,8 @@ FROM gitpod/workspace-full:latest
 
 USER root
 
-RUN apt-get update && apt-get upgrade
-RUN apt-get install python3-pip
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y python3-pip
 
 
 #=========
