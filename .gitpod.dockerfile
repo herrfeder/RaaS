@@ -50,5 +50,4 @@ RUN sudo chmod -R 777 ${HOME} \
   && sudo chgrp -R 0 ${HOME} \
   && sudo chmod -R g=u ${HOME}
   
-RUN pip install BeautifulSoup4
-RUN pip install 
+RUN /usr/bin/pip3 install BeautifulSoup4
