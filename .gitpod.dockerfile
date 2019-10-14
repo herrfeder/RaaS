@@ -38,10 +38,10 @@ RUN GK_VERSION=$(if [ ${GECKODRIVER_VERSION:-latest} = "latest" ]; then echo "0.
 
 USER gitpod
 
-COPY generate_config /opt/bin/generate_config
+#COPY generate_config /opt/bin/generate_config
 
 # Generating a default config during build time
-RUN /opt/bin/generate_config > /opt/selenium/config.json
+#RUN /opt/bin/generate_config > /opt/selenium/config.json
 
 #==========
 # Relaxing permissions for OpenShift and other non-sudo environments
