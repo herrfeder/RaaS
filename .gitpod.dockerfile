@@ -50,4 +50,7 @@ RUN sudo chmod -R 777 ${HOME} \
   && sudo chgrp -R 0 ${HOME} \
   && sudo chmod -R g=u ${HOME}
   
-RUN /usr/bin/pip3 install BeautifulSoup4
+RUN /usr/bin/pip3 install beautifulsoup4
+RUN /usr/bin/pip3 install selenium
+RUN /usr/bin/pip3 install lxml
+RUN /usr/bin/pip3 install urllib3
