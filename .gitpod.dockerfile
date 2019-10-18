@@ -38,10 +38,10 @@ RUN GK_VERSION=$(if [ ${GECKODRIVER_VERSION:-latest} = "latest" ]; then echo "0.
 
 USER gitpod
 
-COPY generate_config /opt/bin/generate_config
+#COPY generate_config /opt/bin/generate_config
 
 # Generating a default config during build time
-RUN /opt/bin/generate_config > /opt/selenium/config.json
+#RUN /opt/bin/generate_config > /opt/selenium/config.json
 
 #==========
 # Relaxing permissions for OpenShift and other non-sudo environments
@@ -50,5 +50,7 @@ RUN sudo chmod -R 777 ${HOME} \
   && sudo chgrp -R 0 ${HOME} \
   && sudo chmod -R g=u ${HOME}
   
-RUN pip3 install BeautifulSoup4
-RUN pip3 install 
+RUN /usr/bin/pip3 install beautifulsoup4
+RUN /usr/bin/pip3 install selenium
+RUN /usr/bin/pip3 install lxml
+RUN /usr/bin/pip3 install urllib3
