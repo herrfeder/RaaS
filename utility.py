@@ -16,6 +16,8 @@ def checkfile(filename):
     return url_to_filename(filename)
 
 def checkdir(dirname):
+    if len(dirname) > 140:
+        dirname = dirname[:140]
     if not os.path.exists(dirname):
         os.mkdir(dirname)
     return dirname

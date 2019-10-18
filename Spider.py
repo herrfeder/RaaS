@@ -126,7 +126,7 @@ class Spider(object):
         if result_dict["type"] != "nocrawlfile":
             sitedir =  checkdir(os.path.join(self.session_dir,url_to_filename(result_dict["url"])))
             if method == "GET":
-                result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"]+"_"+checkfile(result_dict["url"]))
+                result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"])
                 with open(result_dict["source_path"], "w") as f:
                     f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
                     f.write("\n\n")
@@ -264,7 +264,7 @@ class Spider(object):
                 resp = self.httpreq.request("GET",link["link"])
                 return_vals["headers"] = dict(resp.headers)
                 return_vals["status"] = str(resp.status)
-            except urllib3_exc.MaxRetryError:
+            except (urllib3_exc.MaxRetryError,urllib3_exc.LocationParseError):
                 return_vals["result"] = "unknown_domain"
                 return return_vals
             try:
@@ -332,6 +332,36 @@ class Spider(object):
                     self.input_pairs.append({key:inputfield.attrs[key]})
 
         return self.input_pairs
+
+    '''
+    def find_all_forms(self,url="",response=""):
+        if response == "":
+            bsoup = self.parse_html_to_bs(self.get_link_sure(url=url))
+            time.sleep(0.5)
+        else:
+            bsoup = response
+        if bsoup != None:
+            print(self.br.current_url)
+            print(url)
+            #if "text-file-viewer.php" in url:
+            #    pdb.set_trace()
+            forms = bsoup.findAll("form")
+            form_temp_list = []
+            for form in forms:
+                inner_temp_list = []
+                inputs = form.findAll("input")
+                buttons = form.findAll("button")
+                inner_temp_list.append(form)
+                for element in inputs:
+                    inner_temp_list.append(element)
+                for button in buttons:
+                    inner_temp_list.append(button)
+                form_temp_list.append(inner_temp_list)
+
+            self.forms_and_inputs[self.parse_malformed_url(url)] = form_temp_list
+    '''
+
+
 
 
     def check_dup_link(self, new_link, key, tag, request):
