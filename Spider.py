@@ -23,11 +23,13 @@ import logging
 from logging.config import dictConfig
 import os
 
-tag_list = ["a", "option","script","img"] # form
-attr_list = ["href","type","src"] # action
+tag_list_link = ["a", "option","script","img"]
+attr_list_link = ["href","type","src"] # action
 
 tag_list_form = ["form"]
-attr_list_form = ["action"]
+attr_list_form = ["action","enctype","method","name","class"]
+attr_list_form_comp = ["class", "id", "name", "type", "value"]
+comp_list_form = ["input","select"]
 
 notcrawlext_list = ["epub", "pdf", "docx", "csv", "xls", "png", "jpg"]
 
@@ -79,9 +81,8 @@ class Spider(object):
 
         self.httpreq = urllib3.PoolManager()
 
-        self.forms_and_inputs = {}
         self.clicked_links = []
-        self.last_url = ""
+        self.last_visited= ""
         self.start_url = start_url
         base_url, base_url_dict = eval_url(self.start_url)
         self.base_ssl = base_url_dict["ssl"]
@@ -105,8 +106,10 @@ class Spider(object):
 
         if os.path.exists(self.restore_file):
             recover_dict = pickle.load( open(self.restore_file,"rb"))
-            self.links = recover_dict["links"]
-            self.visited = recover_dict["visited"]
+            self.links = recover_dict.get("links","")
+            self.forms = recover_dict.get("forms","")
+            self.form_comps = recover_dict.get("form_comps","")
+            self.visited = recover_dict.get("visited","")
         else:
 
             self.links = []
@@ -157,7 +160,8 @@ class Spider(object):
         if result_dict['page_source']:
             bsoup = self.parse_html_to_bs(result_dict['page_source'])
 
-            result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,keys=attr_list)
+            result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,keys=attr_list_link)
+            result_dict["number_forms"] = self.extract_forms(inputdata=bsoup, keys=attr_list_form)
             if result_dict["number_links"] < 1:
                 self.lgg.debug("Extracted nothing on site {}".format(result_dict["url"]))
 
@@ -228,7 +232,7 @@ class Spider(object):
             try:
                 link["link"] = eval_url(link["link"])[0]
             except (WrongDomainSyntax, DomainNoIp):
-                self.lgg.inf("blah")
+                self.lgg.info("WrongDomainSyntax: "+link["link"])
 
 
             if self.check_visit(link["link"],link["request"]):
@@ -287,6 +291,7 @@ class Spider(object):
             return_vals["result"] = "success"
             if self.logged_in == False:
                 self.br.delete_all_cookies()
+            self.last_visited = self.br.current_url
             return return_vals
         else:
             return_vals["type"] = "nocrawlfile"
@@ -315,7 +320,6 @@ class Spider(object):
 
             return return_vals
 
-    ## optimize attribute finding and return tags and attributes for result dict
 
     def gen_input_attr_raw(self, inputdata, keys):
         for key in keys:
@@ -324,45 +328,30 @@ class Spider(object):
                 yield (found_attrs.name, key, found_attrs.attrs[key])
 
 
-    def get_input_attr_form(self, inputdata, keys):
-        process_data = self.forms_and_inputs[self.last_url][formindex][1:-1]
-        for inputfield in process_data:
-            for attr in inputfield.attrs:
-                if str(attr) == key:
-                    self.input_pairs.append({key:inputfield.attrs[key]})
+    def gen_input_attr_form(self, inputdata, tagkeys, attrkeys):
+        form_o_dict = {}
+        form_comps = []
+        for tagkey in tagkeys:
+            forms = [x for x in inputdata.find_all(tagkey)]
+            for index,form in enumerate(forms):
+                for attr in attrkeys:
+                    form_o_dict[attr] = form.get(attr,"")
+                    form_o_dict["hash"] = hash(frozenset(form_o_dict.items()))
+                form_o_dict["index"] = index
+                for comp in comp_list_form:
+                    form_comps.extend(form_get_comp_list(form, comp, attr_list_form_comp, index))
+                yield (form_o_dict, form_comps)
 
-        return self.input_pairs
-
-    '''
-    def find_all_forms(self,url="",response=""):
-        if response == "":
-            bsoup = self.parse_html_to_bs(self.get_link_sure(url=url))
-            time.sleep(0.5)
-        else:
-            bsoup = response
-        if bsoup != None:
-            print(self.br.current_url)
-            print(url)
-            #if "text-file-viewer.php" in url:
-            #    pdb.set_trace()
-            forms = bsoup.findAll("form")
-            form_temp_list = []
-            for form in forms:
-                inner_temp_list = []
-                inputs = form.findAll("input")
-                buttons = form.findAll("button")
-                inner_temp_list.append(form)
-                for element in inputs:
-                    inner_temp_list.append(element)
-                for button in buttons:
-                    inner_temp_list.append(button)
-                form_temp_list.append(inner_temp_list)
-
-            self.forms_and_inputs[self.parse_malformed_url(url)] = form_temp_list
-    '''
-
-
-
+        def form_get_comp_list(form, comp_el_name, attrs, index):
+            comp_list = []
+            comp_els = form.find_all(comp_el_name)
+            for el in comp_els:
+                new_el = {attr:inp.get(attr,"") for attr in attrs}
+                new_el["form_comp"] = comp_el_name
+                new_el["hash"] = hash(frozenset(new_el.items()))
+                new_el["index"] = index
+                comp_list.append(new_el)
+            return comp_list
 
     def check_dup_link(self, new_link, key, tag, request):
         if not any((link["link"] == new_link) & (link["request"] == request) for link in self.links):
@@ -381,26 +370,43 @@ class Spider(object):
         else:
             return 0
 
+    def add_form(self, new_form):
+        if self.check_dup_form(new_form):
+            self.lgg.debug("New form detected: {}".format(new_form["action"]))
+            self.forms.append(new_form)
+
+    #### proceed in the following function
+
+    def extract_html_get_form(self, inputdata):
 
     def extract_html_get_link(self, inputdata, keys):
         templinks = []
         number_links = 0
         for attr_tuple in self.gen_input_attr_raw(inputdata, keys):
-                tag,key,value = attr_tuple
-                new_link = ""
+            tag,key,value = attr_tuple
 
-                # baseURL is in link
-                if (self.base_url in value):
-                    if value.startswith("//"):
-                        new_link = self.base_ssl+":"+value
-                    if value.startswith("http"):
-                        new_link = value
-                elif (value.startswith("/")) and not (value.startswith("//")):
-                    new_link = join_url(self.start_url, value, urleval=True)
-                elif (value.startswith("//")):
-                    new_link = self.base_ssl+":"+value
-                number_links += self.add_link(new_link, key, tag, "GET")
+            new_link = self.eval_link(value)
+
+            number_links += self.add_link(new_link, key, tag, "GET")
+
         return number_links
+
+
+    def eval_link(self, link):
+        new_link = ""
+        if (self.base_url in link):
+            if link.startswith("//"):
+                new_link = self.base_ssl+":"+value
+            if link.startswith("http"):
+                new_link = value
+        elif (link.startswith("/")) and not (link.startswith("//")):
+            new_link = join_url(self.start_url, link, urleval=True)
+        elif (link.startswith("//")):
+            new_link = self.base_ssl+":"+value
+        elif (link.startswith("#")):
+            new_link = join_url(self.last_visited,link)
+
+        return new_link
 
     def parse_html_to_bs(self,data):
         try:
