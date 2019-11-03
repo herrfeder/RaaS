@@ -161,7 +161,7 @@ class Spider(object):
             bsoup = self.parse_html_to_bs(result_dict['page_source'])
 
             result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,keys=attr_list_link)
-            result_dict["number_forms"] = self.extract_forms(inputdata=bsoup, keys=attr_list_form)
+            result_dict["number_forms"] = self.extract_html_get_form(inputdata=bsoup, tagkeys=tag_list_form,attrkeys=attr_list_form)
             if result_dict["number_links"] < 1:
                 self.lgg.debug("Extracted nothing on site {}".format(result_dict["url"]))
 
@@ -353,6 +353,8 @@ class Spider(object):
                 comp_list.append(new_el)
             return comp_list
 
+
+
     def check_dup_link(self, new_link, key, tag, request):
         if not any((link["link"] == new_link) & (link["request"] == request) for link in self.links):
             return True
@@ -370,17 +372,33 @@ class Spider(object):
         else:
             return 0
 
-    def add_form(self, new_form):
+    def add_form(self, new_form, new_form_comps):
         if self.check_dup_form(new_form):
             self.lgg.debug("New form detected: {}".format(new_form["action"]))
             self.forms.append(new_form)
+            self.form_comps.extend(new_form_comps)
 
+
+    def check_dup_form(self, new_form, request):
+        if not any((form['hash'] == new_form["hash"]) & (form['request'] == request) for form in self.forms):
+            return True
+        else:
+            return False
+
+    
     #### proceed in the following function
 
-    def extract_html_get_form(self, inputdata):
+    def extract_html_get_form(self, inputdata, tagkeys, attrkeys):
+        number_forms = 0
+        for form_tuple in self.gen_input_attr_form(inputdata, tagkeys, attrkeys):
+            new_form, new_comps = form_tuple
+
+            new_form["action"] = self.eval_link(new_form["action"])
+            new_form["request"] = "POST"
+            number_forms += self.add_form(new_form, new_comps)
+
 
     def extract_html_get_link(self, inputdata, keys):
-        templinks = []
         number_links = 0
         for attr_tuple in self.gen_input_attr_raw(inputdata, keys):
             tag,key,value = attr_tuple
@@ -396,13 +414,13 @@ class Spider(object):
         new_link = ""
         if (self.base_url in link):
             if link.startswith("//"):
-                new_link = self.base_ssl+":"+value
+                new_link = self.base_ssl+":"+link
             if link.startswith("http"):
-                new_link = value
+                new_link = link
         elif (link.startswith("/")) and not (link.startswith("//")):
             new_link = join_url(self.start_url, link, urleval=True)
         elif (link.startswith("//")):
-            new_link = self.base_ssl+":"+value
+            new_link = self.base_ssl+":"+link
         elif (link.startswith("#")):
             new_link = join_url(self.last_visited,link)
 
