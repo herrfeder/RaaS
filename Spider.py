@@ -15,6 +15,7 @@ from functools import reduce
 import urllib3
 import urllib3.exceptions as urllib3_exc
 import pickle
+import itertools
 
 from utility import eval_url, join_url, checkdir, checkfile, url_to_filename, change_useragent
 from misc.settings import raas_dictconfig
@@ -48,6 +49,7 @@ return_vals_template = {"url":"",
                        "source_path":"",
                        "screenshot_path":"",
                        "number_links":0,
+                       "number_forms":0,
                        "type":"",
                        "request_type":"",
                        "from_attrib":""
@@ -111,7 +113,8 @@ class Spider(object):
             self.form_comps = recover_dict.get("form_comps","")
             self.visited = recover_dict.get("visited","")
         else:
-
+            self.forms = []
+            self.form_comps = []
             self.links = []
             self.visited = []
 
@@ -160,7 +163,7 @@ class Spider(object):
         if result_dict['page_source']:
             bsoup = self.parse_html_to_bs(result_dict['page_source'])
 
-            result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,keys=attr_list_link)
+            result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,attrkeys=attr_list_link)
             result_dict["number_forms"] = self.extract_html_get_form(inputdata=bsoup, tagkeys=tag_list_form,attrkeys=attr_list_form)
             if result_dict["number_links"] < 1:
                 self.lgg.debug("Extracted nothing on site {}".format(result_dict["url"]))
@@ -191,11 +194,13 @@ class Spider(object):
             cs = bcolors.OKBLUE
         else:
             cs = bcolors.HEADER
+
         if result_entry != None:
             self.lgg.info('''Returned from crawl:
                 {cs}Result:{result}
                 Status:{status}
                 Links:{number_links}
+                Forms:{number_forms}
                 URL:{url}
                 Type:{crawl_type}
                 From:{from_attrib}
@@ -205,6 +210,7 @@ class Spider(object):
                                                     status=result_entry["status"],
                                                     result=result_entry["result"],
                                                     number_links=result_entry["number_links"],
+                                                    number_forms=result_entry["number_forms"],
                                                     crawl_type=result_entry["type"],
                                                     from_attrib=result_entry["from_attrib"],
                                                     request_type=result_entry["request_type"]))
@@ -329,6 +335,17 @@ class Spider(object):
 
 
     def gen_input_attr_form(self, inputdata, tagkeys, attrkeys):
+        def form_get_comp_list(form, comp_el_name, attrs, index):
+            comp_list = []
+            comp_els = form.find_all(comp_el_name)
+            for el in comp_els:
+                new_el = {attr:form.get(attr,"") for attr in attrs}
+                new_el["form_comp"] = comp_el_name
+                new_el["index"] = index
+                comp_list.append(new_el)
+            return comp_list
+
+
         form_o_dict = {}
         form_comps = []
         for tagkey in tagkeys:
@@ -336,24 +353,12 @@ class Spider(object):
             for index,form in enumerate(forms):
                 for attr in attrkeys:
                     form_o_dict[attr] = form.get(attr,"")
-                    form_o_dict["hash"] = hash(frozenset(form_o_dict.items()))
                 form_o_dict["index"] = index
                 for comp in comp_list_form:
                     form_comps.extend(form_get_comp_list(form, comp, attr_list_form_comp, index))
                 yield (form_o_dict, form_comps)
 
-        def form_get_comp_list(form, comp_el_name, attrs, index):
-            comp_list = []
-            comp_els = form.find_all(comp_el_name)
-            for el in comp_els:
-                new_el = {attr:inp.get(attr,"") for attr in attrs}
-                new_el["form_comp"] = comp_el_name
-                new_el["hash"] = hash(frozenset(new_el.items()))
-                new_el["index"] = index
-                comp_list.append(new_el)
-            return comp_list
-
-
+        
 
     def check_dup_link(self, new_link, key, tag, request):
         if not any((link["link"] == new_link) & (link["request"] == request) for link in self.links):
@@ -374,16 +379,23 @@ class Spider(object):
 
     def add_form(self, new_form, new_form_comps):
         if self.check_dup_form(new_form):
-            self.lgg.debug("New form detected: {}".format(new_form["action"]))
+            self.lgg.debug("New form detected: {}".format(new_form))
             self.forms.append(new_form)
             self.form_comps.extend(new_form_comps)
 
+            return 1
+        else:
+            return 0
 
-    def check_dup_form(self, new_form, request):
-        if not any((form['hash'] == new_form["hash"]) & (form['request'] == request) for form in self.forms):
+
+    def check_dup_form(self, new_form):
+        res = list(itertools.filterfalse(lambda i: i in [new_form], self.forms)) \
+        + list(itertools.filterfalse(lambda j: j in self.forms, [new_form]))
+        if res:
             return True
         else:
             return False
+
 
     
     #### proceed in the following function
@@ -397,10 +409,11 @@ class Spider(object):
             new_form["request"] = "POST"
             number_forms += self.add_form(new_form, new_comps)
 
+        return number_forms
 
-    def extract_html_get_link(self, inputdata, keys):
+    def extract_html_get_link(self, inputdata, attrkeys):
         number_links = 0
-        for attr_tuple in self.gen_input_attr_raw(inputdata, keys):
+        for attr_tuple in self.gen_input_attr_raw(inputdata, attrkeys):
             tag,key,value = attr_tuple
 
             new_link = self.eval_link(value)
@@ -421,7 +434,7 @@ class Spider(object):
             new_link = join_url(self.start_url, link, urleval=True)
         elif (link.startswith("//")):
             new_link = self.base_ssl+":"+link
-        elif (link.startswith("#")):
+        elif (link.startswith("#")) and not (self.last_visited.endswith("#")):
             new_link = join_url(self.last_visited,link)
 
         return new_link
