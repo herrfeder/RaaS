@@ -361,7 +361,9 @@ class Spider(object):
         
 
     def check_dup_link(self, new_link, key, tag, request):
-        if not any((link["link"] == new_link) & (link["request"] == request) for link in self.links):
+        if not any((link["link"] == new_link) & \
+                  (link["request"] == request) for link in self.links):
+            ##### CHECK MULTIPLE OCCURENCE OF LINKS
             return True
         else:
             return False
@@ -389,24 +391,25 @@ class Spider(object):
 
 
     def check_dup_form(self, new_form):
-        res = list(itertools.filterfalse(lambda i: i in [new_form], self.forms)) \
-        + list(itertools.filterfalse(lambda j: j in self.forms, [new_form]))
-        if res:
+        
+        if not any((form["action"] == new_form["action"]) & \
+                  (form["class"] == new_form["class"]) & \
+                  (form["method"] == new_form["method"]) for form in self.forms):
+
             return True
         else:
             return False
 
 
-    
-    #### proceed in the following function
 
     def extract_html_get_form(self, inputdata, tagkeys, attrkeys):
         number_forms = 0
         for form_tuple in self.gen_input_attr_form(inputdata, tagkeys, attrkeys):
             new_form, new_comps = form_tuple
 
-            new_form["action"] = self.eval_link(new_form["action"])
-            new_form["request"] = "POST"
+            new_form["link"] = self.eval_link(new_form["action"])
+            if new_form["method"] == '':
+                new_form["method"] = "post"
             number_forms += self.add_form(new_form, new_comps)
 
         return number_forms
