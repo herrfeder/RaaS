@@ -16,6 +16,7 @@ import urllib3
 import urllib3.exceptions as urllib3_exc
 import pickle
 import itertools
+import pprint
 
 from utility import eval_url, join_url, checkdir, checkfile, url_to_filename, change_useragent
 from misc.settings import raas_dictconfig
@@ -83,7 +84,6 @@ class Spider(object):
 
         self.httpreq = urllib3.PoolManager()
 
-        self.clicked_links = []
         self.last_visited= ""
         self.start_url = start_url
         base_url, base_url_dict = eval_url(self.start_url)
@@ -105,6 +105,8 @@ class Spider(object):
         self.session_dir = checkdir(os.path.join(self.tool_dir,url_to_filename(self.base_url)))
         self.restore_file = os.path.join(self.session_dir,"session.p")
         self.result_file = os.path.join(self.session_dir,"result.p")
+
+        self.pop_links = []
 
         if os.path.exists(self.restore_file):
             recover_dict = pickle.load( open(self.restore_file,"rb"))
@@ -219,17 +221,17 @@ class Spider(object):
 
     def collect_links_wrap(self, url="",limit=0):
         link = {"link":"", "attr":"", "tag":"", "request":"GET"}
-        if len(self.links) == 0:
+        if len(self.pop_links) == 0:
             link["link"] = eval_url(url)[0]
             return_val = self.collect_links(link=link)
         while(True):
-            self.links = [i for n, i in enumerate(self.links) if i not in self.links[n + 1:]] 
-            if len(self.links) == 0:
+            self.pop_links = [i for n, i in enumerate(self.pop_links) if i not in self.pop_links[n + 1:]] 
+            if len(self.pop_links) == 0:
                 self.lgg.info("No links to process. Exiting Spider.")
                 pickle.dump(self.result_list, open(self.result_file,"wb"))
                 return
             try:
-                link = self.links.pop()
+                link = self.pop_links.pop()
             except:
                 self.lgg.info("It seems we're finished, no links to process.")
                 pickle.dump(self.result_list, open(self.result_file,"wb"))
@@ -375,7 +377,10 @@ class Spider(object):
                                "attr":key,
                                "tag":tag,
                                "request":request})
+            self.pop_links.append({"link":new_link,
+                                   "request":request}) 
             return 1
+
         else:
             return 0
 
