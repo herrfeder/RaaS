@@ -333,7 +333,9 @@ class Spider(object):
         for key in keys:
             found_attrs_list = [x for x in inputdata.find_all("", {key:re.compile(".*")})]
             for found_attrs in found_attrs_list: 
-                yield (found_attrs.name, key, found_attrs.attrs[key])
+                yield {"tag":found_attrs.name, 
+                        "attr":key, 
+                        "link":found_attrs.attrs[key]}
 
 
     def gen_input_attr_form(self, inputdata, tagkeys, attrkeys):
@@ -362,25 +364,20 @@ class Spider(object):
 
         
 
-    def check_dup_link(self, new_link, key, tag, request):
-        if not any((link["link"] == new_link) & \
-                  (link["request"] == request) for link in self.links):
-            ##### CHECK MULTIPLE OCCURENCE OF LINKS
+    def check_dup_link(self, new_link):
+        if not any((link["link"] == new_link["link"]) & \
+                  (link["request"] == new_link["request"]) for link in self.links):
             return True
         else:
             return False
 
-    def add_link(self, new_link, key, tag, request):
-        if self.check_dup_link(new_link, key, tag, request):
-            self.lgg.debug("New link detected: {}".format(new_link))
-            self.links.append({"link":new_link,
-                               "attr":key,
-                               "tag":tag,
-                               "request":request})
-            self.pop_links.append({"link":new_link,
-                                   "request":request}) 
-            return 1
+    def add_link(self, link):
+        if self.check_dup_link(link):
+            self.lgg.debug("New link detected: {}".format(link["link"]))
+            self.links.append(link)
+            self.pop_links.append(link) 
 
+            return 1
         else:
             return 0
 
@@ -389,6 +386,11 @@ class Spider(object):
             self.lgg.debug("New form detected: {}".format(new_form))
             self.forms.append(new_form)
             self.form_comps.extend(new_form_comps)
+
+            self.add_link({"link":new_form["link"],
+                           "tag":"form",
+                           "attr":"",
+                           "request":"get"})
 
             return 1
         else:
@@ -405,8 +407,6 @@ class Spider(object):
         else:
             return False
 
-
-
     def extract_html_get_form(self, inputdata, tagkeys, attrkeys):
         number_forms = 0
         for form_tuple in self.gen_input_attr_form(inputdata, tagkeys, attrkeys):
@@ -421,12 +421,11 @@ class Spider(object):
 
     def extract_html_get_link(self, inputdata, attrkeys):
         number_links = 0
-        for attr_tuple in self.gen_input_attr_raw(inputdata, attrkeys):
-            tag,key,value = attr_tuple
+        for link in self.gen_input_attr_raw(inputdata, attrkeys):
+            link["link"] = self.eval_link(link["link"])
+            link["request"] = "get"
 
-            new_link = self.eval_link(value)
-
-            number_links += self.add_link(new_link, key, tag, "GET")
+            number_links += self.add_link(link)
 
         return number_links
 
@@ -442,8 +441,12 @@ class Spider(object):
             new_link = join_url(self.start_url, link, urleval=True)
         elif (link.startswith("//")):
             new_link = self.base_ssl+":"+link
-        elif (link.startswith("#")) and not (self.last_visited.endswith("#")):
+        
+        elif (link.startswith("#")) and not \
+             (self.last_visited.endswith("#")) and not \
+             (self.last_visited.count("#") > 0):
             new_link = join_url(self.last_visited,link)
+            new_link = ""
 
         return new_link
 
