@@ -398,7 +398,7 @@ class Spider(object):
 
 
     def check_dup_form(self, new_form):
-        
+        pprint.pprint(self.forms) 
         if not any((form["action"] == new_form["action"]) & \
                   (form["class"] == new_form["class"]) & \
                   (form["method"] == new_form["method"]) for form in self.forms):
