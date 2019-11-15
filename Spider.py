@@ -375,7 +375,7 @@ class Spider(object):
         if self.check_dup_link(link):
             self.lgg.debug("New link detected: {}".format(link["link"]))
             self.links.append(link)
-            self.pop_links.append(link) 
+            self.pop_links.append(link)
 
             return 1
         else:
@@ -398,10 +398,14 @@ class Spider(object):
 
 
     def check_dup_form(self, new_form):
-        pprint.pprint(self.forms) 
-        if not any((form["action"] == new_form["action"]) & \
-                  (form["class"] == new_form["class"]) & \
-                  (form["method"] == new_form["method"]) for form in self.forms):
+
+        if len(self.forms) == 0:
+            return True
+
+
+        if not any(all([ form["action"] == new_form["action"],
+                         form["class"] == new_form["class"],
+                         form["method"] == new_form["method"] ]) for form in self.forms):
 
             return True
         else:
@@ -414,7 +418,7 @@ class Spider(object):
 
             new_form["link"] = self.eval_link(new_form["action"])
             if new_form["method"] == '':
-                new_form["method"] = "post"
+                new_form["method"] = 'get'
             number_forms += self.add_form(new_form, new_comps)
 
         return number_forms
@@ -434,18 +438,20 @@ class Spider(object):
         new_link = ""
         if (self.base_url in link):
             if link.startswith("//"):
-                new_link = self.base_ssl+":"+link
+                new_link = join_url(self.base_ssl+":",link, urleval=True)
             if link.startswith("http"):
-                new_link = link
+                new_link = join_url(link,urleval=True)
+
         elif (link.startswith("/")) and not (link.startswith("//")):
             new_link = join_url(self.start_url, link, urleval=True)
+
         elif (link.startswith("//")):
-            new_link = self.base_ssl+":"+link
-        
+            new_link = join_url(self.base_ssl+":",link, urleval=True)
+
         elif (link.startswith("#")) and not \
              (self.last_visited.endswith("#")) and not \
              (self.last_visited.count("#") > 0):
-            new_link = join_url(self.last_visited,link)
+            new_link = join_url(self.last_visited,link,urleval=True)
             new_link = ""
 
         return new_link
