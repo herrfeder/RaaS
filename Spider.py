@@ -17,6 +17,7 @@ import urllib3.exceptions as urllib3_exc
 import pickle
 import itertools
 import pprint
+import uuid
 
 from utility import eval_url, join_url, checkdir, checkfile, url_to_filename, change_useragent
 from misc.settings import raas_dictconfig
@@ -84,6 +85,8 @@ class Spider(object):
 
         self.httpreq = urllib3.PoolManager()
 
+        self.test = []
+
         self.last_visited= ""
         self.start_url = start_url
         base_url, base_url_dict = eval_url(self.start_url)
@@ -105,7 +108,8 @@ class Spider(object):
         self.session_dir = checkdir(os.path.join(self.tool_dir,url_to_filename(self.base_url)))
         self.restore_file = os.path.join(self.session_dir,"session.p")
         self.result_file = os.path.join(self.session_dir,"result.p")
-
+        self.form_file = os.path.join(self.session_dir,"form.p")
+        self.form_comps_file = os.path.join(self.session_dir,"form_comps.p")
         self.pop_links = []
 
         if os.path.exists(self.restore_file):
@@ -235,6 +239,8 @@ class Spider(object):
             except:
                 self.lgg.info("It seems we're finished, no links to process.")
                 pickle.dump(self.result_list, open(self.result_file,"wb"))
+                pickle.dump(self.forms, open(self.form_file,"wb"))
+                pickle.dump(self.form_comps, open(self.form_comps_file, "wb"))
                 return
 
             try:
@@ -350,27 +356,32 @@ class Spider(object):
             return comp_list
 
 
-        form_o_dict = {}
-        form_comps = []
-        for tagkey in tagkeys:
-            forms = [x for x in inputdata.find_all(tagkey)]
-            for index,form in enumerate(forms):
-                for attr in attrkeys:
-                    form_o_dict[attr] = form.get(attr,"")
-                form_o_dict["index"] = index
-                for comp in comp_list_form:
-                    form_comps.extend(form_get_comp_list(form, comp, attr_list_form_comp, index))
-                yield (form_o_dict, form_comps)
+        form_o_list = []
+        form_comps_list = []
+        tagkey = "form"
+        forms = [x for x in inputdata.find_all(tagkey)]
+        for form in forms:
+            form_o_dict = {}
 
-        
+            # collect HTML attribute values for desired forms
+            for attr in attrkeys:
+                form_o_dict[attr] = form.get(attr,"")
 
-    def check_dup_link(self, new_link):
-        if not any((link["link"] == new_link["link"]) & \
-                  (link["request"] == new_link["request"]) for link in self.links):
-            return True
-        else:
-            return False
+            # create unique ID for matching form with form fields in seperate table
+            form_o_dict["id"] = str(uuid.uuid1())
 
+            # append forms for one HTML source
+            form_o_list.append(form_o_dict)
+
+            # collect form components for each form and create list of list of dicts
+            form_comps = []
+            for comp in comp_list_form:
+                form_comps.extend(form_get_comp_list(form, comp, attr_list_form_comp, form_o_dict["id"]))
+            form_comps_list.append(form_comps)
+
+        return (form_o_list, form_comps_list)
+
+ 
     def add_link(self, link):
         if self.check_dup_link(link):
             self.lgg.debug("New link detected: {}".format(link["link"]))
@@ -384,9 +395,9 @@ class Spider(object):
     def add_form(self, new_form, new_form_comps):
         if self.check_dup_form(new_form):
             self.lgg.debug("New form detected: {}".format(new_form))
+            self.test.append(new_form)
             self.forms.append(new_form)
             self.form_comps.extend(new_form_comps)
-
             self.add_link({"link":new_form["link"],
                            "tag":"form",
                            "attr":"",
@@ -396,26 +407,29 @@ class Spider(object):
         else:
             return 0
 
+    def check_dup_link(self, new_link):
+        if not any((link["link"] == new_link["link"]) & \
+                  (link["request"] == new_link["request"]) for link in self.links):
+            return True
+        else:
+            return False
+
 
     def check_dup_form(self, new_form):
-
         if len(self.forms) == 0:
             return True
-
 
         if not any(all([ form["action"] == new_form["action"],
                          form["class"] == new_form["class"],
                          form["method"] == new_form["method"] ]) for form in self.forms):
-
             return True
         else:
             return False
 
     def extract_html_get_form(self, inputdata, tagkeys, attrkeys):
         number_forms = 0
-        for form_tuple in self.gen_input_attr_form(inputdata, tagkeys, attrkeys):
-            new_form, new_comps = form_tuple
-
+        new_form_list, new_comps_list = self.gen_input_attr_form(inputdata, tagkeys, attrkeys)
+        for new_form, new_comps in zip(new_form_list, new_comps_list):
             new_form["link"] = self.eval_link(new_form["action"])
             if new_form["method"] == '':
                 new_form["method"] = 'get'
@@ -444,9 +458,6 @@ class Spider(object):
 
         elif (link.startswith("/")) and not (link.startswith("//")):
             new_link = join_url(self.start_url, link, urleval=True)
-
-        elif (link.startswith("//")):
-            new_link = join_url(self.base_ssl+":",link, urleval=True)
 
         elif (link.startswith("#")) and not \
              (self.last_visited.endswith("#")) and not \
