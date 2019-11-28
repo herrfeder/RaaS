@@ -18,6 +18,7 @@ import pickle
 import itertools
 import pprint
 import uuid
+import sys
 
 from utility import eval_url, join_url, checkdir, checkfile, url_to_filename, change_useragent
 from misc.settings import raas_dictconfig
@@ -34,7 +35,7 @@ attr_list_form = ["action","enctype","method","name","class"]
 attr_list_form_comp = ["class", "id", "name", "type", "value"]
 comp_list_form = ["input","select"]
 
-notcrawlext_list = ["epub", "pdf", "docx", "csv", "xls", "png", "jpg"]
+notcrawlext_list = ["epub", "pdf", "docx", "csv", "xls", "png", "jpg", "zip", "xml"]
 
 RETS = {"too_many_requests":-5,
         "unknown_domain":-4,
@@ -59,29 +60,18 @@ return_vals_template = {"url":"",
 
 
 pause_sleep = 60
-too_many_requests_sleep = 120
+too_many_requests_sleep = 240
+page_load_timeout = 20
 
 class Spider(object):
 
     def __init__(self, start_url, base_dir="raas_output"):
-        self.useragent = change_useragent()
 
         dictConfig(raas_dictconfig)
         self.lgg = logging.getLogger("RAAS_spider")
-        self.lgg.debug("Starting Spider") 
-        try:
-                options = Options()
-                options.add_argument('--headless')
-                profile = webdriver.FirefoxProfile()
-                profile.set_preference("general.useragent.override", self.useragent)
-                self.br = webdriver.Firefox(profile,options=options)
-                self.br.set_page_load_timeout(5)
-            
+        self.br = []
 
-        except Exception as e:
-            self.lgg.error(" [!] Browser object creation error: {}".format(traceback.format_exc()))
-
-        self.result_list = []
+        self.init_browser()
 
         self.httpreq = urllib3.PoolManager()
 
@@ -103,6 +93,7 @@ class Spider(object):
         self.reg_dict["password"] = r'[Pp]asswor[td]'
         self.logged_in = False
 
+        # Create directories for storing data
         self.base_dir = checkdir(base_dir)
         self.tool_dir = checkdir(os.path.join(base_dir,"spider"))
         self.session_dir = checkdir(os.path.join(self.tool_dir,url_to_filename(self.base_url)))
@@ -110,11 +101,19 @@ class Spider(object):
         self.result_file = os.path.join(self.session_dir,"result.p")
         self.form_file = os.path.join(self.session_dir,"form.p")
         self.form_comps_file = os.path.join(self.session_dir,"form_comps.p")
-        self.pop_links = []
+
+
+        #Init or loading runtime variables that collects all desired data
+        if os.path.exists(self.result_file):
+            self.result_list = pickle.load(open(self.result_file, "rb"))
+        else:
+            self.result_list = []
 
         if os.path.exists(self.restore_file):
+            self.lgg.info("We've found an session file. We will continue.")
             recover_dict = pickle.load( open(self.restore_file,"rb"))
             self.links = recover_dict.get("links","")
+            self.pop_links = recover_dict.get("pop_links","")
             self.forms = recover_dict.get("forms","")
             self.form_comps = recover_dict.get("form_comps","")
             self.visited = recover_dict.get("visited","")
@@ -122,7 +121,62 @@ class Spider(object):
             self.forms = []
             self.form_comps = []
             self.links = []
+            self.pop_links = []
             self.visited = []
+
+    def init_browser(self):
+
+        self.useragent = change_useragent()
+        self.lgg.debug("Start Spider with new Useragent: {}".format(self.useragent))
+        if self.br:
+            self.finish_browser()
+        try:
+                options = Options()
+                options.add_argument('--headless')
+                profile = webdriver.FirefoxProfile()
+                profile.set_preference("general.useragent.override", self.useragent)
+                self.br = webdriver.Firefox(profile,options=options)
+                self.br.set_page_load_timeout(page_load_timeout)
+
+        except Exception as e:
+            self.lgg.error(" [!] Browser object creation error: {}".format(traceback.format_exc()))
+
+
+    def finish_browser(self):
+
+        self.last_html = ""
+        self.last_visited = ""
+        self.br.close()
+        self.br = []
+
+
+    def store_crawler_state(self):
+
+        recover_dict = {'base_url': self.base_url,
+                        'links':self.links,
+                        'visited':self.visited,
+                        'forms':self.forms,
+                        'form_comps':self.form_comps,
+                        'pop_links':self.pop_links}
+        pickle.dump(recover_dict, open(self.restore_file,"wb"))
+        pickle.dump(self.result_list, open(self.result_file,"wb"))
+        self.finish_browser()
+        self.lgg.info("Spider exits. See you soon.")
+        sys.exit(1)
+
+    def finish_return_crawler_state(self):
+
+        pickle.dump(self.result_list, open(self.result_file,"wb"))
+        pickle.dump(self.forms, open(self.form_file,"wb"))
+        pickle.dump(self.form_comps, open(self.form_comps_file,"wb"))
+        try:
+            os.remove(self.restore_file)
+        except:
+            pass
+        self.finish_browser()
+
+        return (self.result_list, self.forms, self.form_comps)
+
 
     def __wait(self):
             time.sleep(0.1)
@@ -169,14 +223,18 @@ class Spider(object):
         if result_dict['page_source']:
             bsoup = self.parse_html_to_bs(result_dict['page_source'])
 
-            result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,attrkeys=attr_list_link)
-            result_dict["number_forms"] = self.extract_html_get_form(inputdata=bsoup, tagkeys=tag_list_form,attrkeys=attr_list_form)
-            if result_dict["number_links"] < 1:
-                self.lgg.debug("Extracted nothing on site {}".format(result_dict["url"]))
+            result_entry = self.check_content_type(result_dict)
+            if result_entry["type"] == "javascriptasdfdsa":
+                self.extract_html_get_js(inputdata=bsoup)
+            elif result_entry["type"] == "stylesheetadsfasdf":
+                self.extract_html_get_css(inputdata=bsoup)
+            else:
+                result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,attrkeys=attr_list_link)
+                result_dict["number_forms"] = self.extract_html_get_form(inputdata=bsoup, tagkeys=tag_list_form,attrkeys=attr_list_form)
 
         result_entry = self.save_screenshot_source(result_dict)
-        result_entry = self.check_content_type(result_entry)
         return result_entry
+
 
 
     def collect_links(self,link):
@@ -191,6 +249,8 @@ class Spider(object):
         result_entry = None
         if result_dict["result"] == "success":
             result_entry = self.parse_link_response(result_dict)
+            if result_dict["number_links"] < 1:
+                self.lgg.debug("Extracted nothing on site {}".format(result_dict["url"]))
             cs = bcolors.OKGREEN
         elif (result_dict["result"] != "unknown_domain") and not (result_dict["result"] == "sucess"):
             result_entry = self.parse_link_response(result_dict)
@@ -227,20 +287,17 @@ class Spider(object):
         link = {"link":"", "attr":"", "tag":"", "request":"GET"}
         if len(self.pop_links) == 0:
             link["link"] = eval_url(url)[0]
+            # Collect first link
             return_val = self.collect_links(link=link)
         while(True):
             self.pop_links = [i for n, i in enumerate(self.pop_links) if i not in self.pop_links[n + 1:]] 
             if len(self.pop_links) == 0:
                 self.lgg.info("No links to process. Exiting Spider.")
-                pickle.dump(self.result_list, open(self.result_file,"wb"))
                 return
             try:
                 link = self.pop_links.pop()
             except:
                 self.lgg.info("It seems we're finished, no links to process.")
-                pickle.dump(self.result_list, open(self.result_file,"wb"))
-                pickle.dump(self.forms, open(self.form_file,"wb"))
-                pickle.dump(self.form_comps, open(self.form_comps_file, "wb"))
                 return
 
             try:
@@ -249,12 +306,16 @@ class Spider(object):
                 self.lgg.info("WrongDomainSyntax: "+link["link"])
 
 
-            if self.check_visit(link["link"],link["request"]):
+            if (self.check_visit(link["link"],link["request"])) and (self.check_link(link["link"])):
                 self.lgg.debug("Insert new link {} into crawler.".format(link["link"]))
+                # Collect new link
                 return_val = self.collect_links(link)
                 if return_val["result"] == "exit":
-                    return
-                self.visited.append(link)
+                    self.lgg.info("Exit because of Error.")
+                    self.finish_browser()
+                    sys.exit()
+                else:
+                    self.visited.append(link)
  
             if limit != 0:
                 if len(self.links)>=limit:
@@ -316,23 +377,28 @@ class Spider(object):
     def get_link_wrap(self,link):
             try_index=0
             if self.temp_count == 30:
+                self.lgg.info("Pausing for 30 seconds after 30 Requests. WAF and stuff :)")
                 time.sleep(pause_sleep)
                 self.temp_count = 0
 
             return_vals = self.get_link(link)
-            if return_vals["result"] == "too_many_requests":
-                time.sleep(too_many_requests_sleep)
-                self.useragent = change_useragent()
-                return_vals = self.get_link(link)
-                if return_vals["result"] == "too_many_requests":
-                    recover_dict = {'base_url': self.base_url,
-                                    'links':self.links,
-                                    'visited':self.visited}
-                    pickle.dump(recover_dict, open(self.restore_file,"wb"))
-                    pickle.dump(self.result_list, open(self.result_file,"wb")) 
-                    return {"result":"exit"}
 
-            return return_vals
+            temp_sleep = too_many_requests_sleep
+            try_counter = 0
+            while return_vals["result"] == "too_many_requests":
+                self.lgg.info("Too many requests. Will rest for {} seconds".format(temp_sleep))
+                print(self.last_html)
+                time.sleep(temp_sleep)
+                self.init_browser()
+                return_vals = self.get_link(link)
+                temp_sleep += 60
+                try_counter += 1
+                if try_counter == 10:
+                    self.lgg.info("We got blocked by the web server. Saving state and exiting.")
+                    self.store_crawler_state() 
+                    return {"result":"exit"}
+            else:
+                return return_vals
 
 
     def gen_input_attr_raw(self, inputdata, keys):
@@ -467,6 +533,13 @@ class Spider(object):
 
         return new_link
 
+    def check_link(self,link_string):
+        try:
+            eval_url(link_string)
+            return True
+        except:
+            return False
+
     def parse_html_to_bs(self,data):
         try:
             temp_bs = bs(data,"lxml")
@@ -480,6 +553,7 @@ if __name__ == "__main__":
     spider = Spider("https://eurid.eu")
     try:
         spider.collect_links_wrap(url="https://eurid.eu")
+        spider.finish_return_crawler_state()
     except:
-        spider.br.close()
+        spider.store_crawler_state()
         spider.lgg.exception("Got Error:")
