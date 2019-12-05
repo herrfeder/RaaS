@@ -3,6 +3,7 @@ import SubdomainCollector
 import MergeResults
 import PortScanner
 import DirectoryTraversal
+import Spider
 
 class Singleton(type):
     _instances = {}
@@ -24,6 +25,9 @@ class Manager(object, metaclass=Singleton):
 
         def newDirectoryTraversal(self, env=""):
             return DirectoryTraversal.DirectoryTraversal(env)
+
+        def newSpider(self, env="", start_url=""):
+            return Spider.Spider(env, start_url)
 
         def threadFinished(self, thread, data, finishedHandler=None):
             print(thread, data)

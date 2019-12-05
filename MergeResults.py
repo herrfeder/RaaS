@@ -41,6 +41,10 @@ class MergeResults(threading.Thread):
             print("[*] Running Module: MergeResults for DirectoryTraversal")
             self.MergeDirTraversal(self.result_list)
 
+    def return_type_df(self):
+        return self.do.ddf[self.env["dftype"]]
+
+
     def getFin(self):
         return self.fin
 
@@ -56,22 +60,23 @@ class MergeResults(threading.Thread):
         jpg_df.apply(lambda x: "/".join(x[0].split("/")[:-1])+"/",axis=1)
 
     ############# Subdomain #############
-    def DomainToIP(self,domain):
+    def domain_to_ip(self,domain):
+        df = self.return_type_df()
         try:
-            return self.do.df[self.do.df['domain'] == domain]['ip4_1'].item()
+            return df[df['domain'] == domain]['ip4_1'].item()
         except:
             return ""
 
-    def getIPList(self):
-
-        ip_list = [(x1,x2) for x1,x2 in zip(self.do.df.ip4_1,self.do.df.ip4_2)]
+    def get_ip_list(self):
+        df = self.return_type_df()
+        ip_list = [(x1,x2) for x1,x2 in zip(df.ip4_1,df.ip4_2)]
         ip_list = pd.Series(sum(ip_list, ()))
         ip_list = ip_list[ip_list != ""]
         return ip_list[~ip_list.duplicated()].reset_index().drop(columns=['index'])
 
-    def getDomainList(self):
-
-        domain_list = self.do.df.domain
+    def get_domain_list(self):
+        df = self.return_type_df()
+        domain_list = df.domain
         domain_list = [x for x in domain_list if x != ""]
         return domain_list
 
@@ -152,8 +157,8 @@ class MergeResults(threading.Thread):
 
         self.do.append(new_entry_df)
 
-    def validatePortscan(self):
-        self.do.df = self.do.df.apply(ap_validate_scan,axis=1)
+    def extract_portscan(self):
+        self.do.df = self.do.df.apply(w_extract_scan,axis=1)
         self.do.df.fillna("",inplace=True)
         try:
             self.do.df.drop(columns=['Unnamed: 0'], inplace=True)
@@ -161,6 +166,27 @@ class MergeResults(threading.Thread):
             pass
         self.do.df = self.do.df[~self.do.df.ip.duplicated()]
  
+    def validate_portscan(self):
+        df = self.return_type_df()
+        ip_list = df.ip.unique()
+        debughere()
+        if 1*(df['state'] == "open").sum() > 0:
+            row['host'] = "up"
+        else:
+            row['host'] = "verify"
+
+        #### check for port type ####
+        webfilt = scan_df[scan_df['port'].isin(["80","81","8080","8081","443","4443"])]
+        if not webfilt.empty:
+            row['web'] = ":".join(list(webfilt.port))
+        '''
+        elif row['port'] in ["22"]:
+            row['type'] = "ssh"
+        else:
+            row['type'] = "verify"
+        '''
+        return row
+
     def returnPortscan(self, ip):
         try:
             return extract_scan(self.do.df, ip)

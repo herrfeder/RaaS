@@ -2,7 +2,7 @@ import re
 from IPython.core.debugger import Tracer; debug_here=Tracer()
 import logging
 import threading
-from utility import getIPfromDomain, evalTarget
+from utility import get_ip_from_domain, eval_target
 import nmap
 import json
 
@@ -26,7 +26,7 @@ class PortScanner(threading.Thread):
 
     def run(self, target):
         print("[*] Running Module: PortScanner")
-        eval_target,target = evalTarget(target)
+        eval_target,target = eval_target(target)
         if eval_target != "invalid":
             if eval_target == "ip":
                 self.scanHost(target)
@@ -49,13 +49,13 @@ class PortScanner(threading.Thread):
 
                 print("\t[+] Host {} is online".format(target))
                 tcp_ports = 0
-                tcp = self.getContent(result, 'tcp')
+                tcp = self.get_content(result, 'tcp')
                 if tcp: 
                     tcp_ports = list(tcp.keys())
                     if len(tcp_ports) > 0:
                         result = nm.scan(target,arguments='-Pn -sV -p-')
                         final_result['host'] = "up"
-                        final_result['tcp'] = json.dumps(self.getContent(result, 'tcp'))
+                        final_result['tcp'] = json.dumps(self.get_content(result, 'tcp'))
         else:
 
             print("\t[+] Host {} is online".format(target))
@@ -67,14 +67,13 @@ class PortScanner(threading.Thread):
         self.result_list.append((target,final_result))
 
 
-    def getContent(self, result, key):
+    def get_content(self, result, key):
 
         scan = result['scan'][list(result['scan'].keys())[0]]
-        
         return scan.get(key,'')
 
 
-    def getResultList(self):
+    def return_resultlist(self):
         return self.result_list
 
 if __name__ == '__main__':

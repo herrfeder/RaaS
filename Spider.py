@@ -1,3 +1,4 @@
+import threading
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 import selenium.common.exceptions as sel_excepts
@@ -63,30 +64,35 @@ pause_sleep = 60
 too_many_requests_sleep = 240
 page_load_timeout = 20
 
-class Spider(object):
+class Spider(threading.Thread):
 
-    def __init__(self, start_url, base_dir="raas_output"):
+    def __init__(self, env, start_url, base_dir="raas_output"):
+        super(Spider , self).__init__()
+        self.thread = threading.Thread(target=self.run, args=())
 
+        # Preparing Config and Logger
         dictConfig(raas_dictconfig)
         self.lgg = logging.getLogger("RAAS_spider")
+
+        # Preparing Selenium Browser and urllib3 client
         self.br = []
-
         self.init_browser()
-
         self.httpreq = urllib3.PoolManager()
 
-        self.test = []
-
+        # Init some variables for runtime      
         self.last_visited= ""
+        self.last_html = ""
+        self.temp_count = 0
+
+        # Getting and evaluate Start URL
         self.start_url = start_url
         base_url, base_url_dict = eval_url(self.start_url)
         self.base_ssl = base_url_dict["ssl"]
         self.base_port = base_url_dict["port"]
         self.base_url = base_url_dict["base_url"]
+        self.final_url = base_url_dict["final_url"]
 
-        self.last_html = ""
-        self.temp_count = 0
-
+        # Prepare some Regex Variables
         self.reg_dict = {}
         self.reg_dict["login"] = r'[Ll][Oo][Gg][Ii][Nn]'
         self.reg_dict["user"] = r'[Uu]sern'
@@ -103,7 +109,7 @@ class Spider(object):
         self.form_comps_file = os.path.join(self.session_dir,"form_comps.p")
 
 
-        #Init or loading runtime variables that collects all desired data
+        #Init or loading (after exiting before finish) runtime variables that collects all desired data
         if os.path.exists(self.result_file):
             self.result_list = pickle.load(open(self.result_file, "rb"))
         else:
@@ -123,6 +129,15 @@ class Spider(object):
             self.links = []
             self.pop_links = []
             self.visited = []
+
+    def run(self):
+        self.lgg.info("[*] Running Module: Spider ")
+        try:
+            self.collect_links_wrap(self.final_url)
+            self.finish_return_crawler_state()
+        except:
+            self.lgg.exception("Got Error:")
+            self.store_crawler_state()
 
     def init_browser(self):
 
@@ -184,10 +199,6 @@ class Spider(object):
     def close(self):
             self.br.close()
 
-    def set_base_url(self,url):
-
-        self.base_url = url
-
     def save_screenshot_source(self, result_dict, method="GET"):
         if result_dict["type"] != "nocrawlfile":
             sitedir =  checkdir(os.path.join(self.session_dir,url_to_filename(result_dict["url"])))
@@ -224,9 +235,9 @@ class Spider(object):
             bsoup = self.parse_html_to_bs(result_dict['page_source'])
 
             result_entry = self.check_content_type(result_dict)
-            if result_entry["type"] == "javascriptasdfdsa":
+            if (result_entry["type"] == "javascriptasdfdsa") and (result_entry["status"] != 404):
                 self.extract_html_get_js(inputdata=bsoup)
-            elif result_entry["type"] == "stylesheetadsfasdf":
+            elif (result_entry["type"] == "stylesheetadsfasdf") and (result_entry["status"] != 404):
                 self.extract_html_get_css(inputdata=bsoup)
             else:
                 result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,attrkeys=attr_list_link)
@@ -461,7 +472,6 @@ class Spider(object):
     def add_form(self, new_form, new_form_comps):
         if self.check_dup_form(new_form):
             self.lgg.debug("New form detected: {}".format(new_form))
-            self.test.append(new_form)
             self.forms.append(new_form)
             self.form_comps.extend(new_form_comps)
             self.add_link({"link":new_form["link"],
@@ -550,10 +560,4 @@ class Spider(object):
 
 
 if __name__ == "__main__":
-    spider = Spider("https://eurid.eu")
-    try:
-        spider.collect_links_wrap(url="https://eurid.eu")
-        spider.finish_return_crawler_state()
-    except:
-        spider.store_crawler_state()
-        spider.lgg.exception("Got Error:")
+    pass 

@@ -5,7 +5,7 @@ import socket
 import logging
 import threading
 from subdomainutil import extractFierceDict
-from utility import getIPfromDomain 
+from utility import get_ip_from_domain
 
 PATH={ "amass":"../amass/amass",
         "subfinder":"../subfinder",
@@ -33,11 +33,9 @@ class SubdomainColl(threading.Thread):
         self.runAmass(self.domain_name)
         self.runFierce(self.domain_name)
         self.cleanDict()
-
-
         self.fin = 1
 
-    def getResultList(self):
+    def get_result_list(self):
         return self.result_list
 
     def getFin(self):
@@ -102,7 +100,7 @@ class SubdomainColl(threading.Thread):
 
             for key,value in temp_dict.items():
                 if value == '':
-                    temp_dict[key] = getIPfromDomain(key)
+                    temp_dict[key] = get_ip_from_domain(key)
 
             self.result_list[index] = temp_dict
 

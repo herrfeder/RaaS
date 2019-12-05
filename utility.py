@@ -3,7 +3,8 @@ import random
 import re
 from exceptions import WrongDomainSyntax, DomainNoIp
 import os
-
+import datetime
+from IPython.core.debugger import Tracer; debughere = Tracer()
 
 def urljoin(*args):
         return "/".join(map(lambda x: str(x).rstrip('/'), args))
@@ -173,3 +174,11 @@ def change_useragent():
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",]
 
     return random.choice(useragents)
+
+
+def return_newest_string(string_list):
+
+    sorted_list = sorted(string_list, key=lambda x: datetime.datetime.strptime(x.split("_")[-1], '%Y%m%d%H%M'))
+    return sorted_list[-1]
+
+

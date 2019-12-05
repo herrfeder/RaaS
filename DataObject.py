@@ -5,7 +5,8 @@ import time
 import datetime
 import sqlalchemy
 from sqlalchemy import MetaData
-from IPython.core.debugger import Tracer; debug_here = Tracer()
+import utility as u
+from IPython.core.debugger import Tracer; debughere = Tracer()
 
 class DataObject():
 
@@ -16,8 +17,8 @@ class DataObject():
 
         self.dftype = env['dftype']
         self.project = env['project']
-        self.df_dict = {}
-        self.conn = sqlalchemy.create_engine("sqlite:///data/"+self.project+".db")
+        self.ddf = {}
+        self.conn = sqlalchemy.create_engine("sqlite:///data/db/"+self.project+".db")
         self.meta = MetaData(self.conn,reflect=True)
         #self.portscan = self.meta.tables['portscan']
         #self.dirtraversal = self.meta.tables['dirtraversal']
@@ -68,13 +69,17 @@ class DataObject():
         self.df = pd.read_csv(load_file)
         self.df.fillna('',inplace=True)
 
-    def load_from_sqlite(self, name, append=False):
+    def load_from_sqlite(self, name="", append=False):
 
+        if name:
+            projectname = name
+        else:
+            projectname = self.project
+        projectname = projectname.rstrip(".db")
         try:
-            conn = sqlite3.connect("data/db/"+self.project+".db")
-            self.df = pd.read_sql_table(self.return_table_name(self.dftype+"_"+"master"), con=self.conn)
-
-        except Error as e:
+            conn = sqlite3.connect("data/db/"+projectname+".db")
+            self.ddf[self.dftype] = self.return_table(self.dftype+"_"+"master")
+        except Exception as e:
             print(e)
 
     def check_existence(self, filtercol, filterval, checkcol='', checkval=''):
@@ -104,18 +109,22 @@ class DataObject():
             if len(possible_names) < 1:
                 return ""
             else:
-                return pd.read_sql_table(possible_names, self.conn)
+                newest_table = u.return_newest_string(possible_names)
+                return pd.read_sql_table(newest_table, self.conn)
         else:
             return pd.read_sql_table(table_name, self.conn)
-        
+
+
     def return_domain_list(self):
-        
+
         return pd.read_sql_table("subdomain", self.conn)['domain'].unique()
-    
+
+
     def return_ip_list(self):
-        
+
         return pd.read_sql_table("subdomain", self.conn)['ip4_1'].unique()
-    
+
+
     def return_dirtraversal(self, domain):
         '''
         Returns a directory traversal scan for one or multiple Domains. As a single IP could be used for multiple domains.
@@ -142,7 +151,7 @@ class DataObject():
                                                                    stats_result[single_domain+'_403'])
         return (final_result, overview_dt)
 
-    
+
     def return_portscan(self, ip):
 
         stats_result = {}
@@ -183,9 +192,7 @@ class DataObject():
             return ""
 
     def domain_to_ip(self, domain):
-        
         df = self.return_table("subdomain")
-        
         if not df.empty:
             return df.query("domain==@domain")["ip4_1"].values
         else:
