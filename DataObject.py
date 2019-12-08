@@ -4,9 +4,14 @@ import glob
 import time
 import datetime
 import sqlalchemy
+import os
 from sqlalchemy import MetaData
 import utility as u
 from IPython.core.debugger import Tracer; debughere = Tracer()
+from misc.settings import raas_dictconfig
+from misc.settings import bcolors
+import logging
+from logging.config import dictConfig
 
 class DataObject():
 
@@ -15,10 +20,17 @@ class DataObject():
         if columns:
             self.df = pd.DataFrame(columns=columns)
 
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_dataobject")
+
         self.dftype = env['dftype']
         self.project = env['project']
         self.ddf = {}
-        self.conn = sqlalchemy.create_engine("sqlite:///data/db/"+self.project+".db")
+        self.ddf["hosts"] = ""
+        self.db_path = "data/db/"+self.project+".db"
+        self.csv_path = "data/csv/"+self.project+"_{dftype}_{timestamp}.csv"
+
+        self.conn = sqlalchemy.create_engine("sqlite:///"+self.db_path)
         self.meta = MetaData(self.conn,reflect=True)
         #self.portscan = self.meta.tables['portscan']
         #self.dirtraversal = self.meta.tables['dirtraversal']
@@ -26,61 +38,72 @@ class DataObject():
         self.time_stamp = "%Y%m%d%H%M"
         self.table_name_tpl = "{dftype}_{tabletype}_{timestamp}"
 
-    def create_from_dict_list(self,result_list):
-        self.df = pd.DataFrame()
+
+    def check_dftype(self):
+        pass
+
+
+    def update_hosts(self, col, value, ip="", subdomain=""):
+        pass
+
+
+    def append_rows(self, new_entry, df_type=""):
+        df_t = self.check_dftype(df_type)
+        self.ddf[df_t] = self.ddf[df_t].append(new_entry, ignore_index=True)
+
+    def drop_index(self, index, df_type=""):
+        df_t = self.check_dftype(df_type)
+        self.ddf[df_t].drop(index, inplace=True)
+
+
+    def create_from_dict_list(self, result_list, df_type=""):
+        df_t = self.check_dftype(df_type)
+        self.ddf[df_t] = pd.DataFrame()
         for result in result_list:
             if isinstance(result,list) and (len(result) > 1):
                 for entry in result:
-                    self.df = self.df.append(entry, ignore_index=True)
+                    self.ddf[df_t] = self.ddf[df_t].append(entry, ignore_index=True)
             elif isinstance(result,list) and (len(result) == 1):
-                self.df = self.df.append(result, ignore_index=True)
-        debug_here()
+                self.ddf[df_t] = self.ddf[df_t].append(result, ignore_index=True)
 
-    def append(self, new_entry):
-        self.df = self.df.append(new_entry, ignore_index=True)
 
-    def drop_index(self, index):
-        self.df.drop(index, inplace=True)
-	
-    def save_to_csv(self):
-
+    def save_to_csv(self, df_type=""):
+        df_t = self.check_dftype(df_type)
         timedate = datetime.datetime.now().strftime(self.time_stamp)
-        self.df.to_csv("data/"+timedate+self.project+"_"+self.dftype+".csv")
+        self.ddf[df_t].to_csv(self.csv_path.format(dftype=df_t,
+                                                   timestamp=timedate)
 
-    def save_to_sqlite(self, name, append=False):
 
+    def save_to_sqlite(self, name, append=False, dftype="", tabletype="new"):
+        df_t = self.check_dftype(df_type)
         try:
-            conn = sqlite3.connect("data/"+self.project+".db")
-            if append:
-                self.df.to_sql(self.get_table_name(name), con=conn, if_exists='append')
-            else:
-                self.df.to_sql(name, con=conn, if_exists='fail')
+            conn = sqlite3.connect(self.db_path)
+            table_name = self.table_name_tpl.format(df_t, tabletype, u.create_timestamp)
+            self.ddf[df_t].to_sql(tabe_name, con=conn, if_exists='fail')
+        except:
+            self.lgg.exception("Got Error:")
 
-        except Error as e:
-            print(e)
 
-    def load_from_csv(self):
-
-        files = sorted(glob.glob("data/*"+self.project+"_"+self.dftype+".csv"))
+    def load_from_csv(self, dftype=""):
+        df_t = self.check_dftype(dftype)
+        files = sorted(glob.glob("data/"+self.project+"_"+df_t+"*.csv"))
         if len(files) < 1:
-            print("No CSV files to load from")
+            self.lgg.exception("No CSV files to load from")
             return
-        load_file = files.pop() 
-        self.df = pd.read_csv(load_file)
-        self.df.fillna('',inplace=True)
 
-    def load_from_sqlite(self, name="", append=False):
+        newest_file = u.return_newest_string([x.rstrip(".csv") for x in files]) + ".csv"
+        self.ddf[df_t] = pd.read_csv(newest_file)
+        self.ddf[df_t].fillna('',inplace=True)
 
-        if name:
-            projectname = name
-        else:
-            projectname = self.project
-        projectname = projectname.rstrip(".db")
+
+    def load_from_sqlite(self, dftype="", tabletype="new",append=False):
+        df_t = self.check_dftype(df_type)
         try:
-            conn = sqlite3.connect("data/db/"+projectname+".db")
-            self.ddf[self.dftype] = self.return_table(self.dftype+"_"+"master")
+            conn = sqlite3.connect(self.db_path)
+            self.ddf[self.dftype] = self.return_table(df_t+"_"+tabletype)
         except Exception as e:
             print(e)
+
 
     def check_existence(self, filtercol, filterval, checkcol='', checkval=''):
 

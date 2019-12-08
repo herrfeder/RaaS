@@ -19,79 +19,80 @@ def popL(inlist):
 
 class MergeResults(threading.Thread):
 
-    def __init__(self, env, columns="", result_list="", load=False):
+    def __init__(self, env, do="", columns="", result_list="", load=False):
         super(MergeResults, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
         self.result_list = result_list
         self.fin = 0
         self.env = env
-        self.do = DataObject(columns, env)
+        if do:
+            self.do = do
+        else:
+            self.do = DataObject(env,)
         if load:
             self.do.load_from_sqlite()
  
     def run(self):
         if self.env['dftype'] == "subdomain":
             print("[*] Running Module: MergeResults for Subdomains")
-            self.MergeSubDomain(self.result_list)
+            self.merge_subdomain(self.result_list)
         if self.env['dftype'] == "portscan":
             print("[*] Running Module: MergeResults for Portscan")
-            self.MergePortscan(self.result_list)
+            self.merge_portscan(self.result_list)
         if self.env['dftype'] == "dirtraversal":
             print("[*] Running Module: MergeResults for DirectoryTraversal")
-            self.MergeDirTraversal(self.result_list)
-
-    def return_type_df(self):
-        return self.do.ddf[self.env["dftype"]]
+            self.merge_dirtraversal(self.result_list)
 
 
-    def getFin(self):
+    def get_fin(self):
         return self.fin
 
     ############# DirTraversal ##########
-    def MergeDirTraversal(self, result_list):
-
-        self.do.CreateFromDictList(result_list)
+    def merge_dirtraversal(self, result_list):
+        self.do.create_from_dict_list(result_list)
 
     ############ Spider #################
 
-    def MergeSpider(self, result_list):
+    def merge_spider(self, result_list):
         jpg_df = df[df[0].str.endswith("jpg")]
         jpg_df.apply(lambda x: "/".join(x[0].split("/")[:-1])+"/",axis=1)
 
     ############# Subdomain #############
     def domain_to_ip(self,domain):
-        df = self.return_type_df()
+        df = self.do.return_df("subdomain")
         try:
             return df[df['domain'] == domain]['ip4_1'].item()
         except:
             return ""
 
     def get_ip_list(self):
-        df = self.return_type_df()
+        df = self.do.return_df("subdomain")
         ip_list = [(x1,x2) for x1,x2 in zip(df.ip4_1,df.ip4_2)]
         ip_list = pd.Series(sum(ip_list, ()))
         ip_list = ip_list[ip_list != ""]
         return ip_list[~ip_list.duplicated()].reset_index().drop(columns=['index'])
 
     def get_domain_list(self):
-        df = self.return_type_df()
+        df = self.do.return_df("subdomain")
         domain_list = df.domain
         domain_list = [x for x in domain_list if x != ""]
         return domain_list
 
 
-    def MergeSubDomain(self, result_list):
+    def merge_subdomain(self, result_list):
 
-        self.extractSubDict(result_list)
+        self.extract_sub_dict(result_list)
 
-    def SubAppend(self, domain='', ip4_1='', ip4_2='', ip6_1='', ip6_2='', checkdup=True):
+    def sub_append(self, domain='', ip4_1='', ip4_2='', ip6_1='', ip6_2='', checkdup=True):
+
+        df = self.do.return_df("subdomain")
 
         new_entry_df = pd.Series({'domain':domain,
                                   'ip4_1':ip4_1, 'ip4_2':ip4_2,
                                   'ip6_1':ip6_1, 'ip6_2':ip6_2})
         if checkdup:
-            duplicated = self.do.df[self.do.df.domain == domain]
+            duplicated = df[df.domain == domain]
             if duplicated.shape[0] > 0:
                 ip4_2 = [x for x in duplicated['ip4_1']]
                 ip6_2 = [x for x in duplicated['ip6_1']]
@@ -110,7 +111,7 @@ class MergeResults(threading.Thread):
                 self.do.append(new_entry_df)
                 return 0
 
-    def extractSubDict(self, result_list):
+    def extract_subdict(self, result_list):
         for dic in result_list:
             for key, value in dic.items():
                 if (isinstance(value, list)) and (len(value) > 1):
@@ -142,13 +143,13 @@ class MergeResults(threading.Thread):
 
     ################ Portscan ###################
 
-    def MergePortscan(self, result_list):
+    def merge_portscan(self, result_list):
         for entry in result_list:
-            self.PortScanAppend(entry['ip'],entry['hoststatus'],entry['tcp'],entry['udp'])
+            self.portscan_append(entry['ip'],entry['hoststatus'],entry['tcp'],entry['udp'])
 
-        self.validatePortscan()
+        self.validate_portscan()
 
-    def PortScanAppend(self, ip='', hoststatus='', tcp='', udp=''):
+    def portscan_append(self, ip='', hoststatus='', tcp='', udp=''):
 
         new_entry_df = pd.Series({'ip':ip, 
                                   'hoststatus':hoststatus, 

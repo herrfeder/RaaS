@@ -175,10 +175,13 @@ def change_useragent():
 
     return random.choice(useragents)
 
+def create_timestamp():
+
+    return datetime.datetime.strftime("%Y%m%d%H%M")
 
 def return_newest_string(string_list):
 
-    sorted_list = sorted(string_list, key=lambda x: datetime.datetime.strptime(x.split("_")[-1], '%Y%m%d%H%M'))
+    sorted_list = sorted(string_list, key=lambda x: datetime.datetime.strptime(x.split("_")[-1], "%Y%m%d%H%M"))
     return sorted_list[-1]
 
 
