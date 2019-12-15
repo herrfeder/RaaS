@@ -17,8 +17,8 @@ class Manager(object, metaclass=Singleton):
         def newSubdomainCollector(self, domain_name, env=""):
             return SubdomainCollector.SubdomainColl( domain_name, env)
 
-        def newMergeResults(self, env, columns="", result_list="", load=False):
-            return MergeResults.MergeResults(env, columns, result_list, load)
+        def newMergeResults(self, env, do="", columns="", result_list="", load=False):
+            return MergeResults.MergeResults(env, do, columns, result_list, load)
 
         def newPortScanner(self, env=""):
             return PortScanner.PortScanner(env)

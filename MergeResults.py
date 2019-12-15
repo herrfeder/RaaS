@@ -68,6 +68,7 @@ class MergeResults(threading.Thread):
 
     def get_ip_list(self):
         df = self.do.return_df("subdomain")
+        debughere()
         ip_list = [(x1,x2) for x1,x2 in zip(df.ip4_1,df.ip4_2)]
         ip_list = pd.Series(sum(ip_list, ()))
         ip_list = ip_list[ip_list != ""]
@@ -168,7 +169,7 @@ class MergeResults(threading.Thread):
         self.do.df = self.do.df[~self.do.df.ip.duplicated()]
  
     def validate_portscan(self):
-        df = self.return_type_df()
+        df = self.do.return_df("portscan")
         ip_list = df.ip.unique()
         debughere()
         if 1*(df['state'] == "open").sum() > 0:
@@ -188,13 +189,13 @@ class MergeResults(threading.Thread):
         '''
         return row
 
-    def returnPortscan(self, ip):
+    def return_portscan(self, ip):
         try:
             return extract_scan(self.do.df, ip)
         except NoScanAvailable:
             return ""
 
-    def returnData(self, ip):
+    def return_data(self, ip):
         output = self.do.df[self.do.df.ip == ip]
         return output
     ############### Directory Traversal #########

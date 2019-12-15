@@ -15,32 +15,62 @@ from logging.config import dictConfig
 
 class DataObject():
 
-    def __init__(self,columns,env, datascope=""):
+    def __init__(self, env, columns="", dftype="", datascope=""):
 
-        if columns:
-            self.df = pd.DataFrame(columns=columns)
+        if columns and dftype:
+            self.ddf["dftype"] = pd.DataFrame(columns=columns)
 
         dictConfig(raas_dictconfig)
         self.lgg = logging.getLogger("RAAS_dataobject")
-
-        self.dftype = env['dftype']
-        self.project = env['project']
         self.ddf = {}
+        self.env = env
+        self._project = env['project']
+        self.init_update_project()
+        self._dftype = env['dftype']
+        self.init_update_dftype()
         self.ddf["hosts"] = ""
-        self.db_path = "data/db/"+self.project+".db"
-        self.csv_path = "data/csv/"+self.project+"_{dftype}_{timestamp}.csv"
-
-        self.conn = sqlalchemy.create_engine("sqlite:///"+self.db_path)
-        self.meta = MetaData(self.conn,reflect=True)
-        #self.portscan = self.meta.tables['portscan']
-        #self.dirtraversal = self.meta.tables['dirtraversal']
         self.table_types = ["master", "new", "temp",]
         self.time_stamp = "%Y%m%d%H%M"
         self.table_name_tpl = "{dftype}_{tabletype}_{timestamp}"
 
+        self._observers = {"project":self.init_update_project,
+                           "dftype":self.init_update_dftype}
 
-    def check_dftype(self):
-        pass
+    @property
+    def project(self):
+        return self._project
+
+    @project.setter
+    def project(self, project):
+        self._project = project
+        self.init_update_project()
+
+    @property
+    def dftype(self):
+        return self._dftype
+
+    @dftype.setter
+    def dftype(self, dftype):
+        self._dftype = dftype
+        self.init_update_dftype()
+
+    def init_update_project(self):
+ 
+        self.db_path = "data/db/"+self._project+".db"
+        self.csv_path = "data/csv/"+self._project+"_{dftype}_{timestamp}.csv"
+        self.conn = sqlalchemy.create_engine("sqlite:///"+self.db_path)
+        self.meta = MetaData(self.conn,reflect=True)
+
+
+    def init_update_dftype(self):
+        self.ddf[self._dftype] = self.return_df(self._dftype)
+
+    def check_dftype(self, new_dftype):
+        if new_dftype:
+            # needs further validation
+            return new_dftype()
+        else:
+            return self._dftype
 
 
     def update_hosts(self, col, value, ip="", subdomain=""):
@@ -67,22 +97,12 @@ class DataObject():
                 self.ddf[df_t] = self.ddf[df_t].append(result, ignore_index=True)
 
 
-    def save_to_csv(self, df_type=""):
-        df_t = self.check_dftype(df_type)
+    def save_to_csv(self, dftype=""):
+        df_t = self.check_dftype(dftype)
         timedate = datetime.datetime.now().strftime(self.time_stamp)
         self.ddf[df_t].to_csv(self.csv_path.format(dftype=df_t,
-                                                   timestamp=timedate)
-
-
-    def save_to_sqlite(self, name, append=False, dftype="", tabletype="new"):
-        df_t = self.check_dftype(df_type)
-        try:
-            conn = sqlite3.connect(self.db_path)
-            table_name = self.table_name_tpl.format(df_t, tabletype, u.create_timestamp)
-            self.ddf[df_t].to_sql(tabe_name, con=conn, if_exists='fail')
-        except:
-            self.lgg.exception("Got Error:")
-
+                                                   timestamp=timedate))
+ 
 
     def load_from_csv(self, dftype=""):
         df_t = self.check_dftype(dftype)
@@ -96,41 +116,62 @@ class DataObject():
         self.ddf[df_t].fillna('',inplace=True)
 
 
-    def load_from_sqlite(self, dftype="", tabletype="new",append=False):
-        df_t = self.check_dftype(df_type)
+    def save_to_sqlite(self, dftype="", tabletype="master", append=False):
+        df_t = self.check_dftype(dftype)
         try:
-            conn = sqlite3.connect(self.db_path)
-            self.ddf[self.dftype] = self.return_table(df_t+"_"+tabletype)
-        except Exception as e:
-            print(e)
+            table_name = self.table_name_tpl.format(dftype=df_t,
+                                                    tabletype=tabletype,
+                                                    timestamp=u.create_timestamp())
+            self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+        except:
+            self.lgg.exception("Got Error:")
 
 
-    def check_existence(self, filtercol, filterval, checkcol='', checkval=''):
+    def load_from_sqlite(self, dftype="", tabletype="master",append=False):
+        df_t = self.check_dftype(dftype)
+        debughere()
+        try:
+            table_name = self.table_name_tpl.format(dftype=df_t,
+                                                    tabletype=tabletype,
+                                                    timestamp="dummy")
+            self.ddf[df_t] = self.return_table(table_name.rstrip("_dummy"))
+            debughere()
+        except:
+            self.lgg.exception("Got Error:")
 
+
+    def check_existence(self, filtercol, filterval, dftype="", checkcol="", checkval=""):
+        df_t = self.check_dftype(df_type)
         if checkval == '':
-            if self.df[filtercol == filterval][checkcol] == None:
+            if self.ddf[df_t][filtercol == filterval][checkcol] == None:
                 return False
             else:
                 return True
         else:
-            if self.df[filtercol == filterval][checkcol] == checkval:
+            if self.ddf[df_t][filtercol == filterval][checkcol] == checkval:
                 return True
             else:
                 return False
 
-    def remove_duplicates_col(self,row, column):
-
-        duplicates = self.df[self.sub_df[column] == row[column]]
-
+    def remove_duplicates_col(self,row, column, dftype=""):
+        df_t = self.check_dftype(df_type)
+        duplicates = self.ddf[df_t][self.sub_df[column] == row[column]]
         for dup in duplicates.iterrows():
             pass
 
-    def return_table(self, table_name):
+    def return_df(self, dftype, table_type = ""):
+        if table_type:
+            table_name = dftype+"_"+table_name
+        else:
+            table_name = dftype+"_"+"master"
+        return self.return_table(table_name)
 
+
+    def return_table(self, table_name):
         if table_name not in self.conn.table_names():
             possible_names = [x for x in self.conn.table_names() if x.startswith(table_name)]
             if len(possible_names) < 1:
-                return ""
+                self.lgg.exception("No table with the name {}".format(table_name))
             else:
                 newest_table = u.return_newest_string(possible_names)
                 return pd.read_sql_table(newest_table, self.conn)
@@ -207,7 +248,7 @@ class DataObject():
 
     def ip_to_domain(self, ip):
 
-        df = self.return_table("subdomain")
+        df = self.return_df("subdomain")
 
         if not df.empty:
             return list(df.query("ip4_1==@ip")["domain"].values)
@@ -215,7 +256,7 @@ class DataObject():
             return ""
 
     def domain_to_ip(self, domain):
-        df = self.return_table("subdomain")
+        df = self.return_df("subdomain")
         if not df.empty:
             return df.query("domain==@domain")["ip4_1"].values
         else:
