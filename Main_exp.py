@@ -22,7 +22,6 @@ if __name__ == '__main__':
     #mt.do.saveToCSV()
 
     mt = ThreadManager.threadManager.newMergeResults(env, load=True)
-    debughere()
     ip_series = mt.get_ip_list()
     domain_list = mt.get_domain_list()
     ip_list = []
@@ -34,15 +33,8 @@ if __name__ == '__main__':
     #ps = ThreadManager.threadManager.newPortScanner(env)
     #for ip in ip_series[0]:
     #    ps.run(ip)
-    debughere()
+    do = mt.do
     mn = ThreadManager.threadManager.newMergeResults(env, do=mt.do, load=True)
     mn.validate_portscan()
-    print(mn.do.df)
-    '''
-    for ip in ip_list:
-        print("list:"+ip)
-        try:
-            print(mt.returnPortscan(ip))
-        except NoScanAvailable:
-            pass
-    '''
+    print(mn.do.ddf)
+    debughere()

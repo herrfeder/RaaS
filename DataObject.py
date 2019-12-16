@@ -28,7 +28,7 @@ class DataObject():
         self.init_update_project()
         self._dftype = env['dftype']
         self.init_update_dftype()
-        self.ddf["hosts"] = ""
+        self.ddf["hosts"] = pd.DataFrame(columns=["ip", "domain", "state", "purpose"])
         self.table_types = ["master", "new", "temp",]
         self.time_stamp = "%Y%m%d%H%M"
         self.table_name_tpl = "{dftype}_{tabletype}_{timestamp}"
@@ -129,13 +129,11 @@ class DataObject():
 
     def load_from_sqlite(self, dftype="", tabletype="master",append=False):
         df_t = self.check_dftype(dftype)
-        debughere()
         try:
             table_name = self.table_name_tpl.format(dftype=df_t,
                                                     tabletype=tabletype,
                                                     timestamp="dummy")
             self.ddf[df_t] = self.return_table(table_name.rstrip("_dummy"))
-            debughere()
         except:
             self.lgg.exception("Got Error:")
 
