@@ -89,7 +89,7 @@ class MergeResults(threading.Thread):
         webfilt = port_df[port_df['port'].isin(["80","81","8080","8081","443","4443"])]
         if not webfilt.empty:
             self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] += ",web"
-        
+ 
         sshfilt = port_df[port_df['port'].isin(["22"])]
         if not sshfilt.empty:
             self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] += ",ssh"

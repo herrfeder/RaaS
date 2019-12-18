@@ -8,8 +8,10 @@ env = {"dftype":"","project":"eurid.eu"}
 
 if __name__ == '__main__':
 
-    #wt = ThreadManager.threadManager.newSubdomainCollector(env["project"],env="")
-    #wt.run()
+    env["dftype"] = "subdomain"
+    wt = ThreadManager.threadManager.newSubdomainCollector(env["project"],env="")
+    wt.run()
+    print("blahblub")
     #getFin = 0
     #while getFin == 0 :
     #    getFin = wt.getFin()

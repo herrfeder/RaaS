@@ -8,7 +8,7 @@ import time
 import re
 from lxml.html.diff import htmldiff
 from selenium.common.exceptions import WebDriverException
-from exceptions import WrongDomainSyntax, DomainNoIp
+from exceptions import WrongDomainSyntax, DomainNoIp, ServerBlocked, SpiderError
 from IPython.core.debugger import Tracer; debughere = Tracer()
 from selenium.webdriver.firefox.options import Options
 import operator
@@ -68,15 +68,13 @@ class Spider(threading.Thread):
 
     def __init__(self, env, start_url, base_dir="raas_output"):
         super(Spider , self).__init__()
-        self.thread = threading.Thread(target=self.run, args=())
-
+        self.fin = 0
         # Preparing Config and Logger
         dictConfig(raas_dictconfig)
         self.lgg = logging.getLogger("RAAS_spider")
 
         # Preparing Selenium Browser and urllib3 client
         self.br = []
-        self.init_browser()
         self.httpreq = urllib3.PoolManager()
 
         # Init some variables for runtime      
@@ -130,14 +128,25 @@ class Spider(threading.Thread):
             self.pop_links = []
             self.visited = []
 
-    def run(self):
+        self.thread = threading.Thread(target=self.run, args=(self.final_url))
+        self.thread.deamon = True
+
+    def run(self, limit=0):
         self.lgg.info("[*] Running Module: Spider ")
-        try:
-            self.collect_links_wrap(self.final_url)
-            self.finish_return_crawler_state()
-        except:
-            self.lgg.exception("Got Error:")
-            self.store_crawler_state()
+        while True:
+            try:
+                self.init_browser()
+                self.collect_links_wrap(self.final_url,limit=limit)
+                return self.finish_return_crawler_state()
+            except ServerBlocked:
+                self.lgg.exception("Got Error ServerBlocked.")
+                self.store_crawler_state()
+                time.sleep(3600)
+            except SpiderError:
+                self.lgg.exception("Got Error SpiderError.")
+                self.store_crawler_state()
+                time.sleep(60)
+
 
     def init_browser(self):
 
@@ -176,8 +185,8 @@ class Spider(threading.Thread):
         pickle.dump(recover_dict, open(self.restore_file,"wb"))
         pickle.dump(self.result_list, open(self.result_file,"wb"))
         self.finish_browser()
-        self.lgg.info("Spider exits. See you soon.")
-        sys.exit(1)
+        self.lgg.info("Spider stops. Will start again after some time.")
+        return 1
 
     def finish_return_crawler_state(self):
 
@@ -189,7 +198,7 @@ class Spider(threading.Thread):
         except:
             pass
         self.finish_browser()
-
+        self.fin = 1
         return (self.result_list, self.forms, self.form_comps)
 
 
@@ -198,54 +207,6 @@ class Spider(threading.Thread):
 
     def close(self):
             self.br.close()
-
-    def save_screenshot_source(self, result_dict, method="GET"):
-        if result_dict["type"] != "nocrawlfile":
-            sitedir =  checkdir(os.path.join(self.session_dir,url_to_filename(result_dict["url"])))
-            if method == "GET":
-                result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"])
-                with open(result_dict["source_path"], "w") as f:
-                    f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
-                    f.write("\n\n")
-                    f.write(result_dict["page_source"]+"\n")
-                result_dict["page_source"] = ""
-                if not result_dict["status"] in ["404", "403"]:
-                    result_dict["screenshot_path"] = os.path.join(sitedir,method+"_screenshot_"+result_dict["status"]+"_"+checkfile(result_dict["url"])+".png")
-                    self.br.save_screenshot(result_dict["screenshot_path"])
-
-        return result_dict
-
-    def check_content_type(self, result_dict):
-        if isinstance(result_dict["headers"], dict):
-            if result_dict["headers"].get("Content-Type") == "application/json":
-                result_dict["type"] = "json"
-            elif result_dict["headers"].get("Content-Type") == "text/plain":
-                result_dict["type"] = "text"
-        if result_dict["url"].split(".")[-1] == "js":
-            result_dict["type"] = "javascript"
-            #extract ajax links and forms
-        if result_dict["url"].split(".")[-1] == "css":
-            result_dict["type"] = "stylesheet"
-
-        return result_dict
-
-    def parse_link_response(self, result_dict):
-
-        if result_dict['page_source']:
-            bsoup = self.parse_html_to_bs(result_dict['page_source'])
-
-            result_entry = self.check_content_type(result_dict)
-            if (result_entry["type"] == "javascriptasdfdsa") and (result_entry["status"] != 404):
-                self.extract_html_get_js(inputdata=bsoup)
-            elif (result_entry["type"] == "stylesheetadsfasdf") and (result_entry["status"] != 404):
-                self.extract_html_get_css(inputdata=bsoup)
-            else:
-                result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,attrkeys=attr_list_link)
-                result_dict["number_forms"] = self.extract_html_get_form(inputdata=bsoup, tagkeys=tag_list_form,attrkeys=attr_list_form)
-
-        result_entry = self.save_screenshot_source(result_dict)
-        return result_entry
-
 
 
     def collect_links(self,link):
@@ -322,22 +283,16 @@ class Spider(threading.Thread):
                 # Collect new link
                 return_val = self.collect_links(link)
                 if return_val["result"] == "exit":
-                    self.lgg.info("Exit because of Error.")
-                    self.finish_browser()
-                    sys.exit()
+                    self.lgg.exception("Got Error:")
+                    raise SpiderError
                 else:
                     self.visited.append(link)
- 
+
             if limit != 0:
-                if len(self.links)>=limit:
+                if len(self.result_list)>=limit:
                     self.lgg.info("[*] We have %s links, thats enough"%(str(limit)))
                     return
 
-    def check_visit(self, new_link, request):
-        if not any(vis["link"] == new_link for vis in self.visited):
-            return True
-        else:
-            return False
 
     def get_link(self,link):
 
@@ -363,6 +318,8 @@ class Spider(threading.Thread):
                 return_vals["result"] = "invalid_request"
                 return return_vals
             except (sel_excepts.UnexpectedAlertPresentException, sel_excepts.TimeoutException): # reCAPTCHA exception
+                self.lgg.exception("Got Error:")
+                debughere()
                 return_vals["result"] = "too_many_requests"
                 return return_vals
 
@@ -398,18 +355,73 @@ class Spider(threading.Thread):
             try_counter = 0
             while return_vals["result"] == "too_many_requests":
                 self.lgg.info("Too many requests. Will rest for {} seconds".format(temp_sleep))
-                print(self.last_html)
                 time.sleep(temp_sleep)
                 self.init_browser()
                 return_vals = self.get_link(link)
-                temp_sleep += 60
+                temp_sleep += 300
                 try_counter += 1
-                if try_counter == 10:
+                if try_counter == 5:
                     self.lgg.info("We got blocked by the web server. Saving state and exiting.")
-                    self.store_crawler_state() 
-                    return {"result":"exit"}
+                    raise ServerBlocked
             else:
                 return return_vals
+
+
+    def save_screenshot_source(self, result_dict, method="GET"):
+        if result_dict["type"] != "nocrawlfile":
+            sitedir =  checkdir(os.path.join(self.session_dir,url_to_filename(result_dict["url"])))
+            if method == "GET":
+                result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"])
+                with open(result_dict["source_path"], "w") as f:
+                    f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
+                    f.write("\n\n")
+                    f.write(result_dict["page_source"]+"\n")
+                result_dict["page_source"] = ""
+                if not result_dict["status"] in ["404", "403"]:
+                    result_dict["screenshot_path"] = os.path.join(sitedir,method+"_screenshot_"+result_dict["status"]+"_"+checkfile(result_dict["url"])+".png")
+                    self.br.save_screenshot(result_dict["screenshot_path"])
+
+        return result_dict
+
+
+    def check_content_type(self, result_dict):
+        if isinstance(result_dict["headers"], dict):
+            if result_dict["headers"].get("Content-Type") == "application/json":
+                result_dict["type"] = "json"
+            elif result_dict["headers"].get("Content-Type") == "text/plain":
+                result_dict["type"] = "text"
+        if result_dict["url"].split(".")[-1] == "js":
+            result_dict["type"] = "javascript"
+            #extract ajax links and forms
+        if result_dict["url"].split(".")[-1] == "css":
+            result_dict["type"] = "stylesheet"
+
+        return result_dict
+
+
+    def parse_link_response(self, result_dict):
+
+        if result_dict['page_source']:
+            bsoup = self.parse_html_to_bs(result_dict['page_source'])
+
+            result_entry = self.check_content_type(result_dict)
+            if (result_entry["type"] == "javascriptasdfdsa") and (result_entry["status"] != 404):
+                self.extract_html_get_js(inputdata=bsoup)
+            elif (result_entry["type"] == "stylesheetadsfasdf") and (result_entry["status"] != 404):
+                self.extract_html_get_css(inputdata=bsoup)
+            else:
+                result_dict["number_links"] = self.extract_html_get_link(inputdata=bsoup,attrkeys=attr_list_link)
+                result_dict["number_forms"] = self.extract_html_get_form(inputdata=bsoup, tagkeys=tag_list_form,attrkeys=attr_list_form)
+
+        result_entry = self.save_screenshot_source(result_dict)
+        return result_entry
+
+
+    def check_visit(self, new_link, request):
+        if not any(vis["link"] == new_link for vis in self.visited):
+            return True
+        else:
+            return False
 
 
     def gen_input_attr_raw(self, inputdata, keys):
@@ -560,4 +572,5 @@ class Spider(threading.Thread):
 
 
 if __name__ == "__main__":
-    pass 
+    spider = Spider(env="",start_url="https://eurid.eu")
+    spider.run(limit=20)
