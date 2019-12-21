@@ -64,7 +64,8 @@ class DataObject():
 
     def init_update_dftype(self):
         self.ddf[self._dftype] = self.return_df(self._dftype)
-
+        if self.ddf[self._dftype] == None:
+            self.ddf[self._dftype] = pd.DataFrame()
     def check_dftype(self, new_dftype):
         if new_dftype:
             # needs further validation
@@ -77,7 +78,7 @@ class DataObject():
         pass
 
 
-    def append_rows(self, new_entry, df_type=""):
+    def append_row(self, new_entry, df_type=""):
         df_t = self.check_dftype(df_type)
         self.ddf[df_t] = self.ddf[df_t].append(new_entry, ignore_index=True)
 

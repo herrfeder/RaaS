@@ -26,8 +26,8 @@ class Manager(object, metaclass=Singleton):
         def newDirectoryTraversal(self, env=""):
             return DirectoryTraversal.DirectoryTraversal(env)
 
-        def newSpider(self, env="", start_url=""):
-            return Spider.Spider(env, start_url)
+        def newSpider(self, env="", start_url="", limit=""):
+            return Spider.Spider(env, start_url, limit=limit)
 
         def threadFinished(self, thread, data, finishedHandler=None):
             print(thread, data)

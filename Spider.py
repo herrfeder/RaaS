@@ -66,7 +66,7 @@ page_load_timeout = 20
 
 class Spider(threading.Thread):
 
-    def __init__(self, env, start_url, base_dir="raas_output"):
+    def __init__(self, env, start_url, base_dir="raas_output",limit=""):
         super(Spider , self).__init__()
         self.fin = 0
         # Preparing Config and Logger
@@ -107,6 +107,7 @@ class Spider(threading.Thread):
         self.form_comps_file = os.path.join(self.session_dir,"form_comps.p")
 
 
+        self.limit = limit
         #Init or loading (after exiting before finish) runtime variables that collects all desired data
         if os.path.exists(self.result_file):
             self.result_list = pickle.load(open(self.result_file, "rb"))
@@ -131,12 +132,12 @@ class Spider(threading.Thread):
         self.thread = threading.Thread(target=self.run, args=(self.final_url))
         self.thread.deamon = True
 
-    def run(self, limit=0):
+    def run(self):
         self.lgg.info("[*] Running Module: Spider ")
         while True:
             try:
                 self.init_browser()
-                self.collect_links_wrap(self.final_url,limit=limit)
+                self.collect_links_wrap(self.final_url,limit=self.limit)
                 return self.finish_return_crawler_state()
             except ServerBlocked:
                 self.lgg.exception("Got Error ServerBlocked.")
@@ -199,8 +200,8 @@ class Spider(threading.Thread):
             pass
         self.finish_browser()
         self.fin = 1
-        return (self.result_list, self.forms, self.form_comps)
-
+        self.result_tuple = (self.result_list, self.forms, self.form_comps)
+        return self.result_tuple
 
     def __wait(self):
             time.sleep(0.1)

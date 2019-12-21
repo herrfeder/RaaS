@@ -195,6 +195,18 @@ class MergeResults(threading.Thread):
         return 1
 
 
+    ################ Spider #####################
+
+    def merge_spider(self):
+        result_list, forms, form_comps = self.result_list
+        for dict_entry in result_list:
+            self.spider_link_append(dict_entry)
+
+    def spider_link_append(self,  dict_entry):
+        new_entry = pd.Series(dict_entry)
+        self.do.append_row(new_entry)
+
+
     ################ Portscan ###################
 
     def merge_portscan(self, result_list):
