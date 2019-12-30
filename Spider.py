@@ -320,7 +320,6 @@ class Spider(threading.Thread):
                 return return_vals
             except (sel_excepts.UnexpectedAlertPresentException, sel_excepts.TimeoutException): # reCAPTCHA exception
                 self.lgg.exception("Got Error:")
-                debughere()
                 return_vals["result"] = "too_many_requests"
                 return return_vals
 

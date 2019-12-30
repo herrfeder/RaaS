@@ -37,19 +37,20 @@ class MergeResults(threading.Thread):
             self.init_hosts(env["dftype"])
     def run(self):
         if self.env['dftype'] == "subdomain":
-            print("[*] Running Module: MergeResults for Subdomains")
-            self.merge_subdomain(self.result_list)
+            self.lgg.info("[*] Running Module: MergeResults for Subdomains")
+            self.merge_subdomain()
         if self.env['dftype'] == "portscan":
-            print("[*] Running Module: MergeResults for Portscan")
-            self.merge_portscan(self.result_list)
+            self.lgg.info("[*] Running Module: MergeResults for Portscan")
+            self.merge_portscan()
         if self.env['dftype'] == "dirtraversal":
-            print("[*] Running Module: MergeResults for DirectoryTraversal")
-            self.merge_dirtraversal(self.result_list)
-
+            self.lgg.info("[*] Running Module: MergeResults for DirectoryTraversal")
+            self.merge_dirtraversal()
+        if self.env['dftype'] == "spider":
+            self.lgg.info("[*] Running Module: MergeResults for Spider")
+            self.merge_spider()
 
     def get_fin(self):
         return self.fin
-
 
 
     ################ Hosts ######################
@@ -96,16 +97,11 @@ class MergeResults(threading.Thread):
 
     ############# DirTraversal ##########
 
-    def merge_dirtraversal(self, result_list):
-        self.do.create_from_dict_list(result_list)
-
-    ############ Spider #################
-
-    def merge_spider(self, result_list):
-        jpg_df = df[df[0].str.endswith("jpg")]
-        jpg_df.apply(lambda x: "/".join(x[0].split("/")[:-1])+"/",axis=1)
+    def merge_dirtraversal(self):
+        self.do.create_from_dict_list(self.result_list)
 
     ############# Subdomain #############
+    
     def domain_to_ip(self,domain):
         df = self.do.return_df("subdomain")
         try:
@@ -127,9 +123,9 @@ class MergeResults(threading.Thread):
         return domain_list
 
 
-    def merge_subdomain(self, result_list):
+    def merge_subdomain(self):
 
-        self.extract_sub_dict(result_list)
+        self.extract_sub_dict(self.result_list)
         #self.update_hosts("subdomain")
 
     def sub_append(self, domain='', ip4_1='', ip4_2='', ip6_1='', ip6_2='', checkdup=True):
@@ -201,16 +197,22 @@ class MergeResults(threading.Thread):
         result_list, forms, form_comps = self.result_list
         for dict_entry in result_list:
             self.spider_link_append(dict_entry)
+        self.do.init_update_dftype("forms")
+        for dict_entry in forms:
+            self.spider_link_append(dict_entry, "forms")
+        self.do.init_update_dftype("formcomps")
+        for dict_entry in form_comps:
+            self.spider_link_append(dict_entry, "formcomps")
 
-    def spider_link_append(self,  dict_entry):
+    def spider_link_append(self,  dict_entry, dftype=""):
         new_entry = pd.Series(dict_entry)
-        self.do.append_row(new_entry)
+        self.do.append_row(new_entry, dftype)
 
 
     ################ Portscan ###################
 
-    def merge_portscan(self, result_list):
-        for entry in result_list:
+    def merge_portscan(self):
+        for entry in self.result_list:
             self.portscan_append(entry['ip'],entry['hoststatus'],entry['tcp'],entry['udp'])
 
         self.validate_portscan()

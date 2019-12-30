@@ -62,14 +62,20 @@ class DataObject():
         self.meta = MetaData(self.conn,reflect=True)
 
 
-    def init_update_dftype(self):
-        self.ddf[self._dftype] = self.return_df(self._dftype)
-        if self.ddf[self._dftype] == None:
-            self.ddf[self._dftype] = pd.DataFrame()
+    def init_update_dftype(self, dftype=""):
+        if dftype:
+            now_dftype = dftype
+        else:
+            now_dftype = self._dftype
+        self.ddf[now_dftype] = self.return_df(now_dftype)
+        if self.ddf[now_dftype] == None:
+            self.ddf[now_dftype] = pd.DataFrame()
+
+
     def check_dftype(self, new_dftype):
         if new_dftype:
             # needs further validation
-            return new_dftype()
+            return new_dftype
         else:
             return self._dftype
 
