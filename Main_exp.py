@@ -1,7 +1,6 @@
 import ThreadManager
 from IPython.core.debugger import Tracer
 from exceptions import NoScanAvailable
-from datasupport import ap_validate_scan
 debughere=Tracer()
 
 env = {"dftype":"","project":"eurid.eu"}
@@ -23,26 +22,19 @@ if __name__ == '__main__':
     #mt.do.saveToCSV()
 
     mt = ThreadManager.threadManager.newMergeResults(env, load=True)
-    ip_series = mt.getIPList()
-    domain_list = mt.getDomainList()
-
+    ip_series = mt.get_ip_list()
+    domain_list = mt.get_domain_list()
     ip_list = []
     for domain in domain_list:
-        ip = mt.DomainToIP(domain)
+        ip = mt.domain_to_ip(domain)
         if ip:
             ip_list.append(ip)
     env["dftype"] = "portscan"
     #ps = ThreadManager.threadManager.newPortScanner(env)
     #for ip in ip_series[0]:
     #    ps.run(ip)
-    mt = ThreadManager.threadManager.newMergeResults(env,load=True)
-    mt.validatePortscan()
-    print(mt.do.df)
-    '''
-    for ip in ip_list:
-        print("list:"+ip)
-        try:
-            print(mt.returnPortscan(ip))
-        except NoScanAvailable:
-            pass
-    '''
+    do = mt.do
+    mn = ThreadManager.threadManager.newMergeResults(env, do=mt.do, load=True)
+    mn.validate_portscan()
+    print(mn.do.ddf)
+    debughere()

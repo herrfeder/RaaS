@@ -3,6 +3,11 @@ import random
 import re
 from exceptions import WrongDomainSyntax, DomainNoIp
 import os
+import datetime
+from IPython.core.debugger import Tracer; debughere = Tracer()
+
+def urljoin(*args):
+        return "/".join(map(lambda x: str(x).rstrip('/'), args))
 
 ###### Filesystem
 def url_to_filename(name):
@@ -57,25 +62,21 @@ def eval_target(target):
         return "invalid"
 
 
-def join_url(base_url,uri,urleval=False):
+def join_url(base_url,uri="",urleval=False):
 
-    base_url = base_url.rstrip("/")
-    uri = uri.lstrip("/")
     if (base_url.replace("http://","").replace("https://","") in uri ):
         return eval_url(uri)[0]
 
-
     if urleval==False:
-        return os.path.join(base_url,uri)
+        return urljoin(base_url,uri)
     else:
-        return eval_url(os.path.join(base_url,uri))[0]
+        return eval_url(urljoin(base_url,uri))[0]
 
 
 def return_url(dic):
     return dic['final_url']
 
 def eval_url(domain, port="", check_online=False):
-
     result_dict = {'final_url':'',
                    'port':'',
                    'ssl':'http',
@@ -141,7 +142,7 @@ def eval_url(domain, port="", check_online=False):
             raise WrongDomainSyntax
 
    
-    result_dict['final_url'] = result_dict['ssl']+"://"+result_dict['base_url']+":"+result_dict['port']+"/"+result_dict['uri']
+    result_dict['final_url'] = result_dict['ssl']+"://"+result_dict['base_url']+":"+result_dict['port']+"/"+result_dict['uri'].lstrip("/")
     
     if check_online==True:
         result_dict['ip'] = get_ip_from_domain(return_url(result_dict))
@@ -173,3 +174,14 @@ def change_useragent():
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",]
 
     return random.choice(useragents)
+
+def create_timestamp():
+
+    return datetime.datetime.strftime("%Y%m%d%H%M")
+
+def return_newest_string(string_list):
+
+    sorted_list = sorted(string_list, key=lambda x: datetime.datetime.strptime(x.split("_")[-1], "%Y%m%d%H%M"))
+    return sorted_list[-1]
+
+
