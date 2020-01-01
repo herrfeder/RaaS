@@ -6,6 +6,7 @@ import datetime
 import sqlalchemy
 import os
 from sqlalchemy import MetaData
+from sqlalchemy.schema import Table, DropTable
 import utility as u
 from IPython.core.debugger import Tracer; debughere = Tracer()
 from misc.settings import raas_dictconfig
@@ -60,7 +61,7 @@ class DataObject():
         self.csv_path = "data/csv/"+self._project+"_{dftype}_{timestamp}.csv"
         self.conn = sqlalchemy.create_engine("sqlite:///"+self.db_path)
         self.meta = MetaData(self.conn,reflect=True)
-
+        debughere()
 
     def init_update_dftype(self, dftype=""):
         if dftype:
@@ -123,6 +124,10 @@ class DataObject():
         self.ddf[df_t].fillna('',inplace=True)
 
 
+    def delete_table(self, table_name):
+        table = Table(table_name, self.meta)
+        table.drop()
+
 
     def save_to_sqlite(self, dftype="", tabletype="master", append=False, ovwr_master=False):
         df_t = self.check_dftype(dftype)
@@ -133,12 +138,11 @@ class DataObject():
             ret_val = self.return_df(dftype=df_t, tabletype=tabletype, only_check=True)
             if ret_val == None:
                 self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
-            elif overwr_master:
+            elif ovwr_master and (ret_val != None):
                 self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
-                # delete ret_val table
-            elif append:
-                # append self.ddf[df_t] to ret_val if exists=append
-
+                self.delete_table(ret_val)
+            elif append and (ret_val != None):
+                self.ddf[df_t].to_sql(ret_val, con=self.conn, if_exists='append')
 
         except:
             self.lgg.exception("Got Error:")
@@ -174,13 +178,13 @@ class DataObject():
         for dup in duplicates.iterrows():
             pass
 
-    def return_df(self, dftype="", table_type = "", only_check=False):
+    def return_df(self, dftype="", tabletype = "", only_check=False):
         df_t = self.check_dftype(dftype)
-        if table_type:
-            table_name = df_t+"_"+table_type
+        if tabletype:
+            tablename = df_t+"_"+tabletype
         else:
-            table_name = df_t+"_"+"master"
-        return self.return_table(table_name, only_check)
+            tablename = df_t+"_"+"master"
+        return self.return_table(tablename, only_check)
 
 
     def return_table(self, table_name, only_check=False):
