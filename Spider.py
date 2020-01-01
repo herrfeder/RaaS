@@ -308,20 +308,26 @@ class Spider(threading.Thread):
             self.lgg.debug("Crawl URL: {}".format(link["link"]))
             try:
                 resp = self.httpreq.request("GET",link["link"])
-                return_vals["headers"] = dict(resp.headers)
+                return_vals["headers"] = str(dict(resp.headers))
                 return_vals["status"] = str(resp.status)
             except (urllib3_exc.MaxRetryError,urllib3_exc.LocationParseError):
                 return_vals["result"] = "unknown_domain"
                 return return_vals
-            try:
-                self.br.get(link["link"])
-            except sel_excepts.InvalidArgumentException:
-                return_vals["result"] = "invalid_request"
-                return return_vals
-            except (sel_excepts.UnexpectedAlertPresentException, sel_excepts.TimeoutException): # reCAPTCHA exception
-                self.lgg.exception("Got Error:")
-                return_vals["result"] = "too_many_requests"
-                return return_vals
+
+            while True:
+                try:
+                    self.br.get(link["link"])
+                except sel_excepts.InvalidArgumentException:
+                    return_vals["result"] = "invalid_request"
+                    return return_vals
+                except (sel_excepts.UnexpectedAlertPresentException, sel_excepts.TimeoutException): # reCAPTCHA exception
+                    self.lgg.exception("Got Error:")
+                    return_vals["result"] = "too_many_requests"
+                    return return_vals
+                except (sel_excepts.WebDriverException): # Page Reload
+                    self.lgg.exception("Got Error:")
+                    continue
+                break
 
             try:
                 return_vals["page_source"] = self.br.page_source
@@ -330,7 +336,7 @@ class Spider(threading.Thread):
                 return_vals["result"] = "bs_parsing_error"
                 return return_vals
             self.last_html = return_vals["page_source"]
-            return_vals["cookies"] = self.br.get_cookies()
+            return_vals["cookies"] = str(self.br.get_cookies())
             return_vals["result"] = "success"
             if self.logged_in == False:
                 self.br.delete_all_cookies()
@@ -454,7 +460,7 @@ class Spider(threading.Thread):
 
             # collect HTML attribute values for desired forms
             for attr in attrkeys:
-                form_o_dict[attr] = form.get(attr,"")
+                form_o_dict[attr] = str(form.get(attr,""))
 
             # create unique ID for matching form with form fields in seperate table
             form_o_dict["id"] = str(uuid.uuid1())

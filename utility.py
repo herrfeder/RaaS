@@ -9,6 +9,10 @@ from IPython.core.debugger import Tracer; debughere = Tracer()
 def urljoin(*args):
         return "/".join(map(lambda x: str(x).rstrip('/'), args))
 
+
+def get_env(project, dftype):
+    return {"dftype":dftype, "project": project}
+
 ###### Filesystem
 def url_to_filename(name):
     return name.replace("//","").\
@@ -177,7 +181,7 @@ def change_useragent():
 
 def create_timestamp():
 
-    return datetime.datetime.strftime("%Y%m%d%H%M")
+    return datetime.datetime.now().strftime("%Y%m%d%H%M")
 
 def return_newest_string(string_list):
 

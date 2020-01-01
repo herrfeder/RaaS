@@ -1,5 +1,4 @@
 import pandas as pd
-from test_data import result_list
 import threading
 from IPython.core.debugger import Tracer; debughere = Tracer()
 import datetime
@@ -197,12 +196,16 @@ class MergeResults(threading.Thread):
         result_list, forms, form_comps = self.result_list
         for dict_entry in result_list:
             self.spider_link_append(dict_entry)
+        self.do.ddf["spider"]["cookies"] = self.do.ddf["spider"]["cookies"].astype("str")
+        self.do.ddf["spider"]["headers"] = self.do.ddf["spider"]["headers"].astype("str")
         self.do.init_update_dftype("forms")
         for dict_entry in forms:
             self.spider_link_append(dict_entry, "forms")
+        self.do.ddf["forms"]["class"] = self.do.ddf["forms"]["class"].astype("str")
         self.do.init_update_dftype("formcomps")
         for dict_entry in form_comps:
             self.spider_link_append(dict_entry, "formcomps")
+        self.do.ddf["formcomps"]["class"] = self.do.ddf["forms"]["class"].astype("str")
 
     def spider_link_append(self,  dict_entry, dftype=""):
         new_entry = pd.Series(dict_entry)

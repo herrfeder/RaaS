@@ -68,7 +68,7 @@ class DataObject():
         else:
             now_dftype = self._dftype
         self.ddf[now_dftype] = self.return_df(now_dftype)
-        if self.ddf[now_dftype] == None:
+        if self.ddf[now_dftype].empty:
             self.ddf[now_dftype] = pd.DataFrame()
 
 
@@ -123,13 +123,23 @@ class DataObject():
         self.ddf[df_t].fillna('',inplace=True)
 
 
-    def save_to_sqlite(self, dftype="", tabletype="master", append=False):
+
+    def save_to_sqlite(self, dftype="", tabletype="master", append=False, ovwr_master=False):
         df_t = self.check_dftype(dftype)
         try:
             table_name = self.table_name_tpl.format(dftype=df_t,
                                                     tabletype=tabletype,
                                                     timestamp=u.create_timestamp())
-            self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+            ret_val = self.return_df(dftype=df_t, tabletype=tabletype, only_check=True)
+            if ret_val == None:
+                self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+            elif overwr_master:
+                self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+                # delete ret_val table
+            elif append:
+                # append self.ddf[df_t] to ret_val if exists=append
+
+
         except:
             self.lgg.exception("Got Error:")
 
@@ -164,24 +174,35 @@ class DataObject():
         for dup in duplicates.iterrows():
             pass
 
-    def return_df(self, dftype, table_type = ""):
+    def return_df(self, dftype="", table_type = "", only_check=False):
+        df_t = self.check_dftype(dftype)
         if table_type:
-            table_name = dftype+"_"+table_name
+            table_name = df_t+"_"+table_type
         else:
-            table_name = dftype+"_"+"master"
-        return self.return_table(table_name)
+            table_name = df_t+"_"+"master"
+        return self.return_table(table_name, only_check)
 
 
-    def return_table(self, table_name):
+    def return_table(self, table_name, only_check=False):
         if table_name not in self.conn.table_names():
             possible_names = [x for x in self.conn.table_names() if x.startswith(table_name)]
             if len(possible_names) < 1:
                 self.lgg.exception("No table with the name {}".format(table_name))
+                if only_check:
+                    return None
+                else:
+                    return pd.DataFrame()
             else:
                 newest_table = u.return_newest_string(possible_names)
-                return pd.read_sql_table(newest_table, self.conn)
+                if only_check:
+                    return newest_table
+                else:
+                    return pd.read_sql_table(newest_table, self.conn)
         else:
-            return pd.read_sql_table(table_name, self.conn)
+            if only_check:
+                return table_name
+            else:
+                return pd.read_sql_table(table_name, self.conn)
 
 
     def return_domain_list(self):

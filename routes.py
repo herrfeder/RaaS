@@ -38,7 +38,7 @@ def get_data():
     datatypes_client = request.form.get('datatype',"")
     load = request.form.get('load',"")
 
-    #datatypes = datatypes_client.split(",")
+    datatypes = datatypes_client.split(",")
 
     #df_dict["dftypes"] = [x for x in datatypes]
 
@@ -48,12 +48,11 @@ def get_data():
         print(env)
         if load:
             mt = ThreadManager.threadManager.newMergeResults(env, load=True)
-            df = mt.do.df
+            df = mt.do.return_df()
             print(df)
         else:
             pass
 
-        
     iframe= "/insert_data"
 
     return render_template( "tablepill.html",
@@ -92,7 +91,6 @@ def change_project():
 def index():
 
     global env
-
 
     env = get_env("", "")
     env['projectlist'] = get_project_list()
