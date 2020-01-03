@@ -46,20 +46,18 @@ def get_ip_from_domain(domain):
 
 
 def eval_target(target):
-    print(target)
+    if target == None:
+        return "invalid"
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}",target)
     if len(result) == 1:
         return ("range",result[0])
-
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}",target)
     if len(result) == 1:
         return ("range", target)
- 
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",target)
     if len(result) == 1:
         return ("ip", result[0])
-
-    ip = getIPfromDomain(target)
+    ip = get_ip_from_domain(target)
     if ip:
         return("ip", ip)
     else:
@@ -79,6 +77,7 @@ def join_url(base_url,uri="",urleval=False):
 
 def return_url(dic):
     return dic['final_url']
+
 
 def eval_url(domain, port="", check_online=False):
     result_dict = {'final_url':'',

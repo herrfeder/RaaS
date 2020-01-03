@@ -61,16 +61,14 @@ class DataObject():
         self.csv_path = "data/csv/"+self._project+"_{dftype}_{timestamp}.csv"
         self.conn = sqlalchemy.create_engine("sqlite:///"+self.db_path)
         self.meta = MetaData(self.conn,reflect=True)
-        debughere()
 
     def init_update_dftype(self, dftype=""):
         if dftype:
             now_dftype = dftype
         else:
             now_dftype = self._dftype
-        self.ddf[now_dftype] = self.return_df(now_dftype)
-        if self.ddf[now_dftype].empty:
-            self.ddf[now_dftype] = pd.DataFrame()
+
+        self.ddf[now_dftype] = pd.DataFrame()
 
 
     def check_dftype(self, new_dftype):
@@ -148,7 +146,7 @@ class DataObject():
             self.lgg.exception("Got Error:")
 
 
-    def load_from_sqlite(self, dftype="", tabletype="master",append=False):
+    def load_from_sqlite(self, dftype="", tabletype="master"):
         df_t = self.check_dftype(dftype)
         try:
             table_name = self.table_name_tpl.format(dftype=df_t,

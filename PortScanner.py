@@ -5,6 +5,8 @@ import threading
 from utility import get_ip_from_domain, eval_target
 import nmap
 import json
+from misc.settings import raas_dictconfig
+from logging.config import dictConfig
 
 PATH={ "amass":"../amass/amass",
         "subfinder":"../subfinder",
@@ -20,51 +22,51 @@ class PortScanner(threading.Thread):
         super(PortScanner, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_portscan")
         self.result_list = []
         self.fin = 0
 
 
     def run(self, target):
-        print("[*] Running Module: PortScanner")
-        eval_target,target = eval_target(target)
-        if eval_target != "invalid":
-            if eval_target == "ip":
-                self.scanHost(target)
-            elif eval_target == "range":
-                self.scanRange(target)
+        self.lgg.info("[*] Running Module: PortScanner")
+        evaltarget,target = eval_target(target)
+        if evaltarget != "invalid":
+            if evaltarget == "ip":
+                return self.scan_host(target)
+            elif evaltarget == "range":
+                return self.scan_range(target)
         else:
            return -1
 
-    def scanHost(self, target):
-        final_result = {"host":"","tcp":"","udp":""}
+    def scan_host(self, target):
         nm = nmap.PortScanner()
         result = nm.scan(target,arguments='--top-ports 10')
         if result['nmap']['scanstats']['uphosts'] == "0":
-            print("\t[+] Host {} seems offline, try to surpress Ping".format(target))
+            self.lgg.debug("[+] Host {} seems offline, try to surpress Ping".format(target))
             result = nm.scan(target,arguments='-Pn -p-')
             if result['nmap']['scanstats']['uphosts'] == "0":
-                print("\t[+] Host {} seems still offline, maybe it's down".format(target))
-                final_result['host'] == "down"
+                self.lgg.debug("[+] Host {} seems still offline, maybe it's down".format(target))
+                return ""
             else:
 
-                print("\t[+] Host {} is online".format(target))
+                self.lgg.info("[+] Host {} is online".format(target))
                 tcp_ports = 0
                 tcp = self.get_content(result, 'tcp')
-                if tcp: 
+                if tcp:
                     tcp_ports = list(tcp.keys())
                     if len(tcp_ports) > 0:
                         result = nm.scan(target,arguments='-Pn -sV -p-')
-                        final_result['host'] = "up"
-                        final_result['tcp'] = json.dumps(self.get_content(result, 'tcp'))
+                        final_result = self.get_content(result, 'tcp')
         else:
 
-            print("\t[+] Host {} is online".format(target))
+            self.lgg.info("[+] Host {} is online".format(target))
             result = nm.scan(target, arguments='-sV -p-')
-            final_result['host'] = "up"
-            final_result['tcp'] = json.dumps(result['scan'][list(result['scan'].keys())[0]]['tcp'])
+            final_result = self.get_content(result, 'tcp')
 
-        print(final_result)
         self.result_list.append((target,final_result))
+
+        return final_result
 
 
     def get_content(self, result, key):

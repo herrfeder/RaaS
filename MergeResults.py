@@ -34,6 +34,8 @@ class MergeResults(threading.Thread):
         if load:
             self.do.load_from_sqlite()
             self.init_hosts(env["dftype"])
+
+
     def run(self):
         if self.env['dftype'] == "subdomain":
             self.lgg.info("[*] Running Module: MergeResults for Subdomains")
@@ -93,6 +95,9 @@ class MergeResults(threading.Thread):
         sshfilt = port_df[port_df['port'].isin(["22"])]
         if not sshfilt.empty:
             self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] += ",ssh"
+
+    def get_host_state(self,ip):
+        return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"]
 
     ############# DirTraversal ##########
 
@@ -214,20 +219,20 @@ class MergeResults(threading.Thread):
 
     ################ Portscan ###################
 
-    def merge_portscan(self):
-        for entry in self.result_list:
-            self.portscan_append(entry['ip'],entry['hoststatus'],entry['tcp'],entry['udp'])
+    def merge_portscan(self, result_list, ip):
+        if result_list:
+            for port in result_list:
+                dict_entry = result_list[port]
+                dict_entry["port"] = port
+                dict_entry["ip"] = ip
+                self.portscan_append(dict_entry)
 
-        self.validate_portscan()
 
-    def portscan_append(self, ip='', hoststatus='', tcp='', udp=''):
+    def portscan_append(self, dict_entry):
 
-        new_entry_df = pd.Series({'ip':ip, 
-                                  'hoststatus':hoststatus, 
-                                  'tcp':tcp, 
-                                  'udp':udp})
-
-        self.do.append(new_entry_df)
+        new_entry_df = pd.Series(dict_entry)
+        debughere()
+        self.do.append_row(new_entry_df)
 
 
     def extract_portscan(self):
