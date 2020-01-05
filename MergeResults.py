@@ -11,12 +11,15 @@ from misc.settings import raas_dictconfig
 from logging.config import dictConfig
 import logging
 
+
+WEBPORTS = ["80","81","8080","8081","443","4443"]
+SSHPORTS = ["22","2222"] 
+
 def popL(inlist):
     try:
         return inlist.pop()
     except IndexError:
         return ""
-
 
 
 class MergeResults(threading.Thread):
@@ -72,13 +75,13 @@ class MergeResults(threading.Thread):
 
     def add_host_sub(self, ip4_1, ip4_2, domain):
         df = self.do.ddf["hosts"]
-        if (ip4_1 == None) and (ip4_2 == None):
+        if (not ip4_1) and (not ip4_2):
             if df[df["domain"] == domain].shape[0] == 0:
-                self.do.ddf["hosts"] = df.append({"domain":domain,"purpose":""}, ignore_index=True)
-        elif (ip4_2 == None):
+                self.do.ddf["hosts"] = df.append({"domain":domain,"ip":"","purpose":""}, ignore_index=True)
+        elif ip4_1:
             if df[df["ip"] == ip4_1].shape[0] == 0:
                 self.do.ddf["hosts"] = df.append({"ip":ip4_1,"domain":domain,"purpose":""}, ignore_index=True)
-        if (ip4_2 != None):
+        elif ip4_2:
             if df[df["ip"] != ip4_2].shape[0] == 0:
                 self.do.ddf["hosts"] = df.append({"ip":ip4_2,"domain":domain,"purpose":""}, ignore_index=True)
 
@@ -87,30 +90,69 @@ class MergeResults(threading.Thread):
         ip_list = port_df.ip.unique()
         for ip in ip_list:
             df = port_df[port_df["ip"] == ip]
+            webfilt = list(df[df['port'].isin(WEBPORTS)]["port"].astype(int).astype(str))
+            sshfilt = list(df[df['port'].isin(SSHPORTS)]["port"].astype(int).astype(str))
+            # if at least one open port for a host it will marked as UP
             if 1*(df['state'] == "open").sum() > 0:
                 self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"] = "up"
             else:
                 self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"] = "verify"
 
-        # check for port type
-        webfilt = port_df[port_df['port'].isin(["80","81","8080","8081","443","4443"])]
-        if not webfilt.empty:
-            self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] += ",web"
- 
-        sshfilt = port_df[port_df['port'].isin(["22"])]
-        if not sshfilt.empty:
-            self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] += ",ssh"
+            purpose_string=""
+            # check for web ports
+            if webfilt:
+                purpose_string += "web,"
+                self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "webports"] = ",".join(webfilt)
+            # check for ssh ports
+            if sshfilt:
+                purpose_string += "ssh,"
+                self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "sshports"] = ",".join(sshfilt)
+            # add other purposes
+            # insert purpose string for specific host
+            self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] = purpose_string
+            self.do.ddf['hosts'].fillna("none",inplace=True)
 
-    def get_host_state(self,ip):
-        return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"]
+
+    def get_host_state(self,ip="",domain=""):
+        if ip:
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"].item()
+        elif domain:
+            debughere()
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), "state"].item()
+        else:
+            return ""
+
+    def get_host_purpose(self,ip="",domain=""):
+        if ip:
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"].item()
+        elif domain:
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), "purpose"].item()
+        else:
+            return ""
+
+    def get_host_ports(self,ip="",domain="", porttype=""):
+        ports = porttype+"ports"
+        if ip:
+            yield self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, ports].item().split(",")
+        elif domain:
+            yield self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), ports].item().split(",")
+        else:
+            return ""
 
     ############# DirTraversal ##########
 
-    def merge_dirtraversal(self):
-        self.do.create_from_dict_list(self.result_list)
+    def merge_dirtraversal(self, result_list):
+        self.do.create_from_dict_list(result_list)
 
     ############# Subdomain #############
-    
+    def ip_to_domain(self, ip):
+        df = self.do.return_df("subdomain")
+        try:
+            return df[df['ip4_1'] == ip]['domain'].iloc[0]
+        except:
+            return ""
+
+
     def domain_to_ip(self,domain):
         df = self.do.return_df("subdomain")
         try:
@@ -138,7 +180,6 @@ class MergeResults(threading.Thread):
         #self.update_hosts("subdomain")
 
     def sub_append(self, domain='', ip4_1='', ip4_2='', ip6_1='', ip6_2='', checkdup=True):
-
         df = self.do.ddf["subdomain"]
         new_entry_df = pd.Series({'domain':domain,
                                   'ip4_1':ip4_1, 'ip4_2':ip4_2,
@@ -157,9 +198,6 @@ class MergeResults(threading.Thread):
                     ((duplicated.ip4_2.empty) and (not new_entry_df.ip4_2.empty)) or\
                     ((duplicated.ip6_1.empty) and (not new_entry_df.ip6_1.empty)) or\
                     ((duplicated.ip6_2.empty) and (not new_entry_df.ip6_2.empty)):
-                        self.add_host_sub(ip4_1=new_entry_df['ip4_1'],
-                                      ip4_2=new_entry_df['ip4_2'],
-                                      domain=new_entry_df['domain'])
                         self.do.append_row(new_entry_df)
                         self.do.drop_index(duplicated.index)
                         return 1
@@ -172,6 +210,7 @@ class MergeResults(threading.Thread):
                               ip4_2=new_entry_df['ip4_2'],
                               domain=new_entry_df['domain'])
                 return 0
+
 
     def extract_sub_dict(self, result_list):
         for dic in result_list:

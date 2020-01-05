@@ -63,13 +63,15 @@ class DataObject():
         self.conn = sqlalchemy.create_engine("sqlite:///"+self.db_path)
         self.meta = MetaData(self.conn,reflect=True)
 
+
     def init_update_dftype(self, dftype=""):
         if dftype:
             now_dftype = dftype
         else:
             now_dftype = self._dftype
 
-        self.ddf[now_dftype] = pd.DataFrame()
+        if not self.ddf.get(now_dftype,""):
+            self.ddf[now_dftype] = pd.DataFrame()
 
 
     def check_dftype(self, new_dftype):
@@ -134,7 +136,7 @@ class DataObject():
             table_name = self.table_name_tpl.format(dftype=df_t,
                                                     tabletype=tabletype,
                                                     timestamp=u.create_timestamp())
-            ret_val = self.return_df(dftype=df_t, tabletype=tabletype, only_check=True)
+            ret_val = self.return_tablename(dftype=df_t, tabletype=tabletype)
             if ret_val == None:
                 self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
             elif ovwr_master and (ret_val != None):
@@ -171,23 +173,33 @@ class DataObject():
             else:
                 return False
 
+
     def remove_duplicates_col(self,row, column, dftype=""):
         df_t = self.check_dftype(df_type)
         duplicates = self.ddf[df_t][self.sub_df[column] == row[column]]
         for dup in duplicates.iterrows():
             pass
 
-    def return_df(self, dftype="", tabletype = "", only_check=False):
+
+    def return_tablename(self, dftype="", tabletype=""):
+        df_t = self.check_dftype(dftype)
+        if tabletype:
+            tablename = df_t+"_"+tabletype
+        else:
+            tablename = df_t+"_"+"master"
+        return self.return_table(tablename, only_check=True)
+
+    def return_df(self, dftype="", tabletype = ""):
         df_t = self.check_dftype(dftype)
         if not self.ddf[df_t].empty:
             return self.ddf[df_t]
-        else
+        else:
             # apply logic for ddf as well after implementing ddf into own class
             if tabletype:
                 tablename = df_t+"_"+tabletype
             else:
                 tablename = df_t+"_"+"master"
-            return self.return_table(tablename, only_check)
+            return self.return_table(tablename)
 
 
     def return_table(self, table_name, only_check=False):
@@ -210,16 +222,6 @@ class DataObject():
                 return table_name
             else:
                 return pd.read_sql_table(table_name, self.conn)
-
-
-    def return_domain_list(self):
-
-        return pd.read_sql_table("subdomain", self.conn)['domain'].unique()
-
-
-    def return_ip_list(self):
-
-        return pd.read_sql_table("subdomain", self.conn)['ip4_1'].unique()
 
 
     def return_dirtraversal(self, domain):
@@ -248,7 +250,7 @@ class DataObject():
                                                                    stats_result[single_domain+'_403'])
         return (final_result, overview_dt)
 
-
+    '''
     def return_portscan(self, ip):
 
         stats_result = {}
@@ -278,22 +280,7 @@ class DataObject():
                                                stats_result['open'],
                                                stats_result['filtered'])
             return (df, overview_ps)
-
-    def ip_to_domain(self, ip):
-
-        df = self.return_df("subdomain")
-
-        if not df.empty:
-            return list(df.query("ip4_1==@ip")["domain"].values)
-        else:
-            return ""
-
-    def domain_to_ip(self, domain):
-        df = self.return_df("subdomain")
-        if not df.empty:
-            return df.query("domain==@domain")["ip4_1"].values
-        else:
-            return ""
+    '''
 
 if __name__ == "__main__":
     do = DataObject(["blah"],"blah","blah")

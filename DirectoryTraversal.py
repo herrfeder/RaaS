@@ -22,11 +22,14 @@ class DirectoryTraversal(threading.Thread):
         self.env = env
         self.result_list = []
         self.fin = 0
+        self.scanned_hosts = []
 
 
-    def run(self, target, port=""):
+    def run(self, target, port=[""]):
         print("[*] Running Module: Directory Traversal")
-        self.runDirsearch(target, port)
+        if not (target,port) in self.scanned_hosts:
+            self.scanned_hosts.append((target,port))
+            self.runDirsearch(target, port)
 
     def runDirsearch(self, target, port="", extension="php,js,txt,yml", wordlist=""):
         url = ""
@@ -74,7 +77,7 @@ class DirectoryTraversal(threading.Thread):
         resultdata = [dict(item, **{'uri':uri,
                             'port':url_dict['port'],
                             'ssl':url_dict['ssl'],
-                            'domain':url_dict['domain'].split("/")[0]}) for item in resultdata]
+                            'domain':url_dict['base_url'].split("/")[0]}) for item in resultdata]
 
         self.result_list.append(resultdata)
  
@@ -82,6 +85,8 @@ class DirectoryTraversal(threading.Thread):
             os.remove(report_name)
         except:
             pass
+
+        return resultdata
 
     def getResultList(self):
         return self.result_list
