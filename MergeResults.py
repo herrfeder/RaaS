@@ -7,6 +7,9 @@ from itertools import chain
 from exceptions import NoScanAvailable
 import json
 from datasupport import *
+from misc.settings import raas_dictconfig
+from logging.config import dictConfig
+import logging
 
 def popL(inlist):
     try:
@@ -22,6 +25,8 @@ class MergeResults(threading.Thread):
         super(MergeResults, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_mergeresults")
         self.result_list = result_list
         self.fin = 0
         self.env = env
@@ -109,7 +114,7 @@ class MergeResults(threading.Thread):
     def domain_to_ip(self,domain):
         df = self.do.return_df("subdomain")
         try:
-            return df[df['domain'] == domain]['ip4_1'].item()
+            return df[df['domain'] == domain]['ip4_1'].iloc[0]
         except:
             return ""
 
@@ -134,11 +139,14 @@ class MergeResults(threading.Thread):
 
     def sub_append(self, domain='', ip4_1='', ip4_2='', ip6_1='', ip6_2='', checkdup=True):
 
-        df = self.do.return_df("subdomain")
-
+        df = self.do.ddf["subdomain"]
         new_entry_df = pd.Series({'domain':domain,
                                   'ip4_1':ip4_1, 'ip4_2':ip4_2,
                                   'ip6_1':ip6_1, 'ip6_2':ip6_2})
+        if df.empty:
+            self.do.append_row(new_entry_df)
+            return 1
+
         if checkdup:
             duplicated = df[df.domain == domain]
             if duplicated.shape[0] > 0:
@@ -152,14 +160,14 @@ class MergeResults(threading.Thread):
                         self.add_host_sub(ip4_1=new_entry_df['ip4_1'],
                                       ip4_2=new_entry_df['ip4_2'],
                                       domain=new_entry_df['domain'])
-                        self.do.append(new_entry_df)
+                        self.do.append_row(new_entry_df)
                         self.do.drop_index(duplicated.index)
                         return 1
                 else:
                     return 2
             else:
 
-                self.do.append(new_entry_df)
+                self.do.append_row(new_entry_df)
                 self.add_host_sub(ip4_1=new_entry_df['ip4_1'],
                               ip4_2=new_entry_df['ip4_2'],
                               domain=new_entry_df['domain'])
@@ -231,7 +239,6 @@ class MergeResults(threading.Thread):
     def portscan_append(self, dict_entry):
 
         new_entry_df = pd.Series(dict_entry)
-        debughere()
         self.do.append_row(new_entry_df)
 
 

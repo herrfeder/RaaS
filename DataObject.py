@@ -29,6 +29,7 @@ class DataObject():
         self.init_update_project()
         self._dftype = env['dftype']
         self.init_update_dftype()
+        # we have to convert ddf to an own class that returns on dict["subdomain"] always the master and on dict["subdomain"]["new"] the specific type
         self.ddf["hosts"] = pd.DataFrame(columns=["ip", "domain", "state", "purpose"])
         self.table_types = ["master", "new", "temp",]
         self.time_stamp = "%Y%m%d%H%M"
@@ -178,11 +179,15 @@ class DataObject():
 
     def return_df(self, dftype="", tabletype = "", only_check=False):
         df_t = self.check_dftype(dftype)
-        if tabletype:
-            tablename = df_t+"_"+tabletype
-        else:
-            tablename = df_t+"_"+"master"
-        return self.return_table(tablename, only_check)
+        if not self.ddf[df_t].empty:
+            return self.ddf[df_t]
+        else
+            # apply logic for ddf as well after implementing ddf into own class
+            if tabletype:
+                tablename = df_t+"_"+tabletype
+            else:
+                tablename = df_t+"_"+"master"
+            return self.return_table(tablename, only_check)
 
 
     def return_table(self, table_name, only_check=False):

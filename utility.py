@@ -48,12 +48,15 @@ def get_ip_from_domain(domain):
 def eval_target(target):
     if target == None:
         return "invalid"
+    # match 123.123.123.123/8
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}",target)
     if len(result) == 1:
         return ("range",result[0])
+    # match 123.123.123.123-148
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}",target)
     if len(result) == 1:
-        return ("range", target)
+        return ("range", result[0])
+    # match 123.123.123.123
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",target)
     if len(result) == 1:
         return ("ip", result[0])

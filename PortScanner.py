@@ -15,8 +15,6 @@ PATH={ "amass":"../amass/amass",
 
 
 class PortScanner(threading.Thread):
-
-
     def __init__(self, env="", load=False):
 
         super(PortScanner, self).__init__()
@@ -26,21 +24,25 @@ class PortScanner(threading.Thread):
         self.lgg = logging.getLogger("RAAS_portscan")
         self.result_list = []
         self.fin = 0
-
+        self.scanned_hosts = []
 
     def run(self, target):
         self.lgg.info("[*] Running Module: PortScanner")
         evaltarget,target = eval_target(target)
         if evaltarget != "invalid":
             if evaltarget == "ip":
-                return self.scan_host(target)
+                if target not in self.scanned_hosts:
+                    self.scanned_hosts.append(target)
+                    return self.scan_host(target)
             elif evaltarget == "range":
-                return self.scan_range(target)
+                # TODO: create generator that creates ip's from range string
+                return self.scan_host(target)
         else:
            return -1
 
     def scan_host(self, target):
         nm = nmap.PortScanner()
+        # scan top 10 ports to check if the host is online
         result = nm.scan(target,arguments='--top-ports 10')
         if result['nmap']['scanstats']['uphosts'] == "0":
             self.lgg.debug("[+] Host {} seems offline, try to surpress Ping".format(target))
@@ -49,7 +51,7 @@ class PortScanner(threading.Thread):
                 self.lgg.debug("[+] Host {} seems still offline, maybe it's down".format(target))
                 return ""
             else:
-
+                print("[+] Host {} is online".format(target))
                 self.lgg.info("[+] Host {} is online".format(target))
                 tcp_ports = 0
                 tcp = self.get_content(result, 'tcp')
@@ -60,6 +62,7 @@ class PortScanner(threading.Thread):
                         final_result = self.get_content(result, 'tcp')
         else:
 
+            print("[+] Host {} is online".format(target))
             self.lgg.info("[+] Host {} is online".format(target))
             result = nm.scan(target, arguments='-sV -p-')
             final_result = self.get_content(result, 'tcp')
