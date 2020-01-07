@@ -66,7 +66,7 @@ page_load_timeout = 20
 
 class Spider(threading.Thread):
 
-    def __init__(self, env, start_url, base_dir="raas_output",limit=""):
+    def __init__(self, env, base_dir="raas_output",limit=""):
         super(Spider , self).__init__()
         self.fin = 0
         # Preparing Config and Logger
@@ -82,14 +82,6 @@ class Spider(threading.Thread):
         self.last_html = ""
         self.temp_count = 0
 
-        # Getting and evaluate Start URL
-        self.start_url = start_url
-        base_url, base_url_dict = eval_url(self.start_url)
-        self.base_ssl = base_url_dict["ssl"]
-        self.base_port = base_url_dict["port"]
-        self.base_url = base_url_dict["base_url"]
-        self.final_url = base_url_dict["final_url"]
-
         # Prepare some Regex Variables
         self.reg_dict = {}
         self.reg_dict["login"] = r'[Ll][Oo][Gg][Ii][Nn]'
@@ -97,18 +89,52 @@ class Spider(threading.Thread):
         self.reg_dict["password"] = r'[Pp]asswor[td]'
         self.logged_in = False
 
+        self.limit = limit
+        self.base_dir = base_dir 
+
+    def run(self, url, port=""):
+        self.lgg.info("[*] Running Module: Spider ")
+        self.init_url(url, port)
+        self.init_directories()
+        while True:
+            try:
+                self.init_browser()
+                self.collect_links_wrap(self.final_url,limit=self.limit)
+                return self.finish_return_crawler_state()
+            except ServerBlocked:
+                self.lgg.exception("Got Error ServerBlocked.")
+                self.store_crawler_state()
+                time.sleep(3600)
+            except SpiderError:
+                self.lgg.exception("Got Error SpiderError.")
+                self.store_crawler_state()
+                time.sleep(60)
+
+
+    def init_url(self, start_url, port=""):
+        # Getting and evaluate Start URL
+        self.start_url = start_url
+        self.port = port
+        base_url, base_url_dict = eval_url(self.start_url, self.port)
+        self.base_ssl = base_url_dict["ssl"]
+        self.base_port = base_url_dict["port"]
+        self.base_url = base_url_dict["base_url"]
+        self.final_url = base_url_dict["final_url"]
+
+        #Init or loading (after exiting before finish) runtime variables that collects all desired data 
+        self.thread = threading.Thread(target=self.run, args=(self.final_url))
+        self.thread.deamon = True
+
+    def init_directories(self):
         # Create directories for storing data
-        self.base_dir = checkdir(base_dir)
-        self.tool_dir = checkdir(os.path.join(base_dir,"spider"))
+        self.base_dir = checkdir(self.base_dir)
+        self.tool_dir = checkdir(os.path.join(self.base_dir,"spider"))
         self.session_dir = checkdir(os.path.join(self.tool_dir,url_to_filename(self.base_url)))
         self.restore_file = os.path.join(self.session_dir,"session.p")
         self.result_file = os.path.join(self.session_dir,"result.p")
         self.form_file = os.path.join(self.session_dir,"form.p")
         self.form_comps_file = os.path.join(self.session_dir,"form_comps.p")
 
-
-        self.limit = limit
-        #Init or loading (after exiting before finish) runtime variables that collects all desired data
         if os.path.exists(self.result_file):
             self.result_list = pickle.load(open(self.result_file, "rb"))
         else:
@@ -128,25 +154,6 @@ class Spider(threading.Thread):
             self.links = []
             self.pop_links = []
             self.visited = []
-
-        self.thread = threading.Thread(target=self.run, args=(self.final_url))
-        self.thread.deamon = True
-
-    def run(self):
-        self.lgg.info("[*] Running Module: Spider ")
-        while True:
-            try:
-                self.init_browser()
-                self.collect_links_wrap(self.final_url,limit=self.limit)
-                return self.finish_return_crawler_state()
-            except ServerBlocked:
-                self.lgg.exception("Got Error ServerBlocked.")
-                self.store_crawler_state()
-                time.sleep(3600)
-            except SpiderError:
-                self.lgg.exception("Got Error SpiderError.")
-                self.store_crawler_state()
-                time.sleep(60)
 
 
     def init_browser(self):

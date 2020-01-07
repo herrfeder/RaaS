@@ -147,9 +147,13 @@ def eval_url(domain, port="", check_online=False):
         else:
             raise WrongDomainSyntax
 
-   
+    if port:
+        if port == "443":
+            result_dict['port'] = port
+            result_dict['ssl'] = "https"
+
     result_dict['final_url'] = result_dict['ssl']+"://"+result_dict['base_url']+":"+result_dict['port']+"/"+result_dict['uri'].lstrip("/")
-    
+
     if check_online==True:
         result_dict['ip'] = get_ip_from_domain(return_url(result_dict))
 

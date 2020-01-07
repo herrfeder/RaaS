@@ -7,9 +7,6 @@ debughere=Tracer()
 
 env = {"dftype":"","project":"shop-apotheke.com"}
 
-
-
-
 if __name__ == '__main__':
 
     env["dftype"] = "subdomain"
@@ -52,15 +49,30 @@ if __name__ == '__main__':
 
     env["dftype"] = "dirtraversal"
     dt = ThreadManager.threadManager.newDirectoryTraversal(env)
-    dm = ThreadManager.threadManager.newMergeResults(env, do=pt.do)
+    dm = ThreadManager.threadManager.newMergeResults(env, do=pt.do, load=True)
+    '''
     for domain in domain_list:
         if env["project"] in domain:
             if (dm.get_host_state(domain=domain) == 'up') and\
                ("web" in dm.get_host_purpose(domain=domain)):
                 for port in dm.get_host_ports(domain=domain, porttype="web"):
+                    print(port)
                     result_list = dt.run(domain, port)
-                    debughere()
                     dm.merge_dirtraversal(result_list)
 
     debughere()
     dm.save_to_sqlite()
+    '''
+
+    env["dftype"] = "spider"
+    spider = ThreadManager.threadManager.newSpider(env)
+    sm = ThreadManager.threadManager.newMergeResults(env, do=dm.do)
+    for domain in domain_list:
+        if env["project"] in domain:
+            if (dm.get_host_state(domain=domain) == 'up') and\
+               ("web" in dm.get_host_purpose(domain=domain)):
+                for port in dm.get_host_ports(domain=domain, porttype="web"):
+                    result_list = spider.run(domain, port)
+                    sm.merge_spider(result_list)
+
+

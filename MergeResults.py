@@ -117,7 +117,6 @@ class MergeResults(threading.Thread):
         if ip:
             return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"].item()
         elif domain:
-            debughere()
             return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), "state"].item()
         else:
             return ""
@@ -133,16 +132,24 @@ class MergeResults(threading.Thread):
     def get_host_ports(self,ip="",domain="", porttype=""):
         ports = porttype+"ports"
         if ip:
-            yield self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, ports].item().split(",")
+            for port in self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, ports].item().split(","):
+                yield port
         elif domain:
-            yield self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), ports].item().split(",")
+            for port in self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), ports].item().split(","):
+                yield port
         else:
             return ""
 
     ############# DirTraversal ##########
 
     def merge_dirtraversal(self, result_list):
-        self.do.create_from_dict_list(result_list)
+        for dict_entry in result_list:
+            self.dirtraversal_append(dict_entry)
+
+    def dirtraversal_append(self, dict_entry):
+        new_entry_df = pd.Series(dict_entry)
+        self.do.append_row(new_entry_df)
+
 
     ############# Subdomain #############
     def ip_to_domain(self, ip):
