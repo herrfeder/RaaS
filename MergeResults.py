@@ -1,5 +1,4 @@
 import pandas as pd
-from test_data import result_list
 import threading
 from IPython.core.debugger import Tracer; debughere = Tracer()
 import datetime
@@ -8,6 +7,13 @@ from itertools import chain
 from exceptions import NoScanAvailable
 import json
 from datasupport import *
+from misc.settings import raas_dictconfig
+from logging.config import dictConfig
+import logging
+
+
+WEBPORTS = ["80","81","8080","8081","443","4443"]
+SSHPORTS = ["22","2222"] 
 
 def popL(inlist):
     try:
@@ -16,13 +22,14 @@ def popL(inlist):
         return ""
 
 
-
 class MergeResults(threading.Thread):
 
     def __init__(self, env, do="", columns="", result_list="", load=False):
         super(MergeResults, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_mergeresults")
         self.result_list = result_list
         self.fin = 0
         self.env = env
@@ -35,6 +42,8 @@ class MergeResults(threading.Thread):
         if load:
             self.do.load_from_sqlite()
             self.init_hosts(env["dftype"])
+
+
     def run(self):
         if self.env['dftype'] == "subdomain":
             self.lgg.info("[*] Running Module: MergeResults for Subdomains")
@@ -66,13 +75,13 @@ class MergeResults(threading.Thread):
 
     def add_host_sub(self, ip4_1, ip4_2, domain):
         df = self.do.ddf["hosts"]
-        if (ip4_1 == None) and (ip4_2 == None):
+        if (not ip4_1) and (not ip4_2):
             if df[df["domain"] == domain].shape[0] == 0:
-                self.do.ddf["hosts"] = df.append({"domain":domain,"purpose":""}, ignore_index=True)
-        elif (ip4_2 == None):
+                self.do.ddf["hosts"] = df.append({"domain":domain,"ip":"","purpose":""}, ignore_index=True)
+        elif ip4_1:
             if df[df["ip"] == ip4_1].shape[0] == 0:
                 self.do.ddf["hosts"] = df.append({"ip":ip4_1,"domain":domain,"purpose":""}, ignore_index=True)
-        if (ip4_2 != None):
+        elif ip4_2:
             if df[df["ip"] != ip4_2].shape[0] == 0:
                 self.do.ddf["hosts"] = df.append({"ip":ip4_2,"domain":domain,"purpose":""}, ignore_index=True)
 
@@ -81,31 +90,80 @@ class MergeResults(threading.Thread):
         ip_list = port_df.ip.unique()
         for ip in ip_list:
             df = port_df[port_df["ip"] == ip]
+            webfilt = list(df[df['port'].isin(WEBPORTS)]["port"].astype(int).astype(str))
+            sshfilt = list(df[df['port'].isin(SSHPORTS)]["port"].astype(int).astype(str))
+            # if at least one open port for a host it will marked as UP
             if 1*(df['state'] == "open").sum() > 0:
                 self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"] = "up"
             else:
                 self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"] = "verify"
 
-        # check for port type
-        webfilt = port_df[port_df['port'].isin(["80","81","8080","8081","443","4443"])]
-        if not webfilt.empty:
-            self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] += ",web"
- 
-        sshfilt = port_df[port_df['port'].isin(["22"])]
-        if not sshfilt.empty:
-            self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] += ",ssh"
+            purpose_string=""
+            # check for web ports
+            if webfilt:
+                purpose_string += "web,"
+                self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "webports"] = ",".join(webfilt)
+            # check for ssh ports
+            if sshfilt:
+                purpose_string += "ssh,"
+                self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "sshports"] = ",".join(sshfilt)
+            # add other purposes
+            # insert purpose string for specific host
+            self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"] = purpose_string
+            self.do.ddf['hosts'].fillna("none",inplace=True)
+
+
+    def get_host_state(self,ip="",domain=""):
+        if ip:
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "state"].item()
+        elif domain:
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), "state"].item()
+        else:
+            return ""
+
+    def get_host_purpose(self,ip="",domain=""):
+        if ip:
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, "purpose"].item()
+        elif domain:
+            return self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), "purpose"].item()
+        else:
+            return ""
+
+    def get_host_ports(self,ip="",domain="", porttype=""):
+        ports = porttype+"ports"
+        if ip:
+            for port in self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == ip, ports].item().split(","):
+                yield port
+        elif domain:
+            for port in self.do.ddf['hosts'].loc[self.do.ddf['hosts'].ip == self.domain_to_ip(domain), ports].item().split(","):
+                yield port
+        else:
+            return ""
 
     ############# DirTraversal ##########
 
-    def merge_dirtraversal(self):
-        self.do.create_from_dict_list(self.result_list)
+    def merge_dirtraversal(self, result_list):
+        for dict_entry in result_list:
+            self.dirtraversal_append(dict_entry)
+
+    def dirtraversal_append(self, dict_entry):
+        new_entry_df = pd.Series(dict_entry)
+        self.do.append_row(new_entry_df)
+
 
     ############# Subdomain #############
-    
+    def ip_to_domain(self, ip):
+        df = self.do.return_df("subdomain")
+        try:
+            return df[df['ip4_1'] == ip]['domain'].iloc[0]
+        except:
+            return ""
+
+
     def domain_to_ip(self,domain):
         df = self.do.return_df("subdomain")
         try:
-            return df[df['domain'] == domain]['ip4_1'].item()
+            return df[df['domain'] == domain]['ip4_1'].iloc[0]
         except:
             return ""
 
@@ -129,12 +187,14 @@ class MergeResults(threading.Thread):
         #self.update_hosts("subdomain")
 
     def sub_append(self, domain='', ip4_1='', ip4_2='', ip6_1='', ip6_2='', checkdup=True):
-
-        df = self.do.return_df("subdomain")
-
+        df = self.do.ddf["subdomain"]
         new_entry_df = pd.Series({'domain':domain,
                                   'ip4_1':ip4_1, 'ip4_2':ip4_2,
                                   'ip6_1':ip6_1, 'ip6_2':ip6_2})
+        if df.empty:
+            self.do.append_row(new_entry_df)
+            return 1
+
         if checkdup:
             duplicated = df[df.domain == domain]
             if duplicated.shape[0] > 0:
@@ -145,21 +205,19 @@ class MergeResults(threading.Thread):
                     ((duplicated.ip4_2.empty) and (not new_entry_df.ip4_2.empty)) or\
                     ((duplicated.ip6_1.empty) and (not new_entry_df.ip6_1.empty)) or\
                     ((duplicated.ip6_2.empty) and (not new_entry_df.ip6_2.empty)):
-                        self.add_host_sub(ip4_1=new_entry_df['ip4_1'],
-                                      ip4_2=new_entry_df['ip4_2'],
-                                      domain=new_entry_df['domain'])
-                        self.do.append(new_entry_df)
+                        self.do.append_row(new_entry_df)
                         self.do.drop_index(duplicated.index)
                         return 1
                 else:
                     return 2
             else:
 
-                self.do.append(new_entry_df)
+                self.do.append_row(new_entry_df)
                 self.add_host_sub(ip4_1=new_entry_df['ip4_1'],
                               ip4_2=new_entry_df['ip4_2'],
                               domain=new_entry_df['domain'])
                 return 0
+
 
     def extract_sub_dict(self, result_list):
         for dic in result_list:
@@ -193,16 +251,30 @@ class MergeResults(threading.Thread):
 
     ################ Spider #####################
 
-    def merge_spider(self):
-        result_list, forms, form_comps = self.result_list
+    def merge_spider(self, result_tuple):
+        result_list, forms, form_comps = result_tuple
         for dict_entry in result_list:
             self.spider_link_append(dict_entry)
+        try:
+            self.do.ddf["spider"]["cookies"] = self.do.ddf["spider"]["cookies"].astype("str")
+            self.do.ddf["spider"]["headers"] = self.do.ddf["spider"]["headers"].astype("str")
+        except:
+            pass
         self.do.init_update_dftype("forms")
         for dict_entry in forms:
             self.spider_link_append(dict_entry, "forms")
+        try:
+            self.do.ddf["forms"]["class"] = self.do.ddf["forms"]["class"].astype("str")
+        except:
+            pass
         self.do.init_update_dftype("formcomps")
         for dict_entry in form_comps:
             self.spider_link_append(dict_entry, "formcomps")
+        try:
+            self.do.ddf["formcomps"]["class"] = self.do.ddf["forms"]["class"].astype("str")
+        except:
+            pass
+
 
     def spider_link_append(self,  dict_entry, dftype=""):
         new_entry = pd.Series(dict_entry)
@@ -211,20 +283,19 @@ class MergeResults(threading.Thread):
 
     ################ Portscan ###################
 
-    def merge_portscan(self):
-        for entry in self.result_list:
-            self.portscan_append(entry['ip'],entry['hoststatus'],entry['tcp'],entry['udp'])
+    def merge_portscan(self, result_list, ip):
+        if result_list:
+            for port in result_list:
+                dict_entry = result_list[port]
+                dict_entry["port"] = port
+                dict_entry["ip"] = ip
+                self.portscan_append(dict_entry)
 
-        self.validate_portscan()
 
-    def portscan_append(self, ip='', hoststatus='', tcp='', udp=''):
+    def portscan_append(self, dict_entry):
 
-        new_entry_df = pd.Series({'ip':ip, 
-                                  'hoststatus':hoststatus, 
-                                  'tcp':tcp, 
-                                  'udp':udp})
-
-        self.do.append(new_entry_df)
+        new_entry_df = pd.Series(dict_entry)
+        self.do.append_row(new_entry_df)
 
 
     def extract_portscan(self):

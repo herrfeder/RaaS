@@ -8,9 +8,9 @@
     <a class="dropdown-toggle" data-toggle="dropdown" href="#">{{df_dict.get('type_'+x|string,'')}}
     <span class="caret"></span></a>
     <ul class="dropdown-menu">
-      <li><a data-toggle="pill" href="#{{df_dict.get('master_name_'+x|string,'None')}}">{{df_dict.get('master_name_'+x|string,'None')}}<div class="numbercircle">{{df_dict.get('master_size_'+str(x),'')}}</div></a></li>
-      <li><a data-toggle="pill" href="#{{df_dict.get('new_name_'+str(x),'None')}}">{{df_dict.get('new_name_'+str(x),'None')}}<div class="numbercircle">{{df_dict.get('new_size_'+str(x),'')}}</div></a></li>
-      <li><a data-toogle="pill" href="#{{df_dict.get('temp_name_'+str(x),'None')}}">{{df_dict.get('temp_name_'+str(x),'None')}}<div class="numbercircle">{{df_dict.get('temp_size'+str(x),'')}}</div></a></li>
+      <li><a data-toggle="pill" href="#{{df_dict.get('master_name_'+x|string,'None')}}">{{df_dict.get('master_name_'+x|string,'None')}}<div class="numbercircle">{{df_dict.get('master_size_'+x|string,'')}}</div></a></li>
+      <li><a data-toggle="pill" href="#{{df_dict.get('new_name_'+x|string,'None')}}">{{df_dict.get('new_name_'+x|string,'None')}}<div class="numbercircle">{{df_dict.get('new_size_'+x|string,'')}}</div></a></li>
+      <li><a data-toogle="pill" href="#{{df_dict.get('temp_name_'+x|string,'None')}}">{{df_dict.get('temp_name_'+x|string,'None')}}<div class="numbercircle">{{df_dict.get('temp_size'+x|string,'')}}</div></a></li>
     </ul>
   </li>
   {% endfor %}
@@ -19,14 +19,14 @@
 <div class="tab-content">
 
   {% for x in range(df_dict.get('number_types',1)) %}
-	<div id="#{{df_dict.get('master_name_'+str(x),'None')}}" class="tab-pane fade">
-		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('master_html_'+str(x),'') }}" frameBorder=0></iframe>
+	<div id="#{{df_dict.get('master_name_'+x|string,'None')}}" class="tab-pane fade">
+		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('master_html_'+x|string,'') }}" frameBorder=0></iframe>
 	</div>
-	<div id="#{{df_dict.get('new_name_'+str(x),'None')}}" class="tab-pane fade">
-		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('new_html_'+str(x),'') }}" frameBorder=0></iframe>
+	<div id="#{{df_dict.get('new_name_'+x|string,'None')}}" class="tab-pane fade">
+		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('new_html_'+x|string,'') }}" frameBorder=0></iframe>
 	</div>
-        <div id="#{{df_dict.get('master_name_'+str(x),'None')}}" class="tab-pane fade">
-		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('temp_html_'+str(x),'') }}" frameBorder=0></iframe>
+        <div id="#{{df_dict.get('master_name_'+x|string,'None')}}" class="tab-pane fade">
+		<iframe id="leftiframe" class="raas-iframe leftiframe" src="{{ df_dict.get('temp_html_'+x|string,'') }}" frameBorder=0></iframe>
 	</div>
 
 

@@ -6,6 +6,7 @@ import datetime
 import sqlalchemy
 import os
 from sqlalchemy import MetaData
+from sqlalchemy.schema import Table, DropTable
 import utility as u
 from IPython.core.debugger import Tracer; debughere = Tracer()
 from misc.settings import raas_dictconfig
@@ -28,6 +29,7 @@ class DataObject():
         self.init_update_project()
         self._dftype = env['dftype']
         self.init_update_dftype()
+        # we have to convert ddf to an own class that returns on dict["subdomain"] always the master and on dict["subdomain"]["new"] the specific type
         self.ddf["hosts"] = pd.DataFrame(columns=["ip", "domain", "state", "purpose"])
         self.table_types = ["master", "new", "temp",]
         self.time_stamp = "%Y%m%d%H%M"
@@ -67,9 +69,12 @@ class DataObject():
             now_dftype = dftype
         else:
             now_dftype = self._dftype
-        self.ddf[now_dftype] = self.return_df(now_dftype)
-        if self.ddf[now_dftype] == None:
-            self.ddf[now_dftype] = pd.DataFrame()
+        try:
+            if not self.ddf.get("now_dftype",""):
+                self.ddf[now_dftype] = pd.DataFrame()
+        except:
+            if self.ddf["now_dftype"].empty:
+                self.ddf[now_dftype] = pd.DataFrame()
 
 
     def check_dftype(self, new_dftype):
@@ -123,18 +128,31 @@ class DataObject():
         self.ddf[df_t].fillna('',inplace=True)
 
 
-    def save_to_sqlite(self, dftype="", tabletype="master", append=False):
+    def delete_table(self, table_name):
+        table = Table(table_name, self.meta)
+        table.drop()
+
+
+    def save_to_sqlite(self, dftype="", tabletype="master", append=False, ovwr_master=False):
         df_t = self.check_dftype(dftype)
         try:
             table_name = self.table_name_tpl.format(dftype=df_t,
                                                     tabletype=tabletype,
                                                     timestamp=u.create_timestamp())
-            self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+            ret_val = self.return_tablename(dftype=df_t, tabletype=tabletype)
+            if ret_val == None:
+                self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+            elif ovwr_master and (ret_val != None):
+                self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+                self.delete_table(ret_val)
+            elif append and (ret_val != None):
+                self.ddf[df_t].to_sql(ret_val, con=self.conn, if_exists='append')
+
         except:
             self.lgg.exception("Got Error:")
 
 
-    def load_from_sqlite(self, dftype="", tabletype="master",append=False):
+    def load_from_sqlite(self, dftype="", tabletype="master"):
         df_t = self.check_dftype(dftype)
         try:
             table_name = self.table_name_tpl.format(dftype=df_t,
@@ -158,40 +176,55 @@ class DataObject():
             else:
                 return False
 
+
     def remove_duplicates_col(self,row, column, dftype=""):
         df_t = self.check_dftype(df_type)
         duplicates = self.ddf[df_t][self.sub_df[column] == row[column]]
         for dup in duplicates.iterrows():
             pass
 
-    def return_df(self, dftype, table_type = ""):
-        if table_type:
-            table_name = dftype+"_"+table_name
+
+    def return_tablename(self, dftype="", tabletype=""):
+        df_t = self.check_dftype(dftype)
+        if tabletype:
+            tablename = df_t+"_"+tabletype
         else:
-            table_name = dftype+"_"+"master"
-        return self.return_table(table_name)
+            tablename = df_t+"_"+"master"
+        return self.return_table(tablename, only_check=True)
+
+    def return_df(self, dftype="", tabletype = ""):
+        df_t = self.check_dftype(dftype)
+        if not self.ddf[df_t].empty:
+            return self.ddf[df_t]
+        else:
+            # apply logic for ddf as well after implementing ddf into own class
+            if tabletype:
+                tablename = df_t+"_"+tabletype
+            else:
+                tablename = df_t+"_"+"master"
+            return self.return_table(tablename)
 
 
-    def return_table(self, table_name):
+    def return_table(self, table_name, only_check=False):
         if table_name not in self.conn.table_names():
             possible_names = [x for x in self.conn.table_names() if x.startswith(table_name)]
             if len(possible_names) < 1:
                 self.lgg.exception("No table with the name {}".format(table_name))
+                if only_check:
+                    return None
+                else:
+                    return pd.DataFrame()
             else:
                 newest_table = u.return_newest_string(possible_names)
-                return pd.read_sql_table(newest_table, self.conn)
+                if only_check:
+                    return newest_table
+                else:
+                    return pd.read_sql_table(newest_table, self.conn)
         else:
-            return pd.read_sql_table(table_name, self.conn)
-
-
-    def return_domain_list(self):
-
-        return pd.read_sql_table("subdomain", self.conn)['domain'].unique()
-
-
-    def return_ip_list(self):
-
-        return pd.read_sql_table("subdomain", self.conn)['ip4_1'].unique()
+            if only_check:
+                return table_name
+            else:
+                return pd.read_sql_table(table_name, self.conn)
 
 
     def return_dirtraversal(self, domain):
@@ -220,7 +253,7 @@ class DataObject():
                                                                    stats_result[single_domain+'_403'])
         return (final_result, overview_dt)
 
-
+    '''
     def return_portscan(self, ip):
 
         stats_result = {}
@@ -250,22 +283,7 @@ class DataObject():
                                                stats_result['open'],
                                                stats_result['filtered'])
             return (df, overview_ps)
-
-    def ip_to_domain(self, ip):
-
-        df = self.return_df("subdomain")
-
-        if not df.empty:
-            return list(df.query("ip4_1==@ip")["domain"].values)
-        else:
-            return ""
-
-    def domain_to_ip(self, domain):
-        df = self.return_df("subdomain")
-        if not df.empty:
-            return df.query("domain==@domain")["ip4_1"].values
-        else:
-            return ""
+    '''
 
 if __name__ == "__main__":
     do = DataObject(["blah"],"blah","blah")

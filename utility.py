@@ -9,6 +9,10 @@ from IPython.core.debugger import Tracer; debughere = Tracer()
 def urljoin(*args):
         return "/".join(map(lambda x: str(x).rstrip('/'), args))
 
+
+def get_env(project, dftype):
+    return {"dftype":dftype, "project": project}
+
 ###### Filesystem
 def url_to_filename(name):
     return name.replace("//","").\
@@ -42,20 +46,21 @@ def get_ip_from_domain(domain):
 
 
 def eval_target(target):
-    print(target)
+    if target == None:
+        return "invalid"
+    # match 123.123.123.123/8
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}",target)
     if len(result) == 1:
         return ("range",result[0])
-
+    # match 123.123.123.123-148
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}",target)
     if len(result) == 1:
-        return ("range", target)
- 
+        return ("range", result[0])
+    # match 123.123.123.123
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",target)
     if len(result) == 1:
         return ("ip", result[0])
-
-    ip = getIPfromDomain(target)
+    ip = get_ip_from_domain(target)
     if ip:
         return("ip", ip)
     else:
@@ -75,6 +80,7 @@ def join_url(base_url,uri="",urleval=False):
 
 def return_url(dic):
     return dic['final_url']
+
 
 def eval_url(domain, port="", check_online=False):
     result_dict = {'final_url':'',
@@ -141,9 +147,13 @@ def eval_url(domain, port="", check_online=False):
         else:
             raise WrongDomainSyntax
 
-   
+    if port:
+        if port == "443":
+            result_dict['port'] = port
+            result_dict['ssl'] = "https"
+
     result_dict['final_url'] = result_dict['ssl']+"://"+result_dict['base_url']+":"+result_dict['port']+"/"+result_dict['uri'].lstrip("/")
-    
+
     if check_online==True:
         result_dict['ip'] = get_ip_from_domain(return_url(result_dict))
 
@@ -177,7 +187,7 @@ def change_useragent():
 
 def create_timestamp():
 
-    return datetime.datetime.strftime("%Y%m%d%H%M")
+    return datetime.datetime.now().strftime("%Y%m%d%H%M")
 
 def return_newest_string(string_list):
 

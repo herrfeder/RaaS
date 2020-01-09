@@ -20,6 +20,7 @@ import itertools
 import pprint
 import uuid
 import sys
+import ast
 
 from utility import eval_url, join_url, checkdir, checkfile, url_to_filename, change_useragent
 from misc.settings import raas_dictconfig
@@ -66,7 +67,7 @@ page_load_timeout = 20
 
 class Spider(threading.Thread):
 
-    def __init__(self, env, start_url, base_dir="raas_output",limit=""):
+    def __init__(self, env, base_dir="raas_output",limit=""):
         super(Spider , self).__init__()
         self.fin = 0
         # Preparing Config and Logger
@@ -82,14 +83,6 @@ class Spider(threading.Thread):
         self.last_html = ""
         self.temp_count = 0
 
-        # Getting and evaluate Start URL
-        self.start_url = start_url
-        base_url, base_url_dict = eval_url(self.start_url)
-        self.base_ssl = base_url_dict["ssl"]
-        self.base_port = base_url_dict["port"]
-        self.base_url = base_url_dict["base_url"]
-        self.final_url = base_url_dict["final_url"]
-
         # Prepare some Regex Variables
         self.reg_dict = {}
         self.reg_dict["login"] = r'[Ll][Oo][Gg][Ii][Nn]'
@@ -97,18 +90,56 @@ class Spider(threading.Thread):
         self.reg_dict["password"] = r'[Pp]asswor[td]'
         self.logged_in = False
 
+        if limit:
+            self.limit = limit
+        else:
+            self.limit = 0
+        self.base_dir = base_dir 
+
+    def run(self, url, port=""):
+        print("[*] Running Module: Spider ")
+        self.lgg.info("[*] Running Module: Spider ")
+        self.init_url(url, port)
+        self.init_directories()
+        while True:
+            try:
+                self.init_browser()
+                self.collect_links_wrap(self.final_url,limit=self.limit)
+                return self.finish_return_crawler_state()
+            except ServerBlocked:
+                self.lgg.exception("Got Error ServerBlocked.")
+                self.store_crawler_state()
+                time.sleep(3600)
+            except SpiderError:
+                self.lgg.exception("Got Error SpiderError.")
+                self.store_crawler_state()
+                time.sleep(60)
+
+
+    def init_url(self, start_url, port=""):
+        # Getting and evaluate Start URL
+        self.start_url = start_url
+        self.port = port
+        base_url, base_url_dict = eval_url(self.start_url, self.port)
+        self.base_ssl = base_url_dict["ssl"]
+        self.base_port = base_url_dict["port"]
+        self.base_url = base_url_dict["base_url"]
+        self.final_url = base_url_dict["final_url"]
+
+        #Init or loading (after exiting before finish) runtime variables that collects all desired data 
+        self.thread = threading.Thread(target=self.run, args=(self.final_url))
+        self.thread.deamon = True
+
+    def init_directories(self):
         # Create directories for storing data
-        self.base_dir = checkdir(base_dir)
-        self.tool_dir = checkdir(os.path.join(base_dir,"spider"))
+        self.base_dir = checkdir(self.base_dir)
+        self.tool_dir = checkdir(os.path.join(self.base_dir,"spider"))
         self.session_dir = checkdir(os.path.join(self.tool_dir,url_to_filename(self.base_url)))
         self.restore_file = os.path.join(self.session_dir,"session.p")
         self.result_file = os.path.join(self.session_dir,"result.p")
         self.form_file = os.path.join(self.session_dir,"form.p")
         self.form_comps_file = os.path.join(self.session_dir,"form_comps.p")
 
-
-        self.limit = limit
-        #Init or loading (after exiting before finish) runtime variables that collects all desired data
         if os.path.exists(self.result_file):
             self.result_list = pickle.load(open(self.result_file, "rb"))
         else:
@@ -128,25 +159,6 @@ class Spider(threading.Thread):
             self.links = []
             self.pop_links = []
             self.visited = []
-
-        self.thread = threading.Thread(target=self.run, args=(self.final_url))
-        self.thread.deamon = True
-
-    def run(self):
-        self.lgg.info("[*] Running Module: Spider ")
-        while True:
-            try:
-                self.init_browser()
-                self.collect_links_wrap(self.final_url,limit=self.limit)
-                return self.finish_return_crawler_state()
-            except ServerBlocked:
-                self.lgg.exception("Got Error ServerBlocked.")
-                self.store_crawler_state()
-                time.sleep(3600)
-            except SpiderError:
-                self.lgg.exception("Got Error SpiderError.")
-                self.store_crawler_state()
-                time.sleep(60)
 
 
     def init_browser(self):
@@ -215,7 +227,7 @@ class Spider(threading.Thread):
             if re.match("[Ll]ogout",link['link']):
                 self.lgg.warning("Found logout in logged in session in URL {}. Dismiss!".format(url))
                 return None
-
+        print("Go to get_link_wrap with {}".format(str(link)))
         result_dict = self.get_link_wrap(link)
         if result_dict["result"] == "exit":
             return {"result":"exit"}
@@ -235,6 +247,25 @@ class Spider(threading.Thread):
             cs = bcolors.HEADER
 
         if result_entry != None:
+            print('''Returned from crawl:
+                {cs}Result:{result}
+                Status:{status}
+                Links:{number_links}
+                Forms:{number_forms}
+                URL:{url}
+                Type:{crawl_type}
+                From:{from_attrib}
+                Request:{request_type}{ce}'''.format(    cs=cs,
+                                                    ce=bcolors.ENDC,
+                                                    url=result_entry["url"],
+                                                    status=result_entry["status"],
+                                                    result=result_entry["result"],
+                                                    number_links=result_entry["number_links"],
+                                                    number_forms=result_entry["number_forms"],
+                                                    crawl_type=result_entry["type"],
+                                                    from_attrib=result_entry["from_attrib"],
+                                                    request_type=result_entry["request_type"]))
+
             self.lgg.info('''Returned from crawl:
                 {cs}Result:{result}
                 Status:{status}
@@ -280,6 +311,7 @@ class Spider(threading.Thread):
 
 
             if (self.check_visit(link["link"],link["request"])) and (self.check_link(link["link"])):
+                print("Insert new link {} into crawler.".format(link["link"]))
                 self.lgg.debug("Insert new link {} into crawler.".format(link["link"]))
                 # Collect new link
                 return_val = self.collect_links(link)
@@ -308,20 +340,28 @@ class Spider(threading.Thread):
             self.lgg.debug("Crawl URL: {}".format(link["link"]))
             try:
                 resp = self.httpreq.request("GET",link["link"])
-                return_vals["headers"] = dict(resp.headers)
+                return_vals["headers"] = str(dict(resp.headers))
                 return_vals["status"] = str(resp.status)
             except (urllib3_exc.MaxRetryError,urllib3_exc.LocationParseError):
+                print("urllib3 error")
                 return_vals["result"] = "unknown_domain"
                 return return_vals
-            try:
-                self.br.get(link["link"])
-            except sel_excepts.InvalidArgumentException:
-                return_vals["result"] = "invalid_request"
-                return return_vals
-            except (sel_excepts.UnexpectedAlertPresentException, sel_excepts.TimeoutException): # reCAPTCHA exception
-                self.lgg.exception("Got Error:")
-                return_vals["result"] = "too_many_requests"
-                return return_vals
+
+            while True:
+                try:
+                    self.br.get(link["link"])
+                except sel_excepts.InvalidArgumentException:
+                    return_vals["result"] = "invalid_request"
+                    return return_vals
+                except (sel_excepts.UnexpectedAlertPresentException, sel_excepts.TimeoutException): # reCAPTCHA exception
+                    self.lgg.exception("Got Error:")
+                    return_vals["result"] = "too_many_requests"
+                    return return_vals
+                except (sel_excepts.WebDriverException): # Page Reload
+                    print("selenium error")
+                    self.lgg.exception("Got Error:")
+                    continue
+                break
 
             try:
                 return_vals["page_source"] = self.br.page_source
@@ -330,7 +370,7 @@ class Spider(threading.Thread):
                 return_vals["result"] = "bs_parsing_error"
                 return return_vals
             self.last_html = return_vals["page_source"]
-            return_vals["cookies"] = self.br.get_cookies()
+            return_vals["cookies"] = str(self.br.get_cookies())
             return_vals["result"] = "success"
             if self.logged_in == False:
                 self.br.delete_all_cookies()
@@ -373,7 +413,7 @@ class Spider(threading.Thread):
             if method == "GET":
                 result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"])
                 with open(result_dict["source_path"], "w") as f:
-                    f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
+                    f.write("\n".join(["{}: {}".format(key,value) for key,value in ast.literal_eval(result_dict["headers"]).items()])+"\n")
                     f.write("\n\n")
                     f.write(result_dict["page_source"]+"\n")
                 result_dict["page_source"] = ""
@@ -454,7 +494,7 @@ class Spider(threading.Thread):
 
             # collect HTML attribute values for desired forms
             for attr in attrkeys:
-                form_o_dict[attr] = form.get(attr,"")
+                form_o_dict[attr] = str(form.get(attr,""))
 
             # create unique ID for matching form with form fields in seperate table
             form_o_dict["id"] = str(uuid.uuid1())
