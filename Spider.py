@@ -20,6 +20,7 @@ import itertools
 import pprint
 import uuid
 import sys
+import ast
 
 from utility import eval_url, join_url, checkdir, checkfile, url_to_filename, change_useragent
 from misc.settings import raas_dictconfig
@@ -89,10 +90,14 @@ class Spider(threading.Thread):
         self.reg_dict["password"] = r'[Pp]asswor[td]'
         self.logged_in = False
 
-        self.limit = limit
+        if limit:
+            self.limit = limit
+        else:
+            self.limit = 0
         self.base_dir = base_dir 
 
     def run(self, url, port=""):
+        print("[*] Running Module: Spider ")
         self.lgg.info("[*] Running Module: Spider ")
         self.init_url(url, port)
         self.init_directories()
@@ -222,7 +227,7 @@ class Spider(threading.Thread):
             if re.match("[Ll]ogout",link['link']):
                 self.lgg.warning("Found logout in logged in session in URL {}. Dismiss!".format(url))
                 return None
-
+        print("Go to get_link_wrap with {}".format(str(link)))
         result_dict = self.get_link_wrap(link)
         if result_dict["result"] == "exit":
             return {"result":"exit"}
@@ -242,6 +247,25 @@ class Spider(threading.Thread):
             cs = bcolors.HEADER
 
         if result_entry != None:
+            print('''Returned from crawl:
+                {cs}Result:{result}
+                Status:{status}
+                Links:{number_links}
+                Forms:{number_forms}
+                URL:{url}
+                Type:{crawl_type}
+                From:{from_attrib}
+                Request:{request_type}{ce}'''.format(    cs=cs,
+                                                    ce=bcolors.ENDC,
+                                                    url=result_entry["url"],
+                                                    status=result_entry["status"],
+                                                    result=result_entry["result"],
+                                                    number_links=result_entry["number_links"],
+                                                    number_forms=result_entry["number_forms"],
+                                                    crawl_type=result_entry["type"],
+                                                    from_attrib=result_entry["from_attrib"],
+                                                    request_type=result_entry["request_type"]))
+
             self.lgg.info('''Returned from crawl:
                 {cs}Result:{result}
                 Status:{status}
@@ -287,6 +311,7 @@ class Spider(threading.Thread):
 
 
             if (self.check_visit(link["link"],link["request"])) and (self.check_link(link["link"])):
+                print("Insert new link {} into crawler.".format(link["link"]))
                 self.lgg.debug("Insert new link {} into crawler.".format(link["link"]))
                 # Collect new link
                 return_val = self.collect_links(link)
@@ -318,6 +343,7 @@ class Spider(threading.Thread):
                 return_vals["headers"] = str(dict(resp.headers))
                 return_vals["status"] = str(resp.status)
             except (urllib3_exc.MaxRetryError,urllib3_exc.LocationParseError):
+                print("urllib3 error")
                 return_vals["result"] = "unknown_domain"
                 return return_vals
 
@@ -332,6 +358,7 @@ class Spider(threading.Thread):
                     return_vals["result"] = "too_many_requests"
                     return return_vals
                 except (sel_excepts.WebDriverException): # Page Reload
+                    print("selenium error")
                     self.lgg.exception("Got Error:")
                     continue
                 break
@@ -386,7 +413,7 @@ class Spider(threading.Thread):
             if method == "GET":
                 result_dict["source_path"] = os.path.join(sitedir,method+"_response_"+result_dict["status"])
                 with open(result_dict["source_path"], "w") as f:
-                    f.write("\n".join(["{}: {}".format(key,value) for key,value in result_dict["headers"].items()])+"\n")
+                    f.write("\n".join(["{}: {}".format(key,value) for key,value in ast.literal_eval(result_dict["headers"]).items()])+"\n")
                     f.write("\n\n")
                     f.write(result_dict["page_source"]+"\n")
                 result_dict["page_source"] = ""

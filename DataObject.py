@@ -69,9 +69,12 @@ class DataObject():
             now_dftype = dftype
         else:
             now_dftype = self._dftype
-
-        if not self.ddf.get(now_dftype,""):
-            self.ddf[now_dftype] = pd.DataFrame()
+        try:
+            if not self.ddf.get("now_dftype",""):
+                self.ddf[now_dftype] = pd.DataFrame()
+        except:
+            if self.ddf["now_dftype"].empty:
+                self.ddf[now_dftype] = pd.DataFrame()
 
 
     def check_dftype(self, new_dftype):

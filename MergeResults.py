@@ -251,20 +251,30 @@ class MergeResults(threading.Thread):
 
     ################ Spider #####################
 
-    def merge_spider(self):
-        result_list, forms, form_comps = self.result_list
+    def merge_spider(self, result_tuple):
+        result_list, forms, form_comps = result_tuple
         for dict_entry in result_list:
             self.spider_link_append(dict_entry)
-        self.do.ddf["spider"]["cookies"] = self.do.ddf["spider"]["cookies"].astype("str")
-        self.do.ddf["spider"]["headers"] = self.do.ddf["spider"]["headers"].astype("str")
+        try:
+            self.do.ddf["spider"]["cookies"] = self.do.ddf["spider"]["cookies"].astype("str")
+            self.do.ddf["spider"]["headers"] = self.do.ddf["spider"]["headers"].astype("str")
+        except:
+            pass
         self.do.init_update_dftype("forms")
         for dict_entry in forms:
             self.spider_link_append(dict_entry, "forms")
-        self.do.ddf["forms"]["class"] = self.do.ddf["forms"]["class"].astype("str")
+        try:
+            self.do.ddf["forms"]["class"] = self.do.ddf["forms"]["class"].astype("str")
+        except:
+            pass
         self.do.init_update_dftype("formcomps")
         for dict_entry in form_comps:
             self.spider_link_append(dict_entry, "formcomps")
-        self.do.ddf["formcomps"]["class"] = self.do.ddf["forms"]["class"].astype("str")
+        try:
+            self.do.ddf["formcomps"]["class"] = self.do.ddf["forms"]["class"].astype("str")
+        except:
+            pass
+
 
     def spider_link_append(self,  dict_entry, dftype=""):
         new_entry = pd.Series(dict_entry)
