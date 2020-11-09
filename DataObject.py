@@ -3,91 +3,287 @@ import sqlite3
 import glob
 import time
 import datetime
-from IPython.core.debugger import Tracer; debug_here = Tracer()
+import sqlalchemy
+import os
+from sqlalchemy import MetaData
+from sqlalchemy.schema import Table, DropTable
+import utility as u
+from IPython.core.debugger import Tracer; debughere = Tracer()
+from misc.settings import raas_dictconfig
+from misc.settings import bcolors
+import logging
+from logging.config import dictConfig
 
 class DataObject():
 
-    def __init__(self,columns,env):
+    def __init__(self, env, columns="", dftype="", datascope=""):
 
-        if columns:
-            self.df = pd.DataFrame(columns=columns)
+        if columns and dftype:
+            self.ddf["dftype"] = pd.DataFrame(columns=columns)
 
-        self.dftype = env['dftype']
-        self.project = env['project']
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_dataobject")
+        self.ddf = {}
+        self.env = env
+        self._project = env['project']
+        self.init_update_project()
+        self._dftype = env['dftype']
+        self.init_update_dftype()
+        # we have to convert ddf to an own class that returns on dict["subdomain"] always the master and on dict["subdomain"]["new"] the specific type
+        self.ddf["hosts"] = pd.DataFrame(columns=["ip", "domain", "state", "purpose"])
+        self.table_types = ["master", "new", "temp",]
+        self.time_stamp = "%Y%m%d%H%M"
+        self.table_name_tpl = "{dftype}_{tabletype}_{timestamp}"
 
-    def CreateFromDictList(self,result_list):
-        self.df = pd.DataFrame()
+        self._observers = {"project":self.init_update_project,
+                           "dftype":self.init_update_dftype}
+
+    @property
+    def project(self):
+        return self._project
+
+    @project.setter
+    def project(self, project):
+        self._project = project
+        self.init_update_project()
+
+    @property
+    def dftype(self):
+        return self._dftype
+
+    @dftype.setter
+    def dftype(self, dftype):
+        self._dftype = dftype
+        self.init_update_dftype()
+
+    def init_update_project(self):
+ 
+        self.db_path = "data/db/"+self._project+".db"
+        self.csv_path = "data/csv/"+self._project+"_{dftype}_{timestamp}.csv"
+        self.conn = sqlalchemy.create_engine("sqlite:///"+self.db_path)
+        self.meta = MetaData(self.conn,reflect=True)
+
+
+    def init_update_dftype(self, dftype=""):
+        if dftype:
+            now_dftype = dftype
+        else:
+            now_dftype = self._dftype
+        try:
+            if not self.ddf.get("now_dftype",""):
+                self.ddf[now_dftype] = pd.DataFrame()
+        except:
+            if self.ddf["now_dftype"].empty:
+                self.ddf[now_dftype] = pd.DataFrame()
+
+
+    def check_dftype(self, new_dftype):
+        if new_dftype:
+            # needs further validation
+            return new_dftype
+        else:
+            return self._dftype
+
+
+    def update_hosts(self, col, value, ip="", subdomain=""):
+        pass
+
+
+    def append_row(self, new_entry, df_type=""):
+        df_t = self.check_dftype(df_type)
+        self.ddf[df_t] = self.ddf[df_t].append(new_entry, ignore_index=True)
+
+    def drop_index(self, index, df_type=""):
+        df_t = self.check_dftype(df_type)
+        self.ddf[df_t].drop(index, inplace=True)
+
+
+    def create_from_dict_list(self, result_list, df_type=""):
+        df_t = self.check_dftype(df_type)
+        self.ddf[df_t] = pd.DataFrame()
         for result in result_list:
             if isinstance(result,list) and (len(result) > 1):
                 for entry in result:
-                    self.df = self.df.append(entry, ignore_index=True)
+                    self.ddf[df_t] = self.ddf[df_t].append(entry, ignore_index=True)
             elif isinstance(result,list) and (len(result) == 1):
-                self.df = self.df.append(result, ignore_index=True)
-        debug_here()
+                self.ddf[df_t] = self.ddf[df_t].append(result, ignore_index=True)
 
-    def append(self, new_entry):
-        self.df = self.df.append(new_entry, ignore_index=True)
 
-    def dropIndex(self, index):
-        self.df.drop(index, inplace=True)
+    def save_to_csv(self, dftype=""):
+        df_t = self.check_dftype(dftype)
+        timedate = datetime.datetime.now().strftime(self.time_stamp)
+        self.ddf[df_t].to_csv(self.csv_path.format(dftype=df_t,
+                                                   timestamp=timedate))
+ 
 
-    def saveToCSV(self):
-
-        timedate = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        self.df.to_csv("data/"+timedate+self.project+"_"+self.dftype+".csv")
-
-    def saveToSqlite(self,append=False):
-
-        try:
-            conn = sqlite3.connect("data/"+self.project)
-            if append:
-                self.df.to_sql(self.dftype, con=conn, if_exists='append')
-            else:
-                self.df.to_sql(self.dftype, con=conn)
-
-        except Error as e:
-            print(e)
-
-    def loadFromCSV(self):
-
-        files = sorted(glob.glob("data/*"+self.project+"_"+self.dftype+".csv"))
+    def load_from_csv(self, dftype=""):
+        df_t = self.check_dftype(dftype)
+        files = sorted(glob.glob("data/"+self.project+"_"+df_t+"*.csv"))
         if len(files) < 1:
-            print("No CSV files to load from")
+            self.lgg.exception("No CSV files to load from")
             return
-        load_file = files.pop() 
-        self.df = pd.read_csv(load_file)
-        self.df.fillna('',inplace=True)
 
-    def loadFromSqlite(self,append=False):
+        newest_file = u.return_newest_string([x.rstrip(".csv") for x in files]) + ".csv"
+        self.ddf[df_t] = pd.read_csv(newest_file)
+        self.ddf[df_t].fillna('',inplace=True)
 
+
+    def delete_table(self, table_name):
+        table = Table(table_name, self.meta)
+        table.drop()
+
+
+    def save_to_sqlite(self, dftype="", tabletype="master", append=False, ovwr_master=False):
+        df_t = self.check_dftype(dftype)
         try:
-            conn = sqlite3.connect("data/"+self.project)
-            self.df = pd.read_sql_table(self.dftype, con=conn)
+            table_name = self.table_name_tpl.format(dftype=df_t,
+                                                    tabletype=tabletype,
+                                                    timestamp=u.create_timestamp())
+            ret_val = self.return_tablename(dftype=df_t, tabletype=tabletype)
+            if ret_val == None:
+                self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+            elif ovwr_master and (ret_val != None):
+                self.ddf[df_t].to_sql(table_name, con=self.conn, if_exists='fail')
+                self.delete_table(ret_val)
+            elif append and (ret_val != None):
+                self.ddf[df_t].to_sql(ret_val, con=self.conn, if_exists='append')
 
-        except Error as e:
-            print(e)
+        except:
+            self.lgg.exception("Got Error:")
 
-    def CheckExistence(self, filtercol, filterval, checkcol='', checkval=''):
 
+    def load_from_sqlite(self, dftype="", tabletype="master"):
+        df_t = self.check_dftype(dftype)
+        try:
+            table_name = self.table_name_tpl.format(dftype=df_t,
+                                                    tabletype=tabletype,
+                                                    timestamp="dummy")
+            self.ddf[df_t] = self.return_table(table_name.rstrip("_dummy"))
+        except:
+            self.lgg.exception("Got Error:")
+
+
+    def check_existence(self, filtercol, filterval, dftype="", checkcol="", checkval=""):
+        df_t = self.check_dftype(df_type)
         if checkval == '':
-            if self.df[filtercol == filterval][checkcol] == None:
+            if self.ddf[df_t][filtercol == filterval][checkcol] == None:
                 return False
             else:
                 return True
         else:
-            if self.df[filtercol == filterval][checkcol] == checkval:
+            if self.ddf[df_t][filtercol == filterval][checkcol] == checkval:
                 return True
             else:
                 return False
 
-    def removeDuplicatesCol(self,row, column):
 
-        duplicates = self.df[self.sub_df[column] == row[column]]
-
+    def remove_duplicates_col(self,row, column, dftype=""):
+        df_t = self.check_dftype(df_type)
+        duplicates = self.ddf[df_t][self.sub_df[column] == row[column]]
         for dup in duplicates.iterrows():
             pass
 
 
+    def return_tablename(self, dftype="", tabletype=""):
+        df_t = self.check_dftype(dftype)
+        if tabletype:
+            tablename = df_t+"_"+tabletype
+        else:
+            tablename = df_t+"_"+"master"
+        return self.return_table(tablename, only_check=True)
+
+    def return_df(self, dftype="", tabletype = ""):
+        df_t = self.check_dftype(dftype)
+        if not self.ddf[df_t].empty:
+            return self.ddf[df_t]
+        else:
+            # apply logic for ddf as well after implementing ddf into own class
+            if tabletype:
+                tablename = df_t+"_"+tabletype
+            else:
+                tablename = df_t+"_"+"master"
+            return self.return_table(tablename)
+
+
+    def return_table(self, table_name, only_check=False):
+        if table_name not in self.conn.table_names():
+            possible_names = [x for x in self.conn.table_names() if x.startswith(table_name)]
+            if len(possible_names) < 1:
+                self.lgg.exception("No table with the name {}".format(table_name))
+                if only_check:
+                    return None
+                else:
+                    return pd.DataFrame()
+            else:
+                newest_table = u.return_newest_string(possible_names)
+                if only_check:
+                    return newest_table
+                else:
+                    return pd.read_sql_table(newest_table, self.conn)
+        else:
+            if only_check:
+                return table_name
+            else:
+                return pd.read_sql_table(table_name, self.conn)
+
+
+    def return_dirtraversal(self, domain):
+        '''
+        Returns a directory traversal scan for one or multiple Domains. As a single IP could be used for multiple domains.
+        '''
+        final_result = {}
+        stats_result = {}
+        overview_dt = "### <span style='color:#606200'>Dirtraversal Stats\n</span>"
+
+        for single_domain in domain:
+            s = select([self.dirtraversal]).where(self.dirtraversal.c.domain == single_domain)
+            temp_result = pd.read_sql(s, self.conn)
+            if temp_result.shape[0] > 0:
+                stats_result[single_domain+'_number'] = temp_result.shape[0]
+                stats_result[single_domain+'_200'] = temp_result[temp_result.status == "200"].shape[0]
+                stats_result[single_domain+'_401'] = temp_result[temp_result.status == "401"].shape[0]
+                stats_result[single_domain+'_403'] = temp_result[temp_result.status == "403"].shape[0]
+
+                final_result[single_domain] = temp_result
+                test=single_domain+'_'+'403'
+                overview_dt = overview_dt + overview_dt_t.format(single_domain,
+                                                                   stats_result[single_domain+'_number'],
+                                                                   stats_result[single_domain+'_200'],
+                                                                   stats_result[single_domain+'_401'],
+                                                                   stats_result[single_domain+'_403'])
+        return (final_result, overview_dt)
+
+    '''
+    def return_portscan(self, ip):
+
+        stats_result = {}
+
+        s = select([self.portscan]).where(self.portscan.c.ip == ip)
+        result = pd.read_sql(s, self.conn)
+        if result.shape[0] > 1:
+            df = extract_scan(result.iloc[0])
+            stats_result['open'] = df[df.state == "open"].shape[0]
+            stats_result['filtered'] = df[df.state == "filtered"].shape[0]
+            overview_ps = overview_ps_t.format(ip,
+                                               stats_result['open'],
+                                               stats_result['filtered'])
+
+            return (df, overview_ps)
+
+        elif result.shape[0] == 0:
+            return pd.DataFrame()
+
+        else:
+            df = extract_scan(result)
+
+            stats_result['open'] = df[df.status == "open"].shape[0]
+            stats_result['filtered'] = df[df.status == "filtered"].shape[0]
+
+            overview_ps = overview_ps_t.format(ip,
+                                               stats_result['open'],
+                                               stats_result['filtered'])
+            return (df, overview_ps)
+    '''
 
 if __name__ == "__main__":
     do = DataObject(["blah"],"blah","blah")

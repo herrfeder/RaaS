@@ -31,26 +31,46 @@ def get_data():
 
     global df
     global env
+    global df_dict
 
-    datatype = request.form.get('datatype',"")
+    df_dict = {}
+
+    datatypes_client = request.form.get('datatype',"")
     load = request.form.get('load',"")
 
+    datatypes = datatypes_client.split(",")
 
-    env["datatype"] = datatype
-    env["dftype"] = datatype
-    print(env)
-    if load:
-        mt = ThreadManager.threadManager.newMergeResults(env, load=True)
-        df = mt.do.df
-    else:
-        pass
+    #df_dict["dftypes"] = [x for x in datatypes]
+
+    for datatype in datatypes:
+        env["datatype"] = datatype
+        env["dftype"] = datatype
+        print(env)
+        if load:
+            mt = ThreadManager.threadManager.newMergeResults(env, load=True)
+            df = mt.do.return_df()
+            print(df)
+        else:
+            pass
 
     iframe= "/insert_data"
 
-    return render_template( "index.html",
+    return render_template( "tablepill.html",
                             leftiframe=iframe,
                             title="RaaS",
+                            df_dict = {"blah":"blah"},
                             env=env)
+
+@app.route('/insert_data/<filename>')
+def insert_data(filename):
+    
+    global df
+    #### insert data here
+
+    return render_template( "data.html",
+                            tables=[easystyler(df).render()],
+                            env=env)
+
 
 @app.route('/change_project')
 def change_project():
@@ -65,14 +85,6 @@ def change_project():
                            env = env)
    
 
-@app.route('/insert_data')
-def insert_data():
-    
-    global df
-    return render_template( "data.html",
-                            tables=[easystyler(df).render()],
-                            env=env)
-
 
 @app.route('/')
 @app.route('/index', methods=['GET', 'POST'])
@@ -80,12 +92,12 @@ def index():
 
     global env
 
-
     env = get_env("", "")
     env['projectlist'] = get_project_list()
-    return render_template('index.html',
+    return render_template('tablepill.html',
                            title='RaaS',
                            #possible_calls=possible_calls,
+                           df_dict = {},
                            env=env)
 
 
