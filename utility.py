@@ -16,7 +16,7 @@ def get_env(dftype, project=""):
     return env_skeleton
 
 
-def getIPfromDomain(domain):
+def get_ip_from_domain(domain):
     ip = ''
 
     try:
@@ -27,7 +27,7 @@ def getIPfromDomain(domain):
     return ip
 
 
-def evalTarget(target):
+def eval_target(target):
     print(target)
     result = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/\d{1,2}",target)
     if len(result) == 1:

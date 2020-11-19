@@ -1,6 +1,6 @@
 import ast
 
-def extractFierceDict(fo):
+def extract_fierce_dict(fo):
 
     dict_buffer = []
     temp_dict = {}
