@@ -4,8 +4,8 @@ from IPython.core.debugger import Tracer
 import socket
 import logging
 import threading
-from subdomainutil import extractFierceDict
-from utility import getIPfromDomain 
+from ... import extractFierceDict
+from ... import getIPfromDomain 
 
 PATH={ "amass":"../amass/amass",
         "subfinder":"../subfinder",

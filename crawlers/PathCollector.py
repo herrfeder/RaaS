@@ -21,10 +21,13 @@ gospider_regex = {
 }
 
 
-class WebSpider():
+class PathCollector(threading.Thread):
 
     def __init__(self, domain_name, env):
 
+        super(PathCollector, self).__init__()
+        self.thread = threading.Thread(target=self.run, args=())
+        self.thread.deamon = True
         self.domain_name = domain_name
         self.result_list = []
         self.fin = 0
@@ -66,7 +69,10 @@ class WebSpider():
     def run_gospider(self,domain):
         self.reg_dict = self.compile_regex("gospider")
 
+        ##############################
         ### TODO add cmd build utility
+        ##############################
+
         cmd = [PATH["gospider"],'-k','2','-d','5','-s',domain]
         popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
         for stdout_line in iter(popen.stdout.readline, ""):
@@ -77,7 +83,7 @@ class WebSpider():
             raise subprocess.CalledProcessError(return_code, cmd)
 
     
-    def extract_gospider_output(self, output_line"):
+    def extract_gospider_output(self, output_line):
         if any((match := regex.match(output_line)) for regex in self.reg_dict.keys()):
             print(self.reg_dict[match.re], output_line[match.span()[1]:])
             
@@ -87,6 +93,6 @@ class WebSpider():
 
 if __name__ == "__main__":
 
-    websp = WebSpider("https://deezer.com", {})
+    websp = PathCollector("https://deezer.com", {})
     websp.run()
 
