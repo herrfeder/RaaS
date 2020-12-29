@@ -10,25 +10,37 @@ import re
 import logging
 import threading
 import re
+import inspect
 import ipdb; trace=ipdb.set_trace
 
-PATH={ "gau":"/home/theia/tools/bin/gau",
+
+
+
+PATH={ "gospider":"/home/theia/tools/bin/gospider",
         }
 
+gospider_regex = {
+    "robots" :         r"\[robots\] - ",
+    "subdomains" :     r"\[subdomains\] - ",
+    "javascript" :     r"\[javascript\] - ",
+    "url" :            r"\[url\] - \[code-[0-9]{3}\] - ",
+    "othersources" :   r"\[other-sources\] - ",
+    "form" :           r"\[form\] - ",
+    "linkfinder" :     r"\[linkfinder\] - ",
+}
 
-tool_regex = {}
 
-class PathCollector(threading.Thread):
+class WebSpider(threading.Thread):
 
     def __init__(self, domain_name, env, callback=None):
 
-        super(PathCollector, self).__init__()
+        super(WebSpider, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
         self.callback = callback
-
-        self.choosen = ["test"]
-
+        
+        self.choosen = ["gospider"]
+        
         self.domain_name = domain_name
         self.result_list = []
         self.fin = 0
@@ -39,8 +51,8 @@ class PathCollector(threading.Thread):
         input_reg_dict = {}
         output_reg_dict = {}
         try:
-            if tool== "generic_tool":
-                input_reg_dict = tool_regex
+            if tool=="gospider":
+                input_reg_dict = gospider_regex
         except:
             # add logging and exit
             pass
@@ -52,15 +64,12 @@ class PathCollector(threading.Thread):
 
     @name_time_thread
     def run(self):
-        print("[*] Running Module: Pathcollector")
-        if "gau" in self.choosen:
-            for output in self.run_gau(self.domain_name):
-                self.extract_gau_output(output)
-        elif "test" in self.choosen:
-            print("run test")
-        
-        if self.callback is not None:
-            self.callback()
+        print("[*] Running Module: Webspider")
+        if "gospider" in self.choosen:
+            for output in self.run_gospider(self.domain_name):
+                self.extract_gospider_output(output)
+
+        self.fin = 1
 
 
     def get_result_list(self):
@@ -71,13 +80,15 @@ class PathCollector(threading.Thread):
         return self.fin
 
 
-    def run_gau(self,domain):
+
+    def run_gospider(self, domain):
+        self.reg_dict = self.compile_regex("gospider")
 
         ##############################
         ### TODO add cmd build utility
         ##############################
 
-        cmd = [PATH["gau"],domain]
+        cmd = [PATH["gospider"],'-k','2','-d','5','-s',domain]
         popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
         for stdout_line in iter(popen.stdout.readline, ""):
             yield stdout_line
@@ -87,10 +98,11 @@ class PathCollector(threading.Thread):
             raise subprocess.CalledProcessError(return_code, cmd)
 
     
-    def extract_gau_output(self, output_line):
-        pass
-        print("gau")
-        print(output_line)
+    def extract_gospider_output(self, output_line):
+        if any((match := regex.match(output_line)) for regex in self.reg_dict.keys()):
+            pass
+            #print("gospider")
+            #print(self.reg_dict[match.re], output_line[match.span()[1]:])
             
 
 
@@ -98,6 +110,6 @@ class PathCollector(threading.Thread):
 
 if __name__ == "__main__":
 
-    websp = PathCollector("https://deezer.com", {})
+    websp = WebSpider("https://deezer.com", {})
     websp.run()
 

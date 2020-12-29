@@ -1,4 +1,5 @@
 import ThreadManager
+import threading
 from IPython.core.debugger import Tracer
 #from exceptions import DomainNoIp
 
@@ -9,13 +10,19 @@ env = {"dftype":"","project":"eurid.eu"}
 if __name__ == '__main__':
 
     #wt = ThreadManager.threadManager.newSubdomainCollector(env["project"],env="")
+    #ws = ThreadManager.ThreadManager.newWebSpider("https://deezer.com",{})
+    #ws.start()
+    #wt.run()
+    #PCgetFin = 0
+    #while PCgetFin == 0 :
+    #    getFin = pc.get_fin()
+    #    print("test")
+
     pc = ThreadManager.ThreadManager.newPathCollector("https://deezer.com",{})
     pc.start()
-    #wt.run()
-    getFin = 0
-    while getFin == 0 :
-        getFin = pc.get_fin()
-        print("test")
+
+   
+
     #getFin == 0
     #
     #env["dftype"] = "subdomain"
