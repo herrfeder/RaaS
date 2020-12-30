@@ -49,6 +49,9 @@ class WebSpider(threading.Thread):
         self.fin = 0
         self.env = env
 
+    def exit_thread(self):
+        self.process.kill()
+
 
     def compile_regex(self, tool=""):
         input_reg_dict = {}

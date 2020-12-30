@@ -10,16 +10,16 @@ env = {"dftype":"","project":"eurid.eu"}
 if __name__ == '__main__':
 
     #wt = ThreadManager.threadManager.newSubdomainCollector(env["project"],env="")
-    #ws = ThreadManager.ThreadManager.newWebSpider("https://deezer.com",{})
-    #ws.start()
+    ws = ThreadManager.ThreadManager.newWebSpider("https://deezer.com",{})
+    ws.start()
     #wt.run()
     #PCgetFin = 0
     #while PCgetFin == 0 :
     #    getFin = pc.get_fin()
     #    print("test")
 
-    pc = ThreadManager.ThreadManager.newPathCollector("https://deezer.com",{})
-    pc.start()
+    #pc = ThreadManager.ThreadManager.newPathCollector("https://deezer.com",{})
+    #pc.start()
 
     for thread in threading.enumerate(): 
         print(thread.name)
