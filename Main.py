@@ -21,7 +21,9 @@ if __name__ == '__main__':
     pc = ThreadManager.ThreadManager.newPathCollector("https://deezer.com",{})
     pc.start()
 
-   
+    for thread in threading.enumerate(): 
+        print(thread.name)
+        debughere()
 
     #getFin == 0
     #

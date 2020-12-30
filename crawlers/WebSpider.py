@@ -32,12 +32,15 @@ gospider_regex = {
 
 class WebSpider(threading.Thread):
 
-    def __init__(self, domain_name, env, callback=None):
+    def __init__(self, domain_name, env, 
+                 finish_cb=None, interrupt_cb=None):
 
         super(WebSpider, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
-        self.callback = callback
+        self.process = None 
+        self.finish_cb = finish_cb
+        self.interrupt_cb = interrupt_cb
         
         self.choosen = ["gospider"]
         
@@ -69,15 +72,13 @@ class WebSpider(threading.Thread):
             for output in self.run_gospider(self.domain_name):
                 self.extract_gospider_output(output)
 
-        self.fin = 1
+
+        if self.finish_cb is not None:
+            self.finish_cb()
 
 
     def get_result_list(self):
         return self.result_list
-
-
-    def get_fin(self):
-        return self.fin
 
 
 
@@ -89,11 +90,11 @@ class WebSpider(threading.Thread):
         ##############################
 
         cmd = [PATH["gospider"],'-k','2','-d','5','-s',domain]
-        popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-        for stdout_line in iter(popen.stdout.readline, ""):
+        self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+        for stdout_line in iter(self.process.stdout.readline, ""):
             yield stdout_line
-        popen.stdout.close()
-        return_code = popen.wait()
+        self.process.stdout.close()
+        return_code = self.process.wait()
         if return_code:
             raise subprocess.CalledProcessError(return_code, cmd)
 

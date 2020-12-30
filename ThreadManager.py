@@ -35,14 +35,14 @@ class Singleton(type):
 class ThreadManager(object):
 
     def __init__(self):
+        self.exit_event = threading.Event()
+        signal.signal(signal.SIGINT, self.signal_handler)
 
-        self-exit_event = threading.Event()
 
     def signal_handler(signum, frame):
         self.exit_event.set()
 
 
-signal.signal(signal.SIGINT, signal_handler)
 
 #    def newPortScanner(self, env=""):
 #        return PortScanner.PortScanner(env)
@@ -58,20 +58,27 @@ signal.signal(signal.SIGINT, signal_handler)
         print("I'm finished")
 
 
+    def interrupt_callback(self, threadobj):
+        print("I'm terminated")
+        threadobj.process.kill()
+
+
+
     def interrupt_callback(self):
         print("I'm terminated but finished")
 
 
     def newPathCollector(self, domain_name, env=""):
+        
         return PathCollector.PathCollector( domain_name, env, 
-                                            finish_callback=self.finish_callback,
-                                            interrupt_callback=self.interrupt_callback)
+                                            finish_cb=self.finish_callback,
+                                            interrupt_cb=self.interrupt_callback)
 
 
     def newWebSpider(self, domain_name, env=""):
         return WebSpider.WebSpider( domain_name, env, 
-                                    finish_callback=self.finish_callback,
-                                    interrupt_callback=self.interrupt_callback)
+                                    finish_cb=self.finish_callback,
+                                    interrupt_cb=self.interrupt_callback)
 
 
 ThreadManager = ThreadManager()

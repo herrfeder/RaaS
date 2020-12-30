@@ -6,6 +6,7 @@ sys.path.append(APP_PATH)
 from utils.threadutil import *
 
 import subprocess
+import time
 import re
 import logging
 import threading
@@ -20,19 +21,29 @@ tool_regex = {}
 
 class PathCollector(threading.Thread):
 
-    def __init__(self, domain_name, env, callback=None):
+    def __init__(self, domain_name, env, 
+                finish_cb=None, interrupt_cb=None):
 
         super(PathCollector, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
-        self.callback = callback
+        self.process = None
+        self.finish_cb = finish_cb
+        self.interrupt_cb = interrupt_cb
 
-        self.choosen = ["test"]
+        self.choosen = ["gau"]
 
         self.domain_name = domain_name
         self.result_list = []
         self.fin = 0
         self.env = env
+
+
+    def exit_thread(self):
+        # it's the only constellation where it works to kill the subprocess
+        # taking to the parent ThreadManager doesn't work and here on any other position it doesn't work as well
+        # needs some further cleaning
+        self.process.kill()
 
 
     def compile_regex(self, tool=""):
@@ -59,8 +70,8 @@ class PathCollector(threading.Thread):
         elif "test" in self.choosen:
             print("run test")
         
-        if self.callback is not None:
-            self.callback()
+        if self.finish_cb is not None:
+            self.finish_cb()
 
 
     def get_result_list(self):
@@ -78,23 +89,19 @@ class PathCollector(threading.Thread):
         ##############################
 
         cmd = [PATH["gau"],domain]
-        popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-        for stdout_line in iter(popen.stdout.readline, ""):
+        self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+        for stdout_line in iter(self.process.stdout.readline, ""):
             yield stdout_line
-        popen.stdout.close()
-        return_code = popen.wait()
+        self.process.stdout.close()
+        return_code = self.process.wait()
         if return_code:
             raise subprocess.CalledProcessError(return_code, cmd)
 
     
     def extract_gau_output(self, output_line):
-        pass
         print("gau")
         print(output_line)
             
-
-
-        pass
 
 if __name__ == "__main__":
 
