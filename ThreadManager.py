@@ -16,11 +16,14 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
-#class SingletonThreadManager(object, metaclass=Singleton):
-#
-#
-#    def newMergeResults(self, env, columns="", result_list="", load=False):
-#        return MergeResults.MergeResults(env, columns, result_list, load)
+class SingletonThreadManager(object, metaclass=Singleton):
+
+
+    def newDatabaseConnector(self, database_host="127.0.0.1", database_port=5432, database_name="raas")
+        return DatabaseConnector.DatabaseConnector(database_host, database_port, database_name)
+
+    def newMergeResults(self, env, columns="", result_list="", load=False):
+        return MergeResults.MergeResults(env, columns, result_list, load)
 
     
 
@@ -33,15 +36,6 @@ class Singleton(type):
 
 
 class ThreadManager(object):
-
-    def __init__(self):
-        self.exit_event = threading.Event()
-        signal.signal(signal.SIGINT, self.signal_handler)
-
-
-    def signal_handler(signum, frame):
-        self.exit_event.set()
-
 
 
 #    def newPortScanner(self, env=""):
@@ -58,9 +52,9 @@ class ThreadManager(object):
         print("I'm finished")
 
 
-    def interrupt_callback(self, threadobj):
+    def interrupt_callback(self):
         print("I'm terminated")
-        threadobj.process.kill()
+        #threadobj.process.kill()
 
 
 
@@ -82,4 +76,4 @@ class ThreadManager(object):
 
 
 ThreadManager = ThreadManager()
-#SingletonThreadManager = SingletonThreadManager()
+SingletonThreadManager = SingletonThreadManager()

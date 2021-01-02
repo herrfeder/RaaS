@@ -4,6 +4,7 @@ APP_PATH = pathlib.Path(__file__).parent.resolve()
 sys.path.append(APP_PATH)
 
 from utils.threadutil import *
+from prototypes.CrawlThreadPrototype import CrawlThreadPrototype
 
 import subprocess
 import time
@@ -19,14 +20,12 @@ PATH={ "gau":"/home/theia/tools/bin/gau",
 
 tool_regex = {}
 
-class PathCollector(threading.Thread):
+class PathCollector(CrawlThreadPrototype):
 
     def __init__(self, domain_name, env, 
                 finish_cb=None, interrupt_cb=None):
 
         super(PathCollector, self).__init__()
-        self.thread = threading.Thread(target=self.run, args=())
-        self.thread.deamon = True
         self.process = None
         self.finish_cb = finish_cb
         self.interrupt_cb = interrupt_cb
@@ -40,10 +39,8 @@ class PathCollector(threading.Thread):
 
 
     def exit_thread(self):
-        # it's the only constellation where it works to kill the subprocess
-        # taking to the parent ThreadManager doesn't work and here on any other position it doesn't work as well
-        # needs some further cleaning
         self.process.kill()
+        self.kill()
 
 
     def compile_regex(self, tool=""):
@@ -74,12 +71,9 @@ class PathCollector(threading.Thread):
             self.finish_cb()
 
 
+
     def get_result_list(self):
         return self.result_list
-
-
-    def get_fin(self):
-        return self.fin
 
 
     def run_gau(self,domain):
@@ -99,8 +93,9 @@ class PathCollector(threading.Thread):
 
     
     def extract_gau_output(self, output_line):
-        print("gau")
-        print(output_line)
+        pass
+        #print("gau")
+        #print(output_line)
             
 
 if __name__ == "__main__":
