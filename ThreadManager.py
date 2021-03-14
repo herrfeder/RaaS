@@ -19,8 +19,8 @@ class Singleton(type):
 class SingletonThreadManager(object, metaclass=Singleton):
 
 
-    def newDatabaseConnector(self, database_host="127.0.0.1", database_port=5432, database_name="raas")
-        return DatabaseConnector.DatabaseConnector(database_host, database_port, database_name)
+    #def newDatabaseConnector(self, database_host="127.0.0.1", database_port=5432, database_name="raas")
+    #    return DatabaseConnector.DatabaseConnector(database_host, database_port, database_name)
 
     def newMergeResults(self, env, columns="", result_list="", load=False):
         return MergeResults.MergeResults(env, columns, result_list, load)
@@ -51,14 +51,8 @@ class ThreadManager(object):
         # put data into database
         print("I'm finished")
 
-
-    def interrupt_callback(self):
-        print("I'm terminated")
-        #threadobj.process.kill()
-
-
-
-    def interrupt_callback(self):
+    def interrupt_callback(self, obj):
+        print(obj.result_list)
         print("I'm terminated but finished")
 
 

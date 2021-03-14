@@ -1,6 +1,6 @@
 import sys
 import threading
-import ipdb; trace=ipdb.set_trace
+
 
 
 
@@ -36,7 +36,7 @@ class CrawlThreadPrototype(threading.Thread):
     def localtrace(self, frame, event, arg): 
         if self.killed: 
             if event == 'line':
-                self.interrupt_cb()
+                self.interrupt_cb(self)
                 print("Exiting Thread") 
                 raise SystemExit() 
         return self.localtrace 

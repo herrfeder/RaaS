@@ -12,7 +12,7 @@ import re
 import logging
 import threading
 import re
-import ipdb; trace=ipdb.set_trace
+
 
 PATH={ "gau":"/home/theia/tools/bin/gau",
         }
@@ -38,9 +38,9 @@ class PathCollector(CrawlThreadPrototype):
         self.env = env
 
 
-    def exit_thread(self):
-        self.process.kill()
-        self.kill()
+    #def exit_thread(self):
+    #    self.process.kill()
+    #    self.kill()
 
 
     def compile_regex(self, tool=""):
@@ -62,11 +62,11 @@ class PathCollector(CrawlThreadPrototype):
     def run(self):
         print("[*] Running Module: Pathcollector")
         if "gau" in self.choosen:
+            # TOOL LOOP
             for output in self.run_gau(self.domain_name):
                 self.extract_gau_output(output)
-        elif "test" in self.choosen:
-            print("run test")
         
+        # GRACEFUL FINISH ACTION
         if self.finish_cb is not None:
             self.finish_cb()
 
@@ -75,6 +75,8 @@ class PathCollector(CrawlThreadPrototype):
     def get_result_list(self):
         return self.result_list
 
+    def append_result_list(self, append_item):
+        self.result_list.append(append_item)
 
     def run_gau(self,domain):
 
@@ -93,9 +95,8 @@ class PathCollector(CrawlThreadPrototype):
 
     
     def extract_gau_output(self, output_line):
-        pass
-        #print("gau")
-        #print(output_line)
+        self.append_result_list(output_line)
+        
             
 
 if __name__ == "__main__":
