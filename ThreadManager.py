@@ -47,26 +47,15 @@ class ThreadManager(object):
 #    def newSubdomainCollector(self, domain_name, env=""):
 #        return SubdomainCollector.SubdomainColl( domain_name, env)
 
-    def finish_callback(self):
-        # put data into database
-        print("I'm finished")
-
-    def interrupt_callback(self, obj):
-        print(obj.result_list)
-        print("I'm terminated but finished")
+    
 
 
     def newPathCollector(self, domain_name, env=""):
-        
-        return PathCollector.PathCollector( domain_name, env, 
-                                            finish_cb=self.finish_callback,
-                                            interrupt_cb=self.interrupt_callback)
+        return PathCollector.PathCollector( domain_name, env )
 
 
     def newWebSpider(self, domain_name, env=""):
-        return WebSpider.WebSpider( domain_name, env, 
-                                    finish_cb=self.finish_callback,
-                                    interrupt_cb=self.interrupt_callback)
+        return WebSpider.WebSpider( domain_name, env )
 
 
 ThreadManager = ThreadManager()

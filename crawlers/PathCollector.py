@@ -6,7 +6,6 @@ sys.path.append(APP_PATH)
 from utils.threadutil import *
 from prototypes.CrawlThreadPrototype import CrawlThreadPrototype
 
-import subprocess
 import time
 import re
 import logging
@@ -22,25 +21,13 @@ tool_regex = {}
 
 class PathCollector(CrawlThreadPrototype):
 
-    def __init__(self, domain_name, env, 
-                finish_cb=None, interrupt_cb=None):
+    def __init__(self, domain_name, env ):
 
         super(PathCollector, self).__init__()
-        self.process = None
-        self.finish_cb = finish_cb
-        self.interrupt_cb = interrupt_cb
-
         self.choosen = ["gau"]
-
         self.domain_name = domain_name
-        self.result_list = []
-        self.fin = 0
         self.env = env
 
-
-    #def exit_thread(self):
-    #    self.process.kill()
-    #    self.kill()
 
 
     def compile_regex(self, tool=""):
@@ -63,44 +50,24 @@ class PathCollector(CrawlThreadPrototype):
         print("[*] Running Module: Pathcollector")
         if "gau" in self.choosen:
             # TOOL LOOP
-            for output in self.run_gau(self.domain_name):
-                self.extract_gau_output(output)
+            for output in self.run_tool(toolcmds=["/home/theia/tools/bin/gau", self.domain_name]):
+                self.extract_output(output)
         
         # GRACEFUL FINISH ACTION
         if self.finish_cb is not None:
             self.finish_cb()
 
-
+    
+    def extract_output(self, output_line):
+        self.append_result_list(output_line)
+        
 
     def get_result_list(self):
         return self.result_list
-
-    def append_result_list(self, append_item):
-        self.result_list.append(append_item)
-
-    def run_gau(self,domain):
-
-        ##############################
-        ### TODO add cmd build utility
-        ##############################
-
-        cmd = [PATH["gau"],domain]
-        self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-        for stdout_line in iter(self.process.stdout.readline, ""):
-            yield stdout_line
-        self.process.stdout.close()
-        return_code = self.process.wait()
-        if return_code:
-            raise subprocess.CalledProcessError(return_code, cmd)
-
-    
-    def extract_gau_output(self, output_line):
-        self.append_result_list(output_line)
-        
             
 
 if __name__ == "__main__":
 
-    websp = PathCollector("https://deezer.com", {})
-    websp.run()
+    pc = PathCollector("https://deezer.com", {})
+    pc.run()
 
