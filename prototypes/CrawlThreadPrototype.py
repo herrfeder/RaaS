@@ -1,6 +1,7 @@
 import sys
 import threading
 import subprocess
+from utils.raaslogging import RaasLogger
 
 
 
@@ -8,12 +9,13 @@ import subprocess
 class CrawlThreadPrototype(threading.Thread): 
 
     def __init__(self):
-
         super(CrawlThreadPrototype, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
         self.killed = False
         self.result_list = []
+
+        self.log = RaasLogger()
 
 
     def __run(self): 
@@ -23,13 +25,13 @@ class CrawlThreadPrototype(threading.Thread):
 
 
     def finish_cb(self):
-        print("I'm finished")
+        self.log.info("Thread finished gracefully")
         return self.result_list
 
 
     def interrupt_cb(self, obj):
-        print("I'm terminated but finished")
-        print(self.result_list)
+        self.log.info("Thread got killed and will be finished gracefully")
+        #print(self.result_list)
         return self.result_list
 
 
@@ -73,7 +75,7 @@ class CrawlThreadPrototype(threading.Thread):
         if self.killed: 
             if event == 'line':
                 self.interrupt_cb(self)
-                print("Exiting Thread") 
+                self.log.debug("Exiting Thread") 
                 raise SystemExit() 
         return self.localtrace 
     

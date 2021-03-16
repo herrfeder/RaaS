@@ -6,6 +6,7 @@ import signal
 import threading
 import crawlers.PathCollector as PathCollector
 import crawlers.WebSpider as WebSpider
+from utils.raaslogging import RaasLogger
 
 
 
@@ -37,6 +38,9 @@ class SingletonThreadManager(object, metaclass=Singleton):
 
 class ThreadManager(object):
 
+    def __init__(self):
+
+        self.log = RaasLogger()
 
 #    def newPortScanner(self, env=""):
 #        return PortScanner.PortScanner(env)
@@ -51,6 +55,7 @@ class ThreadManager(object):
 
 
     def newPathCollector(self, domain_name, env=""):
+        self.log.debug("Created new Pathcollector")
         return PathCollector.PathCollector( domain_name, env )
 
 
