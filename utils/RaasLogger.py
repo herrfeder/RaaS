@@ -4,12 +4,14 @@ import sys
 
 class RaasLogger():
 
-    def __init__(self, debug=False, filelog=True):
+    def __init__(self, logger_name, debug=False, filelog=True):
 
         self.debug_mode = debug
         self.filelog = filelog
 
-        self.mainlogger = logging.getLogger("raasmain")
+        self.default_format = '%(asctime)s::[%(name)s]::%(levelname)s - %(message)s'
+
+        self.mainlogger = logging.getLogger(logger_name)
         self.mainlogger = self.init_logger(self.mainlogger, self.debug, self.filelog)
     
 
@@ -22,20 +24,25 @@ class RaasLogger():
         else:
             self.basic_loglevel = logging.INFO
 
+        logger.setLevel(self.basic_loglevel)
+
         stdout_basic_handler = logging.StreamHandler(sys.stdout)
         stdout_basic_handler.setLevel(self.basic_loglevel)
-        stdout_basic_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+        stdout_basic_format = logging.Formatter(self.default_format)
         stdout_basic_handler.setFormatter(stdout_basic_format)
 
         if filelog:
-            file_basic_handler = logging.FileHandler('info.log')
+            if not os.path.exists("logs"):
+                os.mkdir("logs")
+
+            file_basic_handler = logging.FileHandler('logs/info.log')
             file_basic_handler.setLevel(self.basic_loglevel)
-            file_basic_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            file_basic_format = logging.Formatter(self.default_format)
             file_basic_handler.setFormatter(file_basic_format)
 
-            file_error_handler = logging.FileHandler('error.log')
+            file_error_handler = logging.FileHandler('logs/error.log')
             file_error_handler.setLevel(logging.ERROR)
-            file_error_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            file_error_format = logging.Formatter(self.default_format)
             file_error_handler.setFormatter(file_error_format)
 
             logger.addHandler(file_basic_handler)
@@ -44,11 +51,16 @@ class RaasLogger():
         # Add handlers to the logger
         logger.addHandler(stdout_basic_handler)
 
+
         return logger
 
 
     def info(self, logtext):
+        print("info logging")
         self.mainlogger.info(logtext)
 
     def debug(self, logtext):
         self.mainlogger.debug(logtext)
+
+    def warning(self, logtext):
+        self.mainlogger.warning(logtext)

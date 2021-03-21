@@ -6,7 +6,7 @@ import signal
 import threading
 import crawlers.PathCollector as PathCollector
 import crawlers.WebSpider as WebSpider
-from utils.raaslogging import RaasLogger
+from utils.RaasLogger import RaasLogger
 
 
 
@@ -40,7 +40,7 @@ class ThreadManager(object):
 
     def __init__(self):
 
-        self.log = RaasLogger()
+        self.log = RaasLogger(self.__class__.__name__)
 
 #    def newPortScanner(self, env=""):
 #        return PortScanner.PortScanner(env)

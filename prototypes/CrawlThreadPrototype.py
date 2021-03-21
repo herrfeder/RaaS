@@ -1,7 +1,7 @@
 import sys
 import threading
 import subprocess
-from utils.raaslogging import RaasLogger
+from utils.RaasLogger import RaasLogger
 
 
 
@@ -15,7 +15,7 @@ class CrawlThreadPrototype(threading.Thread):
         self.killed = False
         self.result_list = []
 
-        self.log = RaasLogger()
+        self.log = RaasLogger(self.__class__.__name__)
 
 
     def __run(self): 
