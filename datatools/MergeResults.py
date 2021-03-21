@@ -1,13 +1,12 @@
 import pandas as pd
-from test_data import result_list
 import threading
 from IPython.core.debugger import Tracer; debughere = Tracer()
 import datetime
-from DataObject import DataObject
+from datatools.DataObject import DataObject
 from itertools import chain
-from exceptions import NoScanAvailable
+from utils.exceptions import NoScanAvailable
 import json
-from datasupport import *
+from utils.datasupport import *
 
 def popL(inlist):
     try:
@@ -23,7 +22,6 @@ class MergeResults(threading.Thread):
         super(MergeResults, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
-        self.result_list = result_list
         self.fin = 0
         self.env = env
         self.do = DataObject(columns, env)

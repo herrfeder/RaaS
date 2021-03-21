@@ -1,5 +1,5 @@
 import pandas as pd
-from exceptions import WrongDataFrameSize, NoScanAvailable
+from utils.exceptions import WrongDataFrameSize, NoScanAvailable
 from IPython.core.debugger import Tracer; debughere = Tracer()
 import json
 

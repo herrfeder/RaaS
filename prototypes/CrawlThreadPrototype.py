@@ -25,13 +25,12 @@ class CrawlThreadPrototype(threading.Thread):
 
 
     def finish_cb(self):
-        self.log.info("Thread finished gracefully")
+        self.log.debug("Thread finished gracefully")
         return self.result_list
 
 
     def interrupt_cb(self, obj):
-        self.log.info("Thread got killed and will be finished gracefully")
-        #print(self.result_list)
+        self.log.debug("Thread got killed and will be finished gracefully")
         return self.result_list
 
 

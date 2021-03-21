@@ -1,46 +1,47 @@
 #import crawlers.SubdomainCollector as SubdomainCollector
-#import MergeResults
+from datatools import MergeResults
 #import PortScanner
 #import crawlers.DirectoryTraversal as DirectoryTraversal
+
+from prototypes.ThreadPrototype import *
 import signal
 import threading
 import crawlers.PathCollector as PathCollector
 import crawlers.WebSpider as WebSpider
 from utils.RaasLogger import RaasLogger
+import uuid
 
 
-
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-class SingletonThreadManager(object, metaclass=Singleton):
+#@Singleton
+#class SingletonDatabaseConnector(self, database_host="127.0.0.1", database_port=5432, database_name="raas")
+#    #    return DatabaseConnector.DatabaseConnector(database_host, database_port, database_name)
 
 
-    #def newDatabaseConnector(self, database_host="127.0.0.1", database_port=5432, database_name="raas")
-    #    return DatabaseConnector.DatabaseConnector(database_host, database_port, database_name)
+ 
+
+class AppThreadManager(AppSingleton):
+
+    def __init__(self, app_id):
+        self.appid = app_id   
+        self.logger = RaasLogger(self.__class__.__name__)
+        self.logger.info(f"Starting AppThreadManager for AppID {app_id}")
+
+
 
     def newMergeResults(self, env, columns="", result_list="", load=False):
         return MergeResults.MergeResults(env, columns, result_list, load)
 
+
+
+
     
 
-#    def threadFinished(self, thread, data, finishedHandler=None):
-#        print(thread, data)
-#        if finishedHandler != None:
-#            finishedHandler.setFinishedData(data)
-#        # TODO build nice POPUP for more information
-#        #routes.updateStatus(True, data)
+class ScopeThreadManager(ScopeSingleton):
 
-
-class ThreadManager(object):
-
-    def __init__(self):
-
-        self.log = RaasLogger(self.__class__.__name__)
+    def __init__(self, scope_name):
+        self.scope = scope_name
+        self.logger = RaasLogger(self.__class__.__name__)
+        self.logger.info(f"Starting ScopeThreadManager for scope {scope_name}")
 
 #    def newPortScanner(self, env=""):
 #        return PortScanner.PortScanner(env)
@@ -55,7 +56,7 @@ class ThreadManager(object):
 
 
     def newPathCollector(self, domain_name, env=""):
-        self.log.debug("Created new Pathcollector")
+        self.logger.debug(f"Created new Pathcollector with {domain_name}")
         return PathCollector.PathCollector( domain_name, env )
 
 
@@ -63,5 +64,5 @@ class ThreadManager(object):
         return WebSpider.WebSpider( domain_name, env )
 
 
-ThreadManager = ThreadManager()
-SingletonThreadManager = SingletonThreadManager()
+#ThreadManager = ThreadManager()
+#SingletonThreadManager = SingletonThreadManager()

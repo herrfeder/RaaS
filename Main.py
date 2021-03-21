@@ -3,6 +3,11 @@ import threading
 from IPython.core.debugger import Tracer
 #from exceptions import DomainNoIp
 from utils.RaasLogger import RaasLogger
+import uuid
+
+
+app_id = uuid.uuid4()
+
 
 debughere=Tracer()
 
@@ -10,12 +15,24 @@ env = {"dftype":"","project":"eurid.eu"}
 
 if __name__ == '__main__':
 
-    logger = RaasLogger("main_logger")
+    logger = RaasLogger("main")
+    atm = ThreadManager.AppThreadManager(app_id)
 
-    logger.warning("Start new job")
-    logger.mainlogger.info("blahhhhh")
-    pc = ThreadManager.ThreadManager.newPathCollector("https://deezer.com",{})
-    pc.start()
+    
+    atm_new = ThreadManager.AppThreadManager(app_id)
+
+    if atm == atm_new:
+        print("true")
+    else:
+        print("false")
+
+
+    stm = ThreadManager.ScopeThreadManager("deezer.com")
+    stm_new = ThreadManager.ScopeThreadManager("deezerkack.com")
+
+
+    #pc = stm.newPathCollector("https://deezer.com",{})
+    #pc.start()
 
     for thread in threading.enumerate(): 
         print(thread.name)
