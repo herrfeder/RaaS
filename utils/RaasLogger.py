@@ -56,7 +56,6 @@ class RaasLogger():
 
 
     def info(self, logtext):
-        print("info logging")
         self.mainlogger.info(logtext)
 
     def debug(self, logtext):
@@ -64,3 +63,6 @@ class RaasLogger():
 
     def warning(self, logtext):
         self.mainlogger.warning(logtext)
+
+    def error(self, logtext):
+        self.mainlogger.error(logtext)

@@ -18,13 +18,6 @@ if __name__ == '__main__':
     logger = RaasLogger("main")
     atm = ThreadManager.AppThreadManager(app_id)
 
-    
-    atm_new = ThreadManager.AppThreadManager(app_id)
-
-    if atm == atm_new:
-        print("true")
-    else:
-        print("false")
 
 
     stm = ThreadManager.ScopeThreadManager("deezer.com")

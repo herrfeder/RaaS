@@ -1,8 +1,17 @@
+from utils.RaasLogger import RaasLogger
+
 class Error(Exception):
     '''
     Base class for other Exceptions
     '''
-    pass
+    def __init__(self):
+        self.logger = RaasLogger(self.__class__.__name__)
+
+
+class SingletonAlreadyExists(Error):
+    def __init__(self):
+        super(SingletonAlreadyExists, self).__init__()
+        self.logger.error("This Singleton already exists and cannot created twice")
 
 class WrongProjectEnvironment(Error):
     pass

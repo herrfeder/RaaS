@@ -1,6 +1,5 @@
 from IPython.core.debugger import Tracer; debughere = Tracer()
-
-
+from utils.exceptions import SingletonAlreadyExists
 
 class SingletonBase(object):
     pass
@@ -12,11 +11,11 @@ class AppSingleton(SingletonBase):
     def __new__(cls, *args, **kwds):
         it = cls.__dict__.get("__it__")
         if it is not None:
-            pass
-            #return it
-        cls.__it__ = it = object.__new__(cls)
-        it.init(*args, **kwds)
-        return it
+            raise SingletonAlreadyExists
+        else:
+            cls.__it__ = it = object.__new__(cls)
+            it.init(*args, **kwds)
+            return it
 
     def init(self, *args, **kwds):
         pass
@@ -25,9 +24,14 @@ class AppSingleton(SingletonBase):
 class ScopeSingleton(SingletonBase):
     def __new__(cls, *args, **kwds):
         it = cls.__dict__.get("__it__")
-        if (it != None) and (it.scope == args[0]):
-            return it
-        elif (it.scope != args[0]):
+        if (it is not None):
+            if (it.scope == args[0]):
+                raise SingletonAlreadyExists
+            elif (it.scope != args[0]):
+                cls.__it__ = it = object.__new__(cls)
+                it.init(*args, **kwds)
+                return it
+        else:
             cls.__it__ = it = object.__new__(cls)
             it.init(*args, **kwds)
             return it

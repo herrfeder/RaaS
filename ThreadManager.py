@@ -24,7 +24,7 @@ class AppThreadManager(AppSingleton):
     def __init__(self, app_id):
         self.appid = app_id   
         self.logger = RaasLogger(self.__class__.__name__)
-        self.logger.info(f"Starting AppThreadManager for AppID {app_id}")
+        self.logger.info(f"Starting AppThreadManager for AppID {self.appid}")
 
 
 
