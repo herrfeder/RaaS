@@ -22,37 +22,19 @@ import uuid
 class AppThreadManager(AppSingleton):
 
     def __init__(self, app_id):
+        super(AppSingleton, self).__init__(app_id)
         self.appid = app_id   
-        self.logger = RaasLogger(self.__class__.__name__)
-        self.logger.info(f"Starting AppThreadManager for AppID {self.appid}")
-
 
 
     def newMergeResults(self, env, columns="", result_list="", load=False):
         return MergeResults.MergeResults(env, columns, result_list, load)
 
 
-
-
-    
-
 class ScopeThreadManager(ScopeSingleton):
 
     def __init__(self, scope_name):
+        super(ScopeSingleton, self).__init__(scope_name)
         self.scope = scope_name
-        self.logger = RaasLogger(self.__class__.__name__)
-        self.logger.info(f"Starting ScopeThreadManager for scope {scope_name}")
-
-#    def newPortScanner(self, env=""):
-#        return PortScanner.PortScanner(env)
-
-#    def newDirectoryTraversal(self, env=""):
-#        return DirectoryTraversal.DirectoryTraversal(env)
-
-#    def newSubdomainCollector(self, domain_name, env=""):
-#        return SubdomainCollector.SubdomainColl( domain_name, env)
-
-    
 
 
     def newPathCollector(self, domain_name, env=""):
@@ -63,6 +45,3 @@ class ScopeThreadManager(ScopeSingleton):
     def newWebSpider(self, domain_name, env=""):
         return WebSpider.WebSpider( domain_name, env )
 
-
-#ThreadManager = ThreadManager()
-#SingletonThreadManager = SingletonThreadManager()

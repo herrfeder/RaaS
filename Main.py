@@ -1,4 +1,4 @@
-import ThreadManager
+from ThreadManager import ScopeThreadManager, AppThreadManager
 import threading
 from IPython.core.debugger import Tracer
 #from exceptions import DomainNoIp
@@ -16,12 +16,15 @@ env = {"dftype":"","project":"eurid.eu"}
 if __name__ == '__main__':
 
     logger = RaasLogger("main")
-    atm = ThreadManager.AppThreadManager(app_id)
 
 
 
-    stm = ThreadManager.ScopeThreadManager("deezer.com")
-    stm_new = ThreadManager.ScopeThreadManager("deezerkack.com")
+    stm = ScopeThreadManager("deezer.com")
+    stm_new = ScopeThreadManager("deezerkack.com")
+    stm_new2 = ScopeThreadManager("deezerkack2.com")
+
+    atm = AppThreadManager(app_id)
+
 
 
     #pc = stm.newPathCollector("https://deezer.com",{})

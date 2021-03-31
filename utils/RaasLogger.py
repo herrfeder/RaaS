@@ -26,30 +26,31 @@ class RaasLogger():
 
         logger.setLevel(self.basic_loglevel)
 
-        stdout_basic_handler = logging.StreamHandler(sys.stdout)
-        stdout_basic_handler.setLevel(self.basic_loglevel)
-        stdout_basic_format = logging.Formatter(self.default_format)
-        stdout_basic_handler.setFormatter(stdout_basic_format)
+        if not logger.hasHandlers():
+            stdout_basic_handler = logging.StreamHandler(sys.stdout)
+            stdout_basic_handler.setLevel(self.basic_loglevel)
+            stdout_basic_format = logging.Formatter(self.default_format)
+            stdout_basic_handler.setFormatter(stdout_basic_format)
 
-        if filelog:
-            if not os.path.exists("logs"):
-                os.mkdir("logs")
+            if filelog:
+                if not os.path.exists("logs"):
+                    os.mkdir("logs")
 
-            file_basic_handler = logging.FileHandler('logs/info.log')
-            file_basic_handler.setLevel(self.basic_loglevel)
-            file_basic_format = logging.Formatter(self.default_format)
-            file_basic_handler.setFormatter(file_basic_format)
+                file_basic_handler = logging.FileHandler('logs/info.log')
+                file_basic_handler.setLevel(self.basic_loglevel)
+                file_basic_format = logging.Formatter(self.default_format)
+                file_basic_handler.setFormatter(file_basic_format)
 
-            file_error_handler = logging.FileHandler('logs/error.log')
-            file_error_handler.setLevel(logging.ERROR)
-            file_error_format = logging.Formatter(self.default_format)
-            file_error_handler.setFormatter(file_error_format)
+                file_error_handler = logging.FileHandler('logs/error.log')
+                file_error_handler.setLevel(logging.ERROR)
+                file_error_format = logging.Formatter(self.default_format)
+                file_error_handler.setFormatter(file_error_format)
 
-            logger.addHandler(file_basic_handler)
-            logger.addHandler(file_error_handler)
+                logger.addHandler(file_basic_handler)
+                logger.addHandler(file_error_handler)
 
-        # Add handlers to the logger
-        logger.addHandler(stdout_basic_handler)
+            # Add handlers to the logger
+            logger.addHandler(stdout_basic_handler)
 
 
         return logger
