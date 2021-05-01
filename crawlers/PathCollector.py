@@ -11,6 +11,8 @@ import re
 import logging
 import threading
 import re
+from IPython.core.debugger import Tracer; debughere=Tracer()
+
 
 
 PATH={ "gau":"/home/theia/tools/bin/gau",
@@ -23,7 +25,8 @@ class PathCollector(CrawlThreadPrototype):
 
     def __init__(self, domain_name, env ):
 
-        super(PathCollector, self).__init__()
+        super(CrawlThreadPrototype, self).__init__()
+        super(self.__class__, self).__init__()
         self.choosen = ["gau"]
         self.domain_name = domain_name
         self.env = env
@@ -47,7 +50,7 @@ class PathCollector(CrawlThreadPrototype):
 
     @name_time_thread
     def run(self):
-        print("[*] Running Module: Pathcollector")
+        self.log.info("[*] Running Module: Pathcollector")
         if "gau" in self.choosen:
             # TOOL LOOP
             for output in self.run_tool(toolcmds=["/home/theia/tools/bin/gau", self.domain_name]):
@@ -59,11 +62,9 @@ class PathCollector(CrawlThreadPrototype):
 
     
     def extract_output(self, output_line):
-        self.append_result_list(output_line)
+        self.append_results(output_line)
         
 
-    def get_result_list(self):
-        return self.result_list
             
 
 if __name__ == "__main__":

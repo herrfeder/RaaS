@@ -17,18 +17,13 @@ if __name__ == '__main__':
 
     logger = RaasLogger("main")
 
-
-
     stm = ScopeThreadManager("deezer.com")
-    stm_new = ScopeThreadManager("deezerkack.com")
-    stm_new2 = ScopeThreadManager("deezerkack2.com")
+    #stm_new = ScopeThreadManager("deezerkack.com")
+    #stm_new2 = ScopeThreadManager("deezerkack2.com")
+    #atm = AppThreadManager(app_id)
 
-    atm = AppThreadManager(app_id)
-
-
-
-    #pc = stm.newPathCollector("https://deezer.com",{})
-    #pc.start()
+    pc = stm.newPathCollector("https://deezer.com")
+    pc.start()
 
     for thread in threading.enumerate(): 
         print(thread.name)

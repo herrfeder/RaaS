@@ -1,43 +1,28 @@
 import sys
 import threading
 import subprocess
+from prototypes.ThreadPrototype import ThreadPrototype
 from utils.RaasLogger import RaasLogger
 
 
 
 
-class CrawlThreadPrototype(threading.Thread): 
+class CrawlThreadPrototype(ThreadPrototype): 
 
     def __init__(self):
-        super(CrawlThreadPrototype, self).__init__()
-        self.thread = threading.Thread(target=self.run, args=())
-        self.thread.deamon = True
-        self.killed = False
-        self.result_list = []
-
+        super(ThreadPrototype, self).__init__()
+        self.results = []
         self.log = RaasLogger(self.__class__.__name__)
-
-
-    def __run(self): 
-        sys.settrace(self.globaltrace) 
-        self.__run_backup() 
-        self.run = self.__run_backup 
 
 
     def finish_cb(self):
         self.log.debug("Thread finished gracefully")
-        return self.result_list
+        return self.results
 
 
     def interrupt_cb(self, obj):
         self.log.debug("Thread got killed and will be finished gracefully")
-        return self.result_list
-
-
-    def start(self): 
-        self.__run_backup = self.run 
-        self.run = self.__run       
-        threading.Thread.start(self)
+        return self.results
 
 
     def run_tool(self, toolcmds):
@@ -59,25 +44,9 @@ class CrawlThreadPrototype(threading.Thread):
             raise subprocess.CalledProcessError(return_code, cmd)
 
         
-    def append_result_list(self, append_item):
-        self.result_list.append(append_item)
+    def append_results(self, append_item):
+        self.results.append(append_item)
 
-
-    def globaltrace(self, frame, event, arg): 
-        if event == 'call': 
-            return self.localtrace 
-        else: 
-            return None
     
-
-    def localtrace(self, frame, event, arg): 
-        if self.killed: 
-            if event == 'line':
-                self.interrupt_cb(self)
-                self.log.debug("Exiting Thread") 
-                raise SystemExit() 
-        return self.localtrace 
-    
-
-    def kill(self): 
-        self.killed = True
+    def get_results(self):
+        return self.results

@@ -1,41 +1,44 @@
-from IPython.core.debugger import Tracer; debughere = Tracer()
-from utils.exceptions import SingletonAlreadyExists
+import sys
+import threading
+import subprocess
 from utils.RaasLogger import RaasLogger
 
-class SingletonBase(object):
+class ThreadPrototype(threading.Thread): 
 
-    def __init__(self, *args, **kwds):
-        self.logger = RaasLogger(self.__class__.__name__)
-        self.logger.info(f"Starting New {self.__class__.__name__} with {self.log_string} {args[0]}")
-
-
-class AppSingleton(SingletonBase):
-    # from https://stackoverflow.com/questions/31875/is-there-a-simple-elegant-way-to-define-singletons/33201#33201
-    def __new__(cls, *args, **kwds):
-        it = cls.__dict__.get("__it__")
-        if it is not None:
-            raise SingletonAlreadyExists
-        else:
-            cls.__it__ = it = SingletonBase.__new__(cls)
-            it.log_string = "AppID"
-            return it
-       
-
-class ScopeSingleton(SingletonBase):
-    def __new__(cls, *args, **kwds):
-        it = cls.__dict__.get("__it__")
-        if (it is not None):
-            if (args[0] in cls.__dict__.get("__scopes__")):
-                raise SingletonAlreadyExists
-            elif (it.scope != args[0]):
-                cls.__it__ = it = SingletonBase.__new__(cls)
-                cls.__scopes__.append(args[0])
-                it.log_string = "Scope"
-                return it
-        else:
-            cls.__it__ = it = SingletonBase.__new__(cls)
-            cls.__scopes__ = [args[0]]
-            it.log_string = "Scope"
-            return it
+    def __init__(self):
+        #super(ThreadPrototype, self).__init__()
+        self.thread = threading.Thread(target=self.run, args=())
+        self.thread.deamon = True
+        self.killed = False
 
 
+    def __run(self): 
+        sys.settrace(self.globaltrace) 
+        self.__run_backup() 
+        self.run = self.__run_backup 
+
+
+    def start(self): 
+        self.__run_backup = self.run 
+        self.run = self.__run       
+        threading.Thread.start(self)
+
+    
+    def globaltrace(self, frame, event, arg): 
+        if event == 'call': 
+            return self.localtrace 
+        else: 
+            return None
+    
+
+    def localtrace(self, frame, event, arg): 
+        if self.killed: 
+            if event == 'line':
+                self.interrupt_cb(self)
+                self.log.debug("Exiting Thread") 
+                raise SystemExit() 
+        return self.localtrace 
+    
+
+    def kill(self): 
+        self.killed = True

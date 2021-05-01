@@ -1,12 +1,12 @@
 #import crawlers.SubdomainCollector as SubdomainCollector
-from datatools import MergeResults
+from datatools import DataObject
 #import PortScanner
 #import crawlers.DirectoryTraversal as DirectoryTraversal
 
-from prototypes.ThreadPrototype import *
+from prototypes.SingletonPrototype import AppSingleton, ScopeSingleton
 import signal
 import threading
-import crawlers.PathCollector as PathCollector
+from crawlers.PathCollector import PathCollector
 import crawlers.WebSpider as WebSpider
 from utils.RaasLogger import RaasLogger
 import uuid
@@ -23,8 +23,8 @@ class AppThreadManager(AppSingleton):
 
     def __init__(self, app_id):
         super(AppSingleton, self).__init__(app_id)
-        self.appid = app_id   
-
+        self.appid = app_id
+        
 
     def newMergeResults(self, env, columns="", result_list="", load=False):
         return MergeResults.MergeResults(env, columns, result_list, load)
@@ -32,16 +32,21 @@ class AppThreadManager(AppSingleton):
 
 class ScopeThreadManager(ScopeSingleton):
 
-    def __init__(self, scope_name):
-        super(ScopeSingleton, self).__init__(scope_name)
-        self.scope = scope_name
+    def __init__(self, scope):
+        super(ScopeSingleton, self).__init__(scope)
+        self.scope = scope
+        self.daob = self.newDataObject(self.scope)   
 
 
-    def newPathCollector(self, domain_name, env=""):
+    def newDataObject(self, scope):
+        return DataObject.DataObject(scope)
+
+
+    def newPathCollector(self, domain_name):
         self.logger.debug(f"Created new Pathcollector with {domain_name}")
-        return PathCollector.PathCollector( domain_name, env )
+        return PathCollector(domain_name, "")
 
 
-    def newWebSpider(self, domain_name, env=""):
-        return WebSpider.WebSpider( domain_name, env )
+    def newWebSpider(self, domain_name):
+        return WebSpider.WebSpider(domain_name)
 

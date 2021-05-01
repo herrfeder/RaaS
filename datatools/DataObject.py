@@ -1,20 +1,42 @@
 import pandas as pd
 import sqlite3
+from sqlalchemy import create_engine
+
 import glob
 import time
 import datetime
 from IPython.core.debugger import Tracer; debug_here = Tracer()
+from utils.RaasLogger import RaasLogger
 
 class DataObject():
 
-    def __init__(self,columns,env):
+    def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas_sqlite.db", postgre_ip="127.0.0.1", postgre_port=5432):
 
-        if columns:
-            self.df = pd.DataFrame(columns=columns)
+        self.log = RaasLogger(self.__class__.__name__)
+        self.scope = scope
+        if db not in ["sqlite", "postgre"]:
+            self.log.error(f"We have to quit, your given DB {db} isn't supported")
+        self.dbtype = db
+        self.sqlitefile = sqlitefile
+        self.postgre_ip = postgre_ip
+        
+        self.dbe = self.init_db()
 
-        self.dftype = env['dftype']
-        self.project = env['project']
 
+    def init_db(self):
+        if self.dbtype == "sqlite":
+            dbe = self.connect_sqlite()
+        print(dbe) 
+        return dbe
+
+
+    def connect_sqlite(self):
+        dbe = create_engine("sqlite:///"+self.sqlitefile)
+        self.log.info("Connected Successfully to SQLite Database")
+        return dbe
+
+
+    '''
     def dictlist_to_df(self,result_list):
         self.df = pd.DataFrame()
         for result in result_list:
@@ -95,4 +117,4 @@ if __name__ == "__main__":
         do.saveToCSV()
         time.sleep(2)
     debug_here()
-
+    '''
