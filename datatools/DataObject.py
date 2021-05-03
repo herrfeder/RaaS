@@ -1,6 +1,7 @@
 import pandas as pd
 import sqlite3
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
+from datatools.dataprototypes.datastructures import create_schema
 
 import glob
 import time
@@ -10,29 +11,48 @@ from utils.RaasLogger import RaasLogger
 
 class DataObject():
 
-    def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas_sqlite.db", postgre_ip="127.0.0.1", postgre_port=5432):
+    def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas", postgre_ip="127.0.0.1", postgre_port=5432):
 
         self.log = RaasLogger(self.__class__.__name__)
         self.scope = scope
         if db not in ["sqlite", "postgre"]:
             self.log.error(f"We have to quit, your given DB {db} isn't supported")
         self.dbtype = db
-        self.sqlitefile = sqlitefile
+        self.sqlitefile = sqlitefile + "_" + scope + ".db"
         self.postgre_ip = postgre_ip
-        
         self.dbe = self.init_db()
-
+        debug_here()
 
     def init_db(self):
         if self.dbtype == "sqlite":
             dbe = self.connect_sqlite()
-        print(dbe) 
+
+        if self.check_sqlite_file_empty(dbe):
+            self.log.info(f"SQLite Database for {self.scope} doesn't exist or is empty, initialize now.")
+            create_schema(dbe)
+
+        conn = dbe.connect()
+        trans = conn.begin()
+        trans.commit()
+        trans.close()
+
+         
         return dbe
 
 
+    def check_sqlite_file_empty(self, dbe):
+        dbe_inspect = inspect(dbe)
+        tables = dbe_inspect.get_table_names()
+        if not tables:
+            return True
+        else:
+            return False
+
+
     def connect_sqlite(self):
-        dbe = create_engine("sqlite:///"+self.sqlitefile)
-        self.log.info("Connected Successfully to SQLite Database")
+        sqlite_path = f"sqlite:///{self.sqlitefile}"
+        dbe = create_engine(sqlite_path)
+        self.log.info(f"Connected Successfully to SQLite Database with path {sqlite_path}")
         return dbe
 
 
