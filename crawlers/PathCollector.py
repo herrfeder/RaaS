@@ -23,13 +23,15 @@ tool_regex = {}
 
 class PathCollector(CrawlThreadPrototype):
 
-    def __init__(self, domain_name, env ):
+    def __init__(self, domain_name, data_object ):
 
         super(CrawlThreadPrototype, self).__init__()
         super(self.__class__, self).__init__()
         self.choosen = ["gau"]
         self.domain_name = domain_name
-        self.env = env
+        self.datalink = data_object.get_crawl_linker("pathinput", self.results)
+        self.datalink.start()
+
 
 
 

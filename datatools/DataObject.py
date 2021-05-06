@@ -2,6 +2,7 @@ import pandas as pd
 import sqlite3
 from sqlalchemy import create_engine, inspect
 from datatools.dataprototypes.datastructures import create_schema
+from prototypes.DataThreadPrototype import DataThreadPrototype
 
 import glob
 import time
@@ -9,11 +10,11 @@ import datetime
 from IPython.core.debugger import Tracer; debug_here = Tracer()
 from utils.RaasLogger import RaasLogger
 
-class DataObject():
-
+class DataObject(DataThreadPrototype):
     def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas", postgre_ip="127.0.0.1", postgre_port=5432):
+        super(DataThreadPrototype, self).__init__()
+        super(self.__class__, self).__init__()
 
-        self.log = RaasLogger(self.__class__.__name__)
         self.scope = scope
         if db not in ["sqlite", "postgre"]:
             self.log.error(f"We have to quit, your given DB {db} isn't supported")
@@ -21,7 +22,8 @@ class DataObject():
         self.sqlitefile = sqlitefile + "_" + scope + ".db"
         self.postgre_ip = postgre_ip
         self.dbe = self.init_db()
-        debug_here()
+
+
 
     def init_db(self):
         if self.dbtype == "sqlite":
@@ -31,12 +33,6 @@ class DataObject():
             self.log.info(f"SQLite Database for {self.scope} doesn't exist or is empty, initialize now.")
             create_schema(dbe)
 
-        conn = dbe.connect()
-        trans = conn.begin()
-        trans.commit()
-        trans.close()
-
-         
         return dbe
 
 

@@ -6,7 +6,7 @@ from utils.RaasLogger import RaasLogger
 class ThreadPrototype(threading.Thread): 
 
     def __init__(self):
-        #super(ThreadPrototype, self).__init__()
+        super(ThreadPrototype, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
         self.killed = False

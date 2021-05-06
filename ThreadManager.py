@@ -10,11 +10,8 @@ from crawlers.PathCollector import PathCollector
 import crawlers.WebSpider as WebSpider
 from utils.RaasLogger import RaasLogger
 import uuid
+from IPython.core.debugger import Tracer; debug_here = Tracer()
 
-
-#@Singleton
-#class SingletonDatabaseConnector(self, database_host="127.0.0.1", database_port=5432, database_name="raas")
-#    #    return DatabaseConnector.DatabaseConnector(database_host, database_port, database_name)
 
 
  
@@ -35,16 +32,14 @@ class ScopeThreadManager(ScopeSingleton):
     def __init__(self, scope):
         super(ScopeSingleton, self).__init__(scope)
         self.scope = scope
-        self.daob = self.newDataObject(self.scope)   
-
-
-    def newDataObject(self, scope):
-        return DataObject.DataObject(scope)
+                    
+        self.logger.debug(f"Creating DataObject for Scope {scope}")
+        self.daob = DataObject.DataObject(self.scope)
 
 
     def newPathCollector(self, domain_name):
-        self.logger.debug(f"Created new Pathcollector with {domain_name}")
-        return PathCollector(domain_name, "")
+        self.logger.debug(f"Created new Pathcollector for Scope {domain_name}")
+        return PathCollector(domain_name, self.daob)
 
 
     def newWebSpider(self, domain_name):

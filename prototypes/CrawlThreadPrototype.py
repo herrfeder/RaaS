@@ -13,15 +13,15 @@ class CrawlThreadPrototype(ThreadPrototype):
         super(ThreadPrototype, self).__init__()
         self.results = []
         self.log = RaasLogger(self.__class__.__name__)
-
+       
 
     def finish_cb(self):
-        self.log.debug("Thread finished gracefully")
+        self.log.debug("Thread finished gracefully, sending Data and quit.")
         return self.results
 
 
     def interrupt_cb(self, obj):
-        self.log.debug("Thread got killed and will be finished gracefully")
+        self.log.debug("Thread got killed and will be finished gracefully, sending Data and quit.")
         return self.results
 
 
