@@ -68,7 +68,7 @@ class WebSpider(threading.Thread):
         return output_reg_dict
 
 
-    @name_time_thread
+    @name_thread_crawl
     def run(self):
         print("[*] Running Module: Webspider")
         if "gospider" in self.choosen:

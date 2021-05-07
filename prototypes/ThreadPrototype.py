@@ -10,7 +10,7 @@ class ThreadPrototype(threading.Thread):
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
         self.killed = False
-
+        self.force = False
 
     def __run(self): 
         sys.settrace(self.globaltrace) 
@@ -34,11 +34,14 @@ class ThreadPrototype(threading.Thread):
     def localtrace(self, frame, event, arg): 
         if self.killed: 
             if event == 'line':
-                self.interrupt_cb(self)
+                self.interrupt_cb(self.force)
                 self.log.debug("Exiting Thread") 
                 raise SystemExit() 
         return self.localtrace 
     
 
-    def kill(self): 
+    def kill(self, force=False): 
+        if force:
+            self.force = True
         self.killed = True
+        
