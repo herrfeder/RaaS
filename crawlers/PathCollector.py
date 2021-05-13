@@ -23,12 +23,11 @@ tool_regex = {}
 
 class PathCollector(CrawlThreadPrototype):
 
-    def __init__(self, domain_name, data_object):
+    def __init__(self, domain_name, data_object, tool):
 
         #super().__init__("pathinput", data_object)
-        super(PathCollector, self).__init__("pathinput", data_object)
-        super(self.__class__, self).__init__("pathinput", data_object)
-        self.choosen = ["gau"]
+        #super(PathCollector, self).__init__("pathinput", data_object)
+        super(self.__class__, self).__init__("pathinput", data_object, tool)
         self.domain_name = domain_name
         
 
@@ -51,7 +50,7 @@ class PathCollector(CrawlThreadPrototype):
     @name_thread_crawl
     def run(self):
         self.log.info("Running Module: Pathcollector")
-        if "gau" in self.choosen:
+        if self.tool == "gau":
             # TOOL LOOP
             for output in self.run_tool(toolcmds=["/home/theia/tools/bin/gau", self.domain_name]):
                 self.extract_output(output)

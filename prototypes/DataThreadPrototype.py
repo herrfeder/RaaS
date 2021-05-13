@@ -5,8 +5,12 @@ from prototypes.ThreadPrototype import ThreadPrototype
 import uuid
 from utils.RaasLogger import RaasLogger
 from utils.threadutil import *
+
 from sqlalchemy import create_engine, inspect, insert
-from datatools.dataprototypes.datastructures import create_schema, url_table
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+
+from datatools.dataprototypes.datastructures import create_schema, URLInputTable
 from IPython.core.debugger import Tracer; debug_here = Tracer()
 
 
@@ -18,7 +22,7 @@ def pop_all(l):
 
 
 class DataLinker(ThreadPrototype):
-    def __init__(self, datatype, source_data, event, interval=5):
+    def __init__(self, datatype, source_data, event, source_tool="generic",  interval=5):
         #super(ThreadPrototype, self).__init__()
         super(self.__class__, self).__init__()
 
@@ -27,6 +31,7 @@ class DataLinker(ThreadPrototype):
         self.source_data = source_data
         self.interval = interval
         self.stopped = event
+        self.source_tool = source_tool
 
         self.target_data = []
 
@@ -35,7 +40,13 @@ class DataLinker(ThreadPrototype):
         while not self.stopped.wait(self.interval):
             if self.source_data:
                 self.log.debug(f"Getting {len(self.source_data)} data elements")
-                self.target_data.extend(pop_all(self.source_data))
+                self.parse_datatype_dict()
+                
+
+    def parse_datatype_dict(self):
+        if self.datatype == "pathinput":
+            for url in pop_all(self.source_data):
+                self.target_data.append({"value":url, "source":self.source_tool})
 
 
 
@@ -55,8 +66,8 @@ class DataLinkerObserver(ThreadPrototype):
                 if self.dl_dict[el]["datalinker_object"].target_data:
                     target_data = self.dl_dict[el]["datalinker_object"].target_data
                     self.log.info(f"Having {len(target_data)} data elements")
-                    debug_here()
-                    self.database_con.dbe.execute(url_table.__table__.insert(), )
+                    self.database_con.db_session.bulk_insert_mappings(URLInputTable, pop_all(target_data))
+                    self.database_con.db_session.commit()
 
 
 
@@ -80,10 +91,10 @@ class DataLinkerDict(ThreadPrototype):
                                     "datatype": datatype}
 
     
-    def create_linker(self, datatype, source_data, interval):
+    def create_linker(self, datatype, source_data, tool,interval):
         datalinker_event = Event()
         datalinker_id = uuid.uuid4().hex
-        datalinker_object = DataLinker(datatype, source_data, datalinker_event, interval)
+        datalinker_object = DataLinker(datatype, source_data, datalinker_event, tool, interval)
 
         self.add_linker(datalinker_id, 
                         datalinker_object,
@@ -99,6 +110,9 @@ class DatabaseConnector(ThreadPrototype):
         self.log = RaasLogger(self.__class__.__name__)
         if db not in ["sqlite", "postgre"]:
             self.log.error(f"We have to quit, your given DB {db} isn't supported")
+
+        self.db_session = scoped_session(sessionmaker())
+        self.scope = scope
         self.dbtype = db
         self.sqlitefile = sqlitefile + "_" + scope + ".db"
         self.postgre_ip = postgre_ip
@@ -112,6 +126,9 @@ class DatabaseConnector(ThreadPrototype):
         if self.check_sqlite_file_empty():
             self.log.info(f"SQLite Database for {self.scope} doesn't exist or is empty, initialize now.")
             create_schema(self.dbe)
+
+        self.db_session.configure(bind=self.dbe, autoflush=False, expire_on_commit=False)
+
 
 
     def check_sqlite_file_empty(self):
@@ -165,8 +182,8 @@ class DataThreadPrototype(ThreadPrototype):
         return self.results
 
 
-    def get_crawl_linker(self, datatype, source_data, interval=5):
-        return self.DLDict.create_linker(datatype,source_data, interval)
+    def get_crawl_linker(self, datatype, source_data, source_tool="generic", interval=5):
+        return self.DLDict.create_linker(datatype, source_data, source_tool, interval)
 
 
 

@@ -22,7 +22,7 @@ if __name__ == '__main__':
     #stm_new2 = ScopeThreadManager("deezerkack2.com")
     #atm = AppThreadManager(app_id)
 
-    pc = stm.newPathCollector("https://deezer.com")
+    pc = stm.newPathCollector("https://deezer.com", "gau")
     pc.start()
 
     for thread in threading.enumerate(): 

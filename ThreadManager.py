@@ -37,9 +37,9 @@ class ScopeThreadManager(ScopeSingleton):
         self.daob = DataObject.DataObject(self.scope)
 
 
-    def newPathCollector(self, domain_name):
+    def newPathCollector(self, domain_name, tool):
         self.logger.debug(f"Created new Pathcollector for Scope {domain_name}")
-        return PathCollector(domain_name, self.daob)
+        return PathCollector(domain_name, self.daob, tool)
 
 
     def newWebSpider(self, domain_name):

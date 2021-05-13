@@ -11,8 +11,6 @@ from utils.RaasLogger import RaasLogger
 class DataObject(DataThreadPrototype):
     def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas", postgre_ip="127.0.0.1", postgre_port=5432):
 
-       
-        #super(DataThreadPrototype, self).__init__(scope, db, sqlitefile, postgre_ip, postgre_port)
         super(self.__class__, self).__init__(scope, db, sqlitefile, postgre_ip, postgre_port)
 
 

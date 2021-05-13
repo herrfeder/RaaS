@@ -9,12 +9,13 @@ import time
 
 class CrawlThreadPrototype(ThreadPrototype): 
 
-    def __init__(self, datatype, data_object):
+    def __init__(self, datatype, data_object, tool):
         super(CrawlThreadPrototype, self).__init__()
         self.results = []
         self.log = RaasLogger(self.__class__.__name__)
+        self.tool = tool
 
-        datalink_d = data_object.get_crawl_linker(datatype, self.results)
+        datalink_d = data_object.get_crawl_linker(datatype, self.results, self.tool)
         self.datalink = datalink_d["datalinker_object"]
         self.datalink_event = datalink_d["datalinker_event"]
         self.datalink.start()
