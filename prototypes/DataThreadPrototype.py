@@ -11,6 +11,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 from datatools.dataprototypes.datastructures import create_schema, URLInputTable
+import json
 from IPython.core.debugger import Tracer; debug_here = Tracer()
 
 
@@ -39,14 +40,24 @@ class DataLinker(ThreadPrototype):
     def run(self):
         while not self.stopped.wait(self.interval):
             if self.source_data:
-                self.log.debug(f"Getting {len(self.source_data)} data elements")
+                self.log.info(f"Getting {len(self.source_data)} data elements")
                 self.parse_datatype_dict()
                 
 
     def parse_datatype_dict(self):
         if self.datatype == "pathinput":
-            for url in pop_all(self.source_data):
-                self.target_data.append({"value":url, "source":self.source_tool})
+            if self.source_tool == "gau":
+                for dataline in pop_all(self.source_data):
+                    self.target_data.append({"url":dataline, 
+                                             "source":self.source_tool, 
+                                             "urltype":"generic"})
+            if self.source_tool == "gospider":
+                for dataline in pop_all(self.source_data):
+                    source_dict = json.loads(dataline)
+                    self.target_data.append({"url":source_dict["output"],
+                                             "source":self.source_tool,
+                                             "urltype":source_dict["type"]})
+
 
 
 

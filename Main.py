@@ -24,6 +24,8 @@ if __name__ == '__main__':
 
     pc = stm.newPathCollector("https://deezer.com", "gau")
     pc.start()
+    pc_02 = stm.newPathCollector("https://deezer.com", "gospider")
+    pc_02.start()
 
     for thread in threading.enumerate(): 
         print(thread.name)
