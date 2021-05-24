@@ -41,8 +41,8 @@ class PathCollector(CrawlThreadPrototype):
             if tool== "generic_tool":
                 input_reg_dict = tool_regex
         except:
-            # add logging and exit
-            pass
+            self.log.debug("Special Regex Syntax")    
+            
         for key in input_reg_dict.keys():
             output_reg_dict[re.compile(input_reg_dict[key])] = key
         
@@ -55,7 +55,6 @@ class PathCollector(CrawlThreadPrototype):
         # TOOL LOOP
         cmd = CMD[self.tool]
         cmd.append(self.domain_name)
-        print(cmd)
         for output in self.run_tool(toolcmds=cmd):
             self.extract_output(output)
         
@@ -68,10 +67,4 @@ class PathCollector(CrawlThreadPrototype):
         self.append_results(output_line)
         
 
-            
-
-if __name__ == "__main__":
-
-    pc = PathCollector("https://deezer.com", {})
-    pc.run()
 

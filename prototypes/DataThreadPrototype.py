@@ -40,7 +40,7 @@ class DataLinker(ThreadPrototype):
     def run(self):
         while not self.stopped.wait(self.interval):
             if self.source_data:
-                self.log.info(f"Getting {len(self.source_data)} data elements")
+                #self.log.info(f"Getting {len(self.source_data)} data elements")
                 self.parse_datatype_dict()
                 
 
@@ -48,13 +48,13 @@ class DataLinker(ThreadPrototype):
         if self.datatype == "pathinput":
             if self.source_tool == "gau":
                 for dataline in pop_all(self.source_data):
-                    self.target_data.append({"url":dataline, 
+                    self.target_data.append({"url":dataline.rstrip(), 
                                              "source":self.source_tool, 
                                              "urltype":"generic"})
             if self.source_tool == "gospider":
                 for dataline in pop_all(self.source_data):
                     source_dict = json.loads(dataline)
-                    self.target_data.append({"url":source_dict["output"],
+                    self.target_data.append({"url":source_dict["output"].rstrip(),
                                              "source":self.source_tool,
                                              "urltype":source_dict["type"]})
 
@@ -66,7 +66,7 @@ class DataLinkerObserver(ThreadPrototype):
         super(self.__class__, self).__init__()
         self.log = RaasLogger(self.__class__.__name__)
 
-        self.database_con = database_con
+        self.db_con = database_con
 
     def register(self, dl_dict):
         self.dl_dict = dl_dict
@@ -75,11 +75,11 @@ class DataLinkerObserver(ThreadPrototype):
         while True:
             for el in list(self.dl_dict.keys()):
                 if self.dl_dict[el]["datalinker_object"].target_data:
+                    print(len(self.dl_dict[el]["datalinker_object"].target_data))
                     target_data = self.dl_dict[el]["datalinker_object"].target_data
-                    self.log.info(f"Having {len(target_data)} data elements")
-                    self.database_con.db_session.bulk_insert_mappings(URLInputTable, pop_all(target_data))
-                    self.database_con.db_session.commit()
-
+                    self.log.info(f"Inserting {len(target_data)} data elements")
+                    self.db_con.insert_bulk(pop_all(target_data))
+                    print(len(self.dl_dict[el]["datalinker_object"].target_data))
 
 
 
@@ -158,10 +158,9 @@ class DatabaseConnector(ThreadPrototype):
         return dbe
 
 
-    def insert_data(self, data_dict):
-        stmt = (
-            insert(url_table).values(**data_dict)
-        )   
+    def insert_bulk(self, data_dict):
+        self.db_session.bulk_insert_mappings(URLInputTable, pop_all(data_dict))
+        self.db_session.commit()
 
 
 
@@ -193,7 +192,7 @@ class DataThreadPrototype(ThreadPrototype):
         return self.results
 
 
-    def get_crawl_linker(self, datatype, source_data, source_tool="generic", interval=5):
+    def get_input_linker(self, datatype, source_data, source_tool="generic", interval=5):
         return self.DLDict.create_linker(datatype, source_data, source_tool, interval)
 
 

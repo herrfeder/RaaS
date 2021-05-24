@@ -15,7 +15,7 @@ class CrawlThreadPrototype(ThreadPrototype):
         self.log = RaasLogger(self.__class__.__name__)
         self.tool = tool
 
-        datalink_d = data_object.get_crawl_linker(datatype, self.results, self.tool)
+        datalink_d = data_object.get_input_linker(datatype, self.results, self.tool)
         self.datalink = datalink_d["datalinker_object"]
         self.datalink_event = datalink_d["datalinker_event"]
         self.datalink.start()
