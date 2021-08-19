@@ -23,16 +23,42 @@ def pop_all(l):
 
 
 class DataLinker(ThreadPrototype):
+    """
+    Threading Class that parses source data from RAAS modules into data dictionary.
+    For each running RAAS module will be created a unique DataLinker Thread. 
+    
+    Attributes
+    ----------
+    datatype : str
+        type of data structure that originates from running module
+    source_data : list
+        list of individual data payloads from module output
+    stopped : threading.Event
+        signal to stop the running thread
+    source_tool : str
+        name of tool that defines the explicit data fields to catch
+    interval: int
+        how often the data is fetched from the tool
+
+    Methods
+    -------
+    run():
+        starts thread and will fetch data based on set interval and stop event
+    parse_datatype_dict():
+        parses source data into target data based on datatype and source_tool
+
+     
+    """
     def __init__(self, datatype, source_data, event, source_tool="generic",  interval=5):
-        #super(ThreadPrototype, self).__init__()
         super(self.__class__, self).__init__()
 
         self.log = RaasLogger(self.__class__.__name__)
         self.datatype = datatype
         self.source_data = source_data
-        self.interval = interval
         self.stopped = event
         self.source_tool = source_tool
+        self.interval = interval
+
 
         self.target_data = []
 
@@ -40,7 +66,7 @@ class DataLinker(ThreadPrototype):
     def run(self):
         while not self.stopped.wait(self.interval):
             if self.source_data:
-                #self.log.info(f"Getting {len(self.source_data)} data elements")
+                self.log.debug(f"Getting {len(self.source_data)} data elements")
                 self.parse_datatype_dict()
                 
 
@@ -65,7 +91,6 @@ class DataLinkerObserver(ThreadPrototype):
     def __init__(self, database_con):
         super(self.__class__, self).__init__()
         self.log = RaasLogger(self.__class__.__name__)
-
         self.db_con = database_con
 
     def register(self, dl_dict):
@@ -117,6 +142,35 @@ class DataLinkerDict(ThreadPrototype):
 
 
 class DatabaseConnector(ThreadPrototype):
+    """
+    Threading Class that will create the connector to the dataase
+    For each running RAAS scope will be created a unique DatabaseConnector Thread. 
+    
+    Attributes
+    ----------
+    db_session : sqlalchemy.orm
+        database connection that supports bulk input and orm
+    scope : str
+        scope domain will identify the scope database
+    dbtype : str
+        database backend (sqlite or postgres)
+    sqlitefile : str
+        string with the location of sqlite file
+    postgre_ip : str
+        IP address for postgres database
+    interval: int
+        how often the data is fetched from the tool
+
+    Methods
+    -------
+    run():
+        starts thread and will fetch data based on set interval and stop event
+    parse_datatype_dict():
+        parses source data into target data based on datatype and source_tool
+
+     
+    """
+
     def __init__(self, scope, db, sqlitefile, postgre_ip, postgre_port):
         self.log = RaasLogger(self.__class__.__name__)
         if db not in ["sqlite", "postgre"]:
@@ -164,7 +218,14 @@ class DatabaseConnector(ThreadPrototype):
 
 
 
-class DataThreadPrototype(ThreadPrototype): 
+class DataThreadPrototype(ThreadPrototype):
+    """
+    Threading Class that inits 
+        - Database Connection (DatabaseConnector)
+            + Data Backend for collected and analyzed data   
+        - Data
+    """
+
     def __init__(self, scope, db, sqlitefile, postgre_ip, postgre_port):
         super(ThreadPrototype, self).__init__()
         self.log = RaasLogger(self.__class__.__name__)
