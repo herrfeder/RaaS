@@ -35,7 +35,7 @@ class ThreadPrototype(threading.Thread):
         if self.killed: 
             if event == 'line':
                 self.interrupt_cb(self.force)
-                self.log.debug("Exiting Thread") 
+                self.log.debug("The Thread got an kill signal. Exiting Thread.") 
                 raise SystemExit() 
         return self.localtrace 
     

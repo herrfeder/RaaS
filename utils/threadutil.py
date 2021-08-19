@@ -21,3 +21,12 @@ def name_thread_datalinker(method):
 
     return inner
 
+def name_thread_datalinker_observer(method):
+    def inner(ref):
+        ref.start_time = datetime.now().strftime("%H:%M:%S")
+        ref.setName(type(ref).__name__ +"_"+ref.db_con.scope+"_"+ref.start_time)
+
+        return method(ref)
+
+    return inner
+

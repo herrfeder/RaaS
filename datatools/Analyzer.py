@@ -1,3 +1,5 @@
+
+
 db_con = DatabaseConnector(scope="deezer.com")
 
 df = pd.read_sql_table("url_input_table" , db_con.dbe)
