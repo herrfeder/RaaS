@@ -1,6 +1,6 @@
 import pandas as pd
 import sqlite3
-from prototypes.DataThreadPrototype import DataThreadPrototype
+from prototypes.DataPrototype import DataPrototype
 
 import glob
 import time
@@ -8,7 +8,8 @@ import datetime
 from IPython.core.debugger import Tracer; debug_here = Tracer()
 from utils.RaasLogger import RaasLogger
 
-class DataObject(DataThreadPrototype):
+
+class DataObject(DataPrototype):
     def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas", postgre_ip="127.0.0.1", postgre_port=5432):
 
         super(self.__class__, self).__init__(scope, db, sqlitefile, postgre_ip, postgre_port)

@@ -4,6 +4,11 @@ from IPython.core.debugger import Tracer; debughere = Tracer()
 import json
 
 
+def pop_all(l):
+    r, l[:] = l[:], []
+    return r
+
+
 def extract_scan(df, ip="", protocol="tcp"):
     if ip:
         scan = df[df["ip"] == ip][protocol].iloc[0]

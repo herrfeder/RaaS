@@ -3,7 +3,7 @@ from datatools import DataObject
 #import PortScanner
 #import crawlers.DirectoryTraversal as DirectoryTraversal
 
-from prototypes.SingletonPrototype import AppSingleton, ScopeSingleton
+from prototypes.thread.SingletonPrototype import AppSingleton, ScopeSingleton
 import signal
 import threading
 from crawlers.PathCollector import PathCollector

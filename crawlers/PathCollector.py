@@ -2,16 +2,16 @@ import pathlib
 import sys
 APP_PATH = pathlib.Path(__file__).parent.resolve()
 sys.path.append(APP_PATH)
-
-from utils.threadutil import *
-from prototypes.CrawlThreadPrototype import CrawlThreadPrototype
-
 import time
 import re
 import logging
 import threading
 import re
 from IPython.core.debugger import Tracer; debughere=Tracer()
+
+from utils.threadutil import *
+from prototypes.CrawlPrototype import CrawlPrototype
+
 
 
 
@@ -25,7 +25,7 @@ CMD={"gau":[PATH["gau"]],
 
 tool_regex = {}
 
-class PathCollector(CrawlThreadPrototype):
+class PathCollector(CrawlPrototype):
 
     def __init__(self, domain_name, data_object, tool):
 

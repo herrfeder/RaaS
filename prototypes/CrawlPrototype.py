@@ -1,16 +1,16 @@
 import sys
 import threading
 import subprocess
-from prototypes.ThreadPrototype import ThreadPrototype
+from prototypes.thread.ThreadPrototype import ThreadPrototype
 from utils.RaasLogger import RaasLogger
 import time
 
 
 
-class CrawlThreadPrototype(ThreadPrototype): 
+class CrawlPrototype(ThreadPrototype): 
 
     def __init__(self, datatype, data_object, tool):
-        super(CrawlThreadPrototype, self).__init__()
+        super(CrawlPrototype, self).__init__()
         self.results = []
         self.log = RaasLogger(self.__class__.__name__)
         self.tool = tool

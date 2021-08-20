@@ -20,7 +20,7 @@ class URLResponseTable(ORMBase):
     source = Column(String(128))
     sourceid = Column(String(40))
     responsecode = Column(Integer())
-    responseheaders = Column(String(1024))
+    responseheaders = Column(String(2048))
     responsetime = Column(String(128))
     tags = Column(String(256))
 
