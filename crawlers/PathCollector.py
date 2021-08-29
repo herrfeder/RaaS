@@ -27,9 +27,9 @@ tool_regex = {}
 
 class PathCollector(CrawlPrototype):
 
-    def __init__(self, domain_name, data_object, tool):
+    def __init__(self, domain_name, data_object, tool, sm_write_lock):
 
-        super(self.__class__, self).__init__("pathinput", data_object, tool)
+        super(self.__class__, self).__init__("pathinput", data_object, tool, sm_write_lock)
         self.domain_name = domain_name
         
 
@@ -52,7 +52,6 @@ class PathCollector(CrawlPrototype):
     @name_thread_crawl
     def run(self):
         self.log.info("Running Module: Pathcollector")
-        # TOOL LOOP
         cmd = CMD[self.tool]
         cmd.append(self.domain_name)
         for output in self.run_tool(toolcmds=cmd):

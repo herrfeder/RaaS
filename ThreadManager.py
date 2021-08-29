@@ -35,11 +35,27 @@ class ScopeThreadManager(ScopeSingleton):
                     
         self.logger.debug(f"Creating DataObject for Scope {scope}")
         self.daob = DataObject.DataObject(self.scope)
+        self._write_lock = False
 
+
+    @property
+    def write_lock(self):
+        return self._write_lock
+
+
+    def write_lock_setter(self, lockvalue=""):
+        if self._write_lock and (lockvalue == False):
+            self.logger.info("Unlocking the Write Lock")
+            self._write_lock = lockvalue
+        elif not self._write_lock and (lockvalue == True):
+            self.logger.info("Locking the Crawler Lock")
+            self._write_lock = lockvalue
+        else:
+            return self.write_lock
 
     def newPathCollector(self, domain_name, tool):
         self.logger.debug(f"Created new Pathcollector for Scope {domain_name}")
-        return PathCollector(domain_name, self.daob, tool)
+        return PathCollector(domain_name, self.daob, tool, self.write_lock_setter)
 
 
     def newWebSpider(self, domain_name):

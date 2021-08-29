@@ -9,11 +9,12 @@ import time
 
 class CrawlPrototype(ThreadPrototype): 
 
-    def __init__(self, datatype, data_object, tool):
+    def __init__(self, datatype, data_object, tool, sm_write_lock):
         super(CrawlPrototype, self).__init__()
         self.results = []
         self.log = RaasLogger(self.__class__.__name__)
         self.tool = tool
+        self.write_lock = sm_write_lock
 
         datalink_d = data_object.get_input_linker(datatype, self.results, self.tool)
         self.datalink = datalink_d["datalinker_object"]
@@ -25,6 +26,7 @@ class CrawlPrototype(ThreadPrototype):
         self.log.debug("Thread finished gracefully, sending Data and quit.")
         while not self.results and not self.datalink.target_data:
             time.sleep(1)
+        self.remove_lock()
         
 
     def interrupt_cb(self, force):
@@ -34,10 +36,23 @@ class CrawlPrototype(ThreadPrototype):
                 time.sleep(1)
         else:
             self.log.info("Thread got killed got forced to exit, kill without rescuing data.")
+        self.remove_lock()
+    
+    def check_set_lock(self):
+        while self.write_lock():
+            self.log.info("Log is set, waiting")
+            time.sleep(5)
+        self.log.info("set lock")
+        print(self.write_lock)
+        self.write_lock(True)
+
+    def remove_lock(self):
+        self.write_lock(False)
 
 
     def run_tool(self, toolcmds):
 
+        self.check_set_lock()
         ##############################
         ### TODO add cmd build utility
         ##############################
