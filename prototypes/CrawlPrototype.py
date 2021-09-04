@@ -14,7 +14,7 @@ class CrawlPrototype(ThreadPrototype):
         self.results = []
         self.log = RaasLogger(self.__class__.__name__)
         self.tool = tool
-        self.write_lock = sm_write_lock
+        self.write_lock_setter = sm_write_lock
 
         datalink_d = data_object.get_input_linker(datatype, self.results, self.tool)
         self.datalink = datalink_d["datalinker_object"]
@@ -39,15 +39,18 @@ class CrawlPrototype(ThreadPrototype):
         self.remove_lock()
     
     def check_set_lock(self):
-        while self.write_lock():
-            self.log.info("Log is set, waiting")
-            time.sleep(5)
+        #if self.write_lock_setter():
+            #self.log.info("Log is set, waiting")
+        #    self.pause()
         self.log.info("set lock")
-        print(self.write_lock)
-        self.write_lock(True)
+        self.write_lock_setter(True)
+        print(f"Run in CrawlPrototype {self.write_lock_setter()}")
+
+
 
     def remove_lock(self):
-        self.write_lock(False)
+        self.log.info("Remove lock")
+        self.write_lock_setter(False)
 
 
     def run_tool(self, toolcmds):

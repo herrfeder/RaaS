@@ -11,11 +11,22 @@ class ThreadPrototype(threading.Thread):
         self.thread.deamon = True
         self.killed = False
         self.force = False
+        self.__flag = threading.Event() # The flag used to pause the thread
+        self.__flag.set() # Set to True
+        self.__running = threading.Event() # Used to stop the thread identification
+        self.__running.set() # Set running to True
 
     def __run(self): 
         sys.settrace(self.globaltrace) 
         self.__run_backup() 
         self.run = self.__run_backup 
+
+
+    def pause(self):
+        self.__flag.clear() # Set to False to block the thread
+
+    def resume(self):
+        self.__flag.set() # Set to True, let the thread stop blocking
 
 
     def start(self): 

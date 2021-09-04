@@ -33,7 +33,6 @@ class PathCollector(CrawlPrototype):
         self.domain_name = domain_name
         
 
-
     def compile_regex(self, tool=""):
         input_reg_dict = {}
         output_reg_dict = {}
@@ -51,7 +50,7 @@ class PathCollector(CrawlPrototype):
 
     @name_thread_crawl
     def run(self):
-        self.log.info("Running Module: Pathcollector")
+        self.log.info(f"Running Module: Pathcollector with {self.tool}")
         cmd = CMD[self.tool]
         cmd.append(self.domain_name)
         for output in self.run_tool(toolcmds=cmd):
