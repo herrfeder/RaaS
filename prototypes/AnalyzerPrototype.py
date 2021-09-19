@@ -10,7 +10,7 @@ import time
 class AnalyzerPrototype(ThreadPrototype): 
 
     def __init__(self, datatype, data_object, tool, sm_write_lock):
-        super(CrawlPrototype, self).__init__()
+        super(self.__class__, self).__init__()
         self.results = []
         self.log = RaasLogger(self.__class__.__name__)
         self.tool = tool

@@ -9,7 +9,7 @@ from utils.datasupport import *
 from prototypes.thread.ThreadPrototype import ThreadPrototype
 from datatools.dataprototypes.datastructures import create_schema, URLInputTable
 
-class DatabasePrototype(ThreadPrototype):
+class DatabaseInitPrototype(ThreadPrototype):
     """
     Threading Class that will create the connector to the dataase
     For each running RAAS scope will be created a unique DatabaseConnector Thread. 
@@ -42,6 +42,7 @@ class DatabasePrototype(ThreadPrototype):
     """
 
     def __init__(self, scope, db, sqlitefile, postgre_ip, postgre_port):
+        #super(DatabaseInitPrototype, self).__init__(scope, db, sqlitefile, postgre_ip, postgre_port)
         self.log = RaasLogger(self.__class__.__name__)
         if db not in ["sqlite", "postgre"]:
             self.log.error(f"We have to quit, your given DB {db} isn't supported")
@@ -65,7 +66,6 @@ class DatabasePrototype(ThreadPrototype):
         self.db_session.configure(bind=self.dbe, autoflush=False, expire_on_commit=False)
 
 
-
     def check_sqlite_file_empty(self):
         dbe_inspect = inspect(self.dbe)
         tables = dbe_inspect.get_table_names()
@@ -82,6 +82,22 @@ class DatabasePrototype(ThreadPrototype):
         return dbe
 
 
+class DatabaseInputPrototype(DatabaseInitPrototype):
+
     def insert_bulk(self, data_dict):
         self.db_session.bulk_insert_mappings(URLInputTable, pop_all(data_dict))
         self.db_session.commit()
+
+
+class DatabaseOutputPrototype(DatabaseInitPrototype):
+    
+    def exfil_bulk(self, data_dict):
+        self.db_session.bulk_insert_mappings(URLInputTable, pop_all(data_dict))
+        self.db_session.commit()
+
+class DatabasePrototype(DatabaseInputPrototype, DatabaseOutputPrototype):
+    def __init__(self, scope, db, sqlitefile, postgre_ip, postgre_port):
+        super(self.__class__, self).__init__(scope, db, sqlitefile, postgre_ip, postgre_port)
+
+
+    

@@ -177,6 +177,7 @@ class DataLinkerObserver(ThreadPrototype):
         else:
             self.log.debug("The dl_dict isn't registered yet")
 
+
     def is_datalinker_dict_empty(self):
         linker_keys = list(self.dl_dict.keys())
         if not len(linker_keys):
@@ -188,14 +189,9 @@ class DataLinkerObserver(ThreadPrototype):
                 return True
 
 
-
-
-
-
-
 class DataPrototype(ThreadPrototype):
     """
-    Threading Class that inits and iunterfaces all previous Classes in this file.
+    Threading Class that inits and interfaces all previous Classes in this file.
     For each running RAAS scope will be created a unique DataThreadPrototype. 
     It manages:
         - Database Connection (DatabaseConnector)
