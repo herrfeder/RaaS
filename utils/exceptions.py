@@ -29,3 +29,9 @@ class NoScanAvailable(Error):
 
 class WrongDataFrameSize(Error):
     pass
+
+class SpiderError(Error):
+    pass
+
+class ServerBlocked(Error):
+    pass

@@ -1,5 +1,5 @@
 import re
-from IPython.core.debugger import Tracer; debug_here=Tracer()
+from IPython.core.debugger import Tracer; debughere=Tracer()
 import logging
 import threading
 from paths import PATH
@@ -9,7 +9,9 @@ import json
 import datetime
 from utility import eval_url
 from exceptions import WrongDomainSyntax, DomainNoIp
-
+from misc.settings import raas_dictconfig
+import logging
+from logging.config import dictConfig
 
 class DirectoryTraversal(threading.Thread):
 
@@ -19,30 +21,39 @@ class DirectoryTraversal(threading.Thread):
         super(DirectoryTraversal, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_spider")
         self.env = env
         self.result_list = []
         self.fin = 0
+        self.scanned_hosts = []
 
 
-    def run(self, target, port=""):
+    def run(self, target, port=[""]):
         print("[*] Running Module: Directory Traversal")
-        self.runDirsearch(target, port)
+        if not (target,port) in self.scanned_hosts:
+            self.scanned_hosts.append((target,port))
+            return self.run_dirsearch(target, port)
+        else:
+            print("is in scanned hosts")
 
-    def runDirsearch(self, target, port="", extension="php,js,txt,yml", wordlist=""):
+    def run_dirsearch(self, target, port="", extension="php,js,txt,yml", wordlist=""):
         url = ""
         url_dict = ""
         try:
             url, url_dict = eval_url(target, port)
         except (DomainNoIp, WrongDomainSyntax) as e:
             print(e)
+            self.lgg.exception("Got Error:")
             return -1
 
         if not url:
             return -1
 
         print("\t[+] Starting Dirsearch for {}".format(url))
-        timedate = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        timedate = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S.%f")[:-3]
         report_name = "temp/"+timedate+"_"+self.env['project']+"_"+self.env['dftype']
+        print(report_name)
         cmd_arr =  [PATH["dirsearch"],
                    '-u', url,
                    '-e', extension,
@@ -66,6 +77,7 @@ class DirectoryTraversal(threading.Thread):
 
         except Exception as e:
             print(e)
+            self.lgg.exception("Got Error:")
             resultdata = [{"status":"noscan",
                           "content-length":"",
                           "redirect":"",
@@ -74,16 +86,19 @@ class DirectoryTraversal(threading.Thread):
         resultdata = [dict(item, **{'uri':uri,
                             'port':url_dict['port'],
                             'ssl':url_dict['ssl'],
-                            'domain':url_dict['domain'].split("/")[0]}) for item in resultdata]
+                            'domain':url_dict['base_url'].split("/")[0]}) for item in resultdata]
 
         self.result_list.append(resultdata)
  
         try:
             os.remove(report_name)
-        except:
+        except Exception as e:
+            print(e)
             pass
 
-    def getResultList(self):
+        return resultdata
+
+    def get_result_list(self):
         return self.result_list
 
 if __name__ == '__main__':

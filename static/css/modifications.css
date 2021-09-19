@@ -143,3 +143,12 @@ i {
     resize: none;
 }
 
+.numbercircle {
+    width: 120px;
+    line-height: 120px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 32px;
+    border: 2px solid #aaa;
+    background-color: #aaa;
+}

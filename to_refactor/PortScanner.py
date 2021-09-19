@@ -2,9 +2,11 @@ import re
 from IPython.core.debugger import Tracer; debug_here=Tracer()
 import logging
 import threading
-from utility import getIPfromDomain, evalTarget
+from utility import get_ip_from_domain, eval_target
 import nmap
 import json
+from misc.settings import raas_dictconfig
+from logging.config import dictConfig
 
 PATH={ "amass":"../amass/amass",
         "subfinder":"../subfinder",
@@ -13,68 +15,70 @@ PATH={ "amass":"../amass/amass",
 
 
 class PortScanner(threading.Thread):
-
-
     def __init__(self, env="", load=False):
 
         super(PortScanner, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_portscan")
         self.result_list = []
         self.fin = 0
-
+        self.scanned_hosts = []
 
     def run(self, target):
-        print("[*] Running Module: PortScanner")
-        eval_target,target = evalTarget(target)
-        if eval_target != "invalid":
-            if eval_target == "ip":
-                self.scanHost(target)
-            elif eval_target == "range":
-                self.scanRange(target)
+        self.lgg.info("[*] Running Module: PortScanner")
+        evaltarget,target = eval_target(target)
+        if evaltarget != "invalid":
+            if evaltarget == "ip":
+                if target not in self.scanned_hosts:
+                    self.scanned_hosts.append(target)
+                    return self.scan_host(target)
+            elif evaltarget == "range":
+                # TODO: create generator that creates ip's from range string
+                return self.scan_host(target)
         else:
            return -1
 
-    def scanHost(self, target):
-        final_result = {"host":"","tcp":"","udp":""}
+    def scan_host(self, target):
         nm = nmap.PortScanner()
+        # scan top 10 ports to check if the host is online
         result = nm.scan(target,arguments='--top-ports 10')
         if result['nmap']['scanstats']['uphosts'] == "0":
-            print("\t[+] Host {} seems offline, try to surpress Ping".format(target))
+            self.lgg.debug("[+] Host {} seems offline, try to surpress Ping".format(target))
             result = nm.scan(target,arguments='-Pn -p-')
             if result['nmap']['scanstats']['uphosts'] == "0":
-                print("\t[+] Host {} seems still offline, maybe it's down".format(target))
-                final_result['host'] == "down"
+                self.lgg.debug("[+] Host {} seems still offline, maybe it's down".format(target))
+                return ""
             else:
-
-                print("\t[+] Host {} is online".format(target))
+                print("[+] Host {} is online".format(target))
+                self.lgg.info("[+] Host {} is online".format(target))
                 tcp_ports = 0
-                tcp = self.getContent(result, 'tcp')
-                if tcp: 
+                tcp = self.get_content(result, 'tcp')
+                if tcp:
                     tcp_ports = list(tcp.keys())
                     if len(tcp_ports) > 0:
                         result = nm.scan(target,arguments='-Pn -sV -p-')
-                        final_result['host'] = "up"
-                        final_result['tcp'] = json.dumps(self.getContent(result, 'tcp'))
+                        final_result = self.get_content(result, 'tcp')
         else:
 
-            print("\t[+] Host {} is online".format(target))
+            print("[+] Host {} is online".format(target))
+            self.lgg.info("[+] Host {} is online".format(target))
             result = nm.scan(target, arguments='-sV -p-')
-            final_result['host'] = "up"
-            final_result['tcp'] = json.dumps(result['scan'][list(result['scan'].keys())[0]]['tcp'])
+            final_result = self.get_content(result, 'tcp')
 
-        print(final_result)
         self.result_list.append((target,final_result))
 
+        return final_result
 
-    def getContent(self, result, key):
+
+    def get_content(self, result, key):
 
         scan = result['scan'][list(result['scan'].keys())[0]]
-        
         return scan.get(key,'')
 
 
-    def getResultList(self):
+    def return_resultlist(self):
         return self.result_list
 
 if __name__ == '__main__':

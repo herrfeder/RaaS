@@ -1,11 +1,15 @@
 import subprocess
 import re
-from IPython.core.debugger import Tracer
+from IPython.core.debugger import Tracer; debughere = Tracer()
 import socket
 import logging
 import threading
 from ... import extractFierceDict
 from ... import getIPfromDomain 
+from subdomainutil import extractFierceDict
+from utility import get_ip_from_domain
+from misc.settings import raas_dictconfig
+from logging.config import dictConfig
 
 PATH={ "amass":"../amass/amass",
         "subfinder":"../subfinder",
@@ -21,6 +25,10 @@ class SubdomainColl(threading.Thread):
         super(SubdomainColl, self).__init__()
         self.thread = threading.Thread(target=self.run, args=())
         self.thread.deamon = True
+
+        dictConfig(raas_dictconfig)
+        self.lgg = logging.getLogger("RAAS_subdomain")
+
         self.domain_name = domain_name
         self.result_list = []
         self.fin = 0
@@ -28,16 +36,14 @@ class SubdomainColl(threading.Thread):
 
 
     def run(self):
-        print("[*] Running Module: Subdomain Collector")
-        self.runSubfinder(self.domain_name)
-        self.runAmass(self.domain_name)
-        self.runFierce(self.domain_name)
-        self.cleanDict()
-
-
+        self.lgg.info("[*] Running Module: Subdomain Collector")
+        self.run_subfinder(self.domain_name)
+        self.run_amass(self.domain_name)
+        self.run_fierce(self.domain_name)
+        self.clean_dict()
         self.fin = 1
 
-    def getResultList(self):
+    def get_result_list(self):
         return self.result_list
 
     def getFin(self):
@@ -45,8 +51,8 @@ class SubdomainColl(threading.Thread):
         return self.fin
 
 
-    def runAmass(self,domain):
-        print("\t[+] Starting Amass")
+    def run_amass(self,domain):
+        self.lgg.info("Starting Amass")
         p = subprocess.run([PATH["amass"],'-d',domain,'-ip'], stdout=subprocess.PIPE)
 
         result_list = {}
@@ -60,14 +66,14 @@ class SubdomainColl(threading.Thread):
         self.result_list.append(result_list)
 
 
-    def runSubfinder(self,domain):
-        print("\t[+] Starting Subfinder")
+    def run_subfinder(self,domain):
+        self.lgg.info("Starting Subfinder")
         p = subprocess.run([PATH["subfinder"],'-d',domain], stdout=subprocess.PIPE)
 
         result_list = {}
         domain_list = str(p.stdout).split('\n\n')[0]
-        index = list(re.finditer('Unique subdomains',domain_list))[0].span()[1]
-        domain_list = domain_list[index+1:].split('\\n')
+        #index = list(re.finditer('Enumerating subdomains',domain_list))[0].span()[1]
+        domain_list = domain_list.split('\\n')
 
         for entry in domain_list:
 
@@ -76,8 +82,8 @@ class SubdomainColl(threading.Thread):
         self.result_list.append(result_list)
 
 
-    def runFierce(self, domain):
-        print("\t[+] Starting Fierce")
+    def run_fierce(self, domain):
+        self.lgg.info("Starting Fierce")
         p = subprocess.run([PATH["fierce"], '--domain', domain, '--wide'], stdout=subprocess.PIPE)
 
         result_list = {}
@@ -93,7 +99,7 @@ class SubdomainColl(threading.Thread):
 
         self.result_list.append(result_list)
 
-    def cleanDict(self):
+    def clean_dict(self):
 
         for index, dic in enumerate(self.result_list):
 
@@ -102,7 +108,7 @@ class SubdomainColl(threading.Thread):
 
             for key,value in temp_dict.items():
                 if value == '':
-                    temp_dict[key] = getIPfromDomain(key)
+                    temp_dict[key] = get_ip_from_domain(key)
 
             self.result_list[index] = temp_dict
 
