@@ -7,7 +7,7 @@ import time
 
 
 
-class CrawlPrototype(ThreadPrototype): 
+class AnalyzerPrototype(ThreadPrototype): 
 
     def __init__(self, datatype, data_object, tool, sm_write_lock):
         super(CrawlPrototype, self).__init__()

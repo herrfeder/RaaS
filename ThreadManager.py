@@ -81,7 +81,6 @@ class ScopeThreadManager(ScopeSingleton):
         elif not self._write_lock and (lockvalue == True):
             self.logger.info("Locking the Write Lock")
             self._write_lock = lockvalue
-            print(f"Run in write_lock_setter after setting {self.write_lock}")
         else:
             return self.write_lock
 
