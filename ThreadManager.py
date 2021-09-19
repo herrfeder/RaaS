@@ -8,7 +8,7 @@ from prototypes.thread.ThreadPrototype import ThreadPrototype
 import signal
 import threading
 from crawlers.PathCollector import PathCollector
-import crawlers.WebSpider as WebSpider
+#import crawlers.WebSpider as WebSpider
 from utils.RaasLogger import RaasLogger
 import uuid
 import time

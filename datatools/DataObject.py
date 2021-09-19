@@ -200,9 +200,9 @@ class DataObject(DataPrototype):
 
 
     def return_dirtraversal(self, domain):
-        '''
+        
         Returns a directory traversal scan for one or multiple Domains. As a single IP could be used for multiple domains.
-        '''
+        
         final_result = {}
         stats_result = {}
         overview_dt = "### <span style='color:#606200'>Dirtraversal Stats\n</span>"
