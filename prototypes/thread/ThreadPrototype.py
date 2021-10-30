@@ -56,3 +56,29 @@ class ThreadPrototype(threading.Thread):
             self.force = True
         self.killed = True
         
+
+     def finish_cb(self):
+        self.log.debug("Thread finished gracefully, sending Data and quit.")
+        while not self.results and not self.datalink.target_data:
+            time.sleep(1)
+        self.remove_lock()
+        
+
+    def interrupt_cb(self, force):
+        if not force:
+            self.log.info("Thread got killed and will be finished gracefully, sending Data and quit.")
+            while not self.results and not self.datalink.target_data:
+                time.sleep(1)
+        else:
+            self.log.info("Thread got killed got forced to exit, kill without rescuing data.")
+        self.remove_lock()
+    
+    def check_set_lock(self):
+        self.log.info("set lock")
+        self.write_lock_setter(True)
+
+
+    def remove_lock(self):
+        self.log.info("Remove lock")
+        self.write_lock_setter(False)
+        

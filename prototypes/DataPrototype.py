@@ -78,7 +78,9 @@ class DataLinker(ThreadPrototype):
                     self.target_data.append({"url":source_dict["output"].rstrip(),
                                              "source":self.source_tool,
                                              "urltype":source_dict["type"]})
-
+        if self.datatype == "crawldata":
+            # pass datadefinition for crawl analyzer here
+            pass
 
 
 class DataLinkerDict(ThreadPrototype):
@@ -233,7 +235,6 @@ class DataPrototype(ThreadPrototype):
 
         self.DLObserver.register(self.DLDict.datalinker_d)
         self.DLObserver.start()
-
 
 
     def finish_cb(self):

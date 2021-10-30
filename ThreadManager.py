@@ -8,7 +8,7 @@ from prototypes.thread.ThreadPrototype import ThreadPrototype
 import signal
 import threading
 from crawlers.PathCollector import PathCollector
-#import crawlers.WebSpider as WebSpider
+from analyzers.PathInputAnalyzer import PathInputAnalyzer
 from utils.RaasLogger import RaasLogger
 import uuid
 import time
@@ -88,7 +88,7 @@ class ScopeThreadManager(ScopeSingleton):
     def newPathCollector(self, domain_name, tool):
         self.logger.debug(f"Created new Pathcollector for Scope {domain_name}")
         self.QuOb.put(PathCollector(domain_name, self.daob, tool, self.write_lock_setter))
-        #self.taskqueue.put(analyzer)
+        self.QuOb.put(PathInputAnalyzer(domain_name, self.daob, ))
 
 
     def newWebSpider(self, domain_name):

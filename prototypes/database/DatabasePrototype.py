@@ -91,9 +91,10 @@ class DatabaseInputPrototype(DatabaseInitPrototype):
 
 class DatabaseOutputPrototype(DatabaseInitPrototype):
     
-    def exfil_bulk(self, data_dict):
-        self.db_session.bulk_insert_mappings(URLInputTable, pop_all(data_dict))
+    def get_table(self, data_dict):
+        self.db_session.query(table_name).all()
         self.db_session.commit()
+
 
 class DatabasePrototype(DatabaseInputPrototype, DatabaseOutputPrototype):
     def __init__(self, scope, db, sqlitefile, postgre_ip, postgre_port):
