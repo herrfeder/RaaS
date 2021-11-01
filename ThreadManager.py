@@ -1,5 +1,5 @@
 #import crawlers.SubdomainCollector as SubdomainCollector
-from datatools import DataObject
+from datatools.DataObject import DataInputObject, DataOutputObject
 #import PortScanner
 #import crawlers.DirectoryTraversal as DirectoryTraversal
 import queue
@@ -63,7 +63,8 @@ class ScopeThreadManager(ScopeSingleton):
         self.scope = scope
                     
         self.logger.debug(f"Creating DataObject for Scope {scope}")
-        self.daob = DataObject.DataObject(self.scope)
+        self.dainob = DataInputObject(self.scope)
+        self.daouob = DataOutputObject(self.scope)
         self._write_lock = False
         self.QuOb = QueueObserver(self.write_lock_setter)
         self.QuOb.start()
@@ -87,8 +88,14 @@ class ScopeThreadManager(ScopeSingleton):
 
     def newPathCollector(self, domain_name, tool):
         self.logger.debug(f"Created new Pathcollector for Scope {domain_name}")
-        self.QuOb.put(PathCollector(domain_name, self.daob, tool, self.write_lock_setter))
+        self.QuOb.put(PathCollector(domain_name, self.dainob, tool, self.write_lock_setter))
         self.QuOb.put(PathInputAnalyzer(domain_name, self.daob, ))
+
+
+    def newPathAnalyzer(self, domain_name):
+        self.logger.debug(f"Created new PathInputAnalyzer for Scope {domain_name}")
+        self.QuOb.put(PathInputAnalyzer(domain_name, self.dainob, self.daouob, self.write_lock_setter))
+
 
 
     def newWebSpider(self, domain_name):

@@ -1,6 +1,7 @@
 import pandas as pd
 import sqlite3
-from prototypes.DataPrototype import DataPrototype
+from prototypes.DataPrototype import DataInputPrototype, DataOutputPrototype
+
 
 import glob
 import time
@@ -9,12 +10,16 @@ from IPython.core.debugger import Tracer; debug_here = Tracer()
 from utils.RaasLogger import RaasLogger
 
 
-class DataObject(DataPrototype):
+class DataInputObject(DataInputPrototype):
     def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas", postgre_ip="127.0.0.1", postgre_port=5432):
 
         super(self.__class__, self).__init__(scope, db, sqlitefile, postgre_ip, postgre_port)
 
 
+class DataOutputObject(DataOutputPrototype):
+    def __init__(self, scope, db="sqlite", sqlitefile="/home/project/raas", postgre_ip="127.0.0.1", postgre_port=5432):
+
+        super(self.__class__, self).__init__(scope, db, sqlitefile, postgre_ip, postgre_port)
 
     
 

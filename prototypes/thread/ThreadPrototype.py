@@ -57,7 +57,7 @@ class ThreadPrototype(threading.Thread):
         self.killed = True
         
 
-     def finish_cb(self):
+    def finish_cb(self):
         self.log.debug("Thread finished gracefully, sending Data and quit.")
         while not self.results and not self.datalink.target_data:
             time.sleep(1)

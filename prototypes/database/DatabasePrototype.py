@@ -91,9 +91,9 @@ class DatabaseInputPrototype(DatabaseInitPrototype):
 
 class DatabaseOutputPrototype(DatabaseInitPrototype):
     
-    def get_table(self, data_dict):
-        self.db_session.query(table_name).all()
-        self.db_session.commit()
+    def get_table(self, table_name):
+        whole_table = self.db_session.query(table_name).all()
+        return whole_table
 
 
 class DatabasePrototype(DatabaseInputPrototype, DatabaseOutputPrototype):

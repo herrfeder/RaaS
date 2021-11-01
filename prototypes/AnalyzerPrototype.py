@@ -9,14 +9,16 @@ import time
 
 class AnalyzerPrototype(ThreadPrototype): 
 
-    def __init__(self, datatype_input, data_object, datatype_output, sm_write_lock):
-        super(self.__class__, self).__init__()
+    def __init__(self, datatype_input, data_input_object, data_output_object, datatype_output, sm_write_lock):
+        super(AnalyzerPrototype, self).__init__()
         self.results = []
         self.log = RaasLogger(self.__class__.__name__)
         self.write_lock_setter = sm_write_lock
+        self.datatype_input = datatype_input
+        self.datatype_output = datatype_output
 
-        datalink_d = data_object.get_input_linker(datatype_output, self.results, self.tool)
-        
+
+        datalink_d = data_input_object.get_input_linker(datatype_output, self.results, self.tool)
         self.datalink = datalink_d["datalinker_object"]
         self.datalink_event = datalink_d["datalinker_event"]
         self.datalink.start()

@@ -15,20 +15,20 @@ env = {"dftype":"","project":"eurid.eu"}
 
 if __name__ == '__main__':
 
+    stm = ScopeThreadManager("deezer.com")
+    stm.newPathAnalyzer("https://deezer.com")
+
+    """
     logger = RaasLogger("main")
 
     stm = ScopeThreadManager("deezer.com")
-    #stm_new = ScopeThreadManager("deezerkack.com")
-    #stm_new2 = ScopeThreadManager("deezerkack2.com")
-    #atm = AppThreadManager(app_id)
+    
 
     pc = stm.newPathCollector("https://deezer.com", "gau")
-    #pc.start()
     pc_02 = stm.newPathCollector("https://deezer.com", "gospider")
-    #pc_02.start()
 
     for thread in threading.enumerate(): 
         print(thread.name)
         debughere()
-
+    """
     

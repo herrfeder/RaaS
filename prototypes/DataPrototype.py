@@ -191,7 +191,7 @@ class DataLinkerObserver(ThreadPrototype):
                 return True
 
 
-class DataPrototype(ThreadPrototype):
+class DataInputPrototype(ThreadPrototype):
     """
     Threading Class that inits and interfaces all previous Classes in this file.
     For each running RAAS scope will be created a unique DataThreadPrototype. 
@@ -256,6 +256,33 @@ class DataPrototype(ThreadPrototype):
 
 
 
+class DataOutputPrototype(ThreadPrototype):
+   
+    def __init__(self, scope, db, sqlitefile, postgre_ip, postgre_port):
+        super(ThreadPrototype, self).__init__()
+        self.log = RaasLogger(self.__class__.__name__)
+
+        self.scope = scope
+        self.datacon = DatabaseConnector(scope, db, sqlitefile, postgre_ip, postgre_port)
+
+
+
+    def finish_cb(self):
+        self.log.debug("Thread finished gracefully, writing everything important to DB and exit")
+        return self.results
+
+
+    def interrupt_cb(self, force):
+        if not force:
+            self.log.info("Thread got killed and will be finished gracefully, write everything to database and quit.")
+            if not DLObserver.is_datalinker_dict_empty():
+                time.sleep(1)
+        else:
+            self.log.info("Thread got killed and got forced to exit, kill without rescuing data.")
+
+
+    def get_data_output_object(self):
+        return self.datacon
 
 
 
