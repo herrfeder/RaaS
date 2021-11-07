@@ -174,8 +174,9 @@ class DataLinkerObserver(ThreadPrototype):
             for el in list(self.dl_dict.keys()):
                 if self.dl_dict[el]["datalinker_object"].target_data:
                     target_data = self.dl_dict[el]["datalinker_object"].target_data
+                    data_type = self.dl_dict[el]["datatype"]
                     self.log.debug(f"Inserting {len(target_data)} data elements")
-                    self.db_con.insert_bulk(pop_all(target_data))
+                    self.db_con.insert_bulk(data_type, target_data)
         else:
             self.log.debug("The dl_dict isn't registered yet")
 
@@ -266,7 +267,6 @@ class DataOutputPrototype(ThreadPrototype):
         self.datacon = DatabaseConnector(scope, db, sqlitefile, postgre_ip, postgre_port)
 
 
-
     def finish_cb(self):
         self.log.debug("Thread finished gracefully, writing everything important to DB and exit")
         return self.results
@@ -275,8 +275,6 @@ class DataOutputPrototype(ThreadPrototype):
     def interrupt_cb(self, force):
         if not force:
             self.log.info("Thread got killed and will be finished gracefully, write everything to database and quit.")
-            if not DLObserver.is_datalinker_dict_empty():
-                time.sleep(1)
         else:
             self.log.info("Thread got killed and got forced to exit, kill without rescuing data.")
 

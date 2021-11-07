@@ -89,7 +89,7 @@ class ScopeThreadManager(ScopeSingleton):
     def newPathCollector(self, domain_name, tool):
         self.logger.debug(f"Created new Pathcollector for Scope {domain_name}")
         self.QuOb.put(PathCollector(domain_name, self.dainob, tool, self.write_lock_setter))
-        self.QuOb.put(PathInputAnalyzer(domain_name, self.daob, ))
+        self.QuOb.put(PathInputAnalyzer(domain_name, self.dainob, self.daouob, self.write_lock_setter))
 
 
     def newPathAnalyzer(self, domain_name):

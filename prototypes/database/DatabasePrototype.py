@@ -2,12 +2,18 @@ import uuid
 from utils.RaasLogger import RaasLogger
 from utils.threadutil import *
 
-from sqlalchemy import create_engine, inspect, insert
+from sqlalchemy import create_engine, inspect, insert, select
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from utils.datasupport import *
 from prototypes.thread.ThreadPrototype import ThreadPrototype
 from datatools.dataprototypes.datastructures import create_schema, URLInputTable
+
+from IPython.core.debugger import Tracer; debughere=Tracer()
+
+
+data_model_mapping_dict = {"pathinput": URLInputTable}
+
 
 class DatabaseInitPrototype(ThreadPrototype):
     """
@@ -84,16 +90,36 @@ class DatabaseInitPrototype(ThreadPrototype):
 
 class DatabaseInputPrototype(DatabaseInitPrototype):
 
-    def insert_bulk(self, data_dict):
-        self.db_session.bulk_insert_mappings(URLInputTable, pop_all(data_dict))
+    def insert_bulk(self, table_name, data_dict):
+        table_model = None
+        try:
+            table_model = data_model_mapping_dict[table_name]
+        except:
+            print("not found model_name")
+        self.db_session.bulk_insert_mappings(table_model, pop_all(data_dict))
         self.db_session.commit()
 
 
 class DatabaseOutputPrototype(DatabaseInitPrototype):
     
     def get_table(self, table_name):
-        whole_table = self.db_session.query(table_name).all()
-        return whole_table
+        table_model = None
+        try:
+            table_model = data_model_mapping_dict[table_name]
+        except:
+            print("not found model_name")
+        debughere()
+        q = select([table_model])
+        table_iterator = self.dbe.execution_options(stream_results=True).execute(q)
+        while 'batch not empty': 
+            batch = table_iterator.fetchmany(10000)
+            if not batch:
+                break
+            
+            yield [row for row in batch]
+
+        table_iterator.close()
+        #whole_table = self.db_session.query(table_model).all()
 
 
 class DatabasePrototype(DatabaseInputPrototype, DatabaseOutputPrototype):

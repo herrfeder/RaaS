@@ -59,7 +59,8 @@ class CrawlPrototype(ThreadPrototype):
         self.process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
         
         for stdout_line in iter(self.process.stdout.readline, ""):
-            yield stdout_line
+            result_line = stdout_line.rstrip()
+            yield result_line
 
         self.process.stdout.close()
         return_code = self.process.wait()
